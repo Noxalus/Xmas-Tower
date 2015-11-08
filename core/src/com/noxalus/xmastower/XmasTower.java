@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -24,22 +25,31 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
+import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.utils.TimeUtils;
+
+import java.util.ArrayList;
 
 public class XmasTower extends ApplicationAdapter implements InputProcessor {
+
+	private static final String TAG = "XmasTower";
+
 	SpriteBatch batch;
 	Sprite sprite, sprite2;
 	Texture img;
 	Music music;
 	World world;
-	Body body, body2;
-	Body bodyEdgeScreen;
+	private ArrayList<Body> boxes = new ArrayList<Body>();
+	Body groundBody;
 	Box2DDebugRenderer debugRenderer;
 	Matrix4 debugMatrix;
 	OrthographicCamera camera;
 	BitmapFont font;
-
-	float torque = 0.0f;
+	private MouseJoint mouseJoint = null;
+	Body hitBody = null;
 	boolean drawSprite = true;
 
 	final float PIXELS_TO_METERS = 100f;
@@ -47,24 +57,23 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-
 		img = new Texture("badlogic.jpg");
 		sprite = new Sprite(img);
-		sprite.setPosition(-sprite.getWidth()/2,-sprite.getHeight()/2 + 200);
+		sprite.setPosition(-sprite.getWidth() / 2, -sprite.getHeight() / 2 + 200);
 		sprite2 = new Sprite(img);
-		sprite2.setPosition(-sprite.getWidth()/2 + 20,-sprite.getHeight()/2 + 400);
+		sprite2.setPosition(-sprite.getWidth() / 2 + 20,-sprite.getHeight() / 2 + 400);
 
 		music = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/music.mp3"));
 		music.setLooping(true);
 
 		music.play();
 
-		world = new World(new Vector2(0, -1f), true);
+		world = new World(new Vector2(0, -9.8f), true);
 
 		// Now create a BodyDefinition.  This defines the physics objects type and position in the simulation
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyDef.BodyType.DynamicBody;
-		// We are going to use 1 to 1 dimensions.  Meaning 1 in physics engine is 1 pixel
+		// We are going to use 1 to 1 dimensions. Meaning 1 in physics engine is 1 pixel
 		// Set our body to the same position as our sprite
 		bodyDef.position.set(
 				(sprite.getX() + sprite.getWidth() / 2) / PIXELS_TO_METERS,
@@ -72,16 +81,20 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		);
 
 		// Create a body in the world using our definition
-		body = world.createBody(bodyDef);
+		Body body = world.createBody(bodyDef);
+		body.setUserData(sprite);
+		boxes.add(body);
 
-		// Sprite2's physics body
 		BodyDef bodyDef2 = new BodyDef();
 		bodyDef2.type = BodyDef.BodyType.DynamicBody;
 		bodyDef2.position.set(
 				(sprite2.getX() + sprite2.getWidth() / 2) / PIXELS_TO_METERS,
-				(sprite2.getY() + sprite2.getHeight() / 2) / PIXELS_TO_METERS);
+				(sprite2.getY() + sprite2.getHeight() / 2) / PIXELS_TO_METERS
+		);
 
-		body2 = world.createBody(bodyDef2);
+		Body body2 = world.createBody(bodyDef2);
+		body2.setUserData(sprite2);
+		boxes.add(body2);
 
 		// Now define the dimensions of the physics shape
 		PolygonShape shape = new PolygonShape();
@@ -98,16 +111,16 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		// If you are wondering, density and area are used to calculate over all mass
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = shape;
-		fixtureDef.density = 0.1f;
-		fixtureDef.restitution = 0.5f;
+		fixtureDef.density = 1f;
+//		fixtureDef.restitution = 0.5f;
 
 		body.createFixture(fixtureDef);
 
 		// Sprite2
 		FixtureDef fixtureDef2 = new FixtureDef();
 		fixtureDef2.shape = shape;
-		fixtureDef2.density = 0.1f;
-		fixtureDef2.restitution = 0.5f;
+		fixtureDef2.density = 1f;
+//		fixtureDef2.restitution = 0.5f;
 
 		body2.createFixture(fixtureDef2);
 
@@ -116,21 +129,17 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
-		float w = Gdx.graphics.getWidth()/PIXELS_TO_METERS;
-		// Set the height to just 50 pixels above the bottom of the screen so we can see the edge in the
-		// debug renderer
-		float h = Gdx.graphics.getHeight()/PIXELS_TO_METERS- 50/PIXELS_TO_METERS;
-		//bodyDef2.position.set(0,
-//                h-10/PIXELS_TO_METERS);
+		float w = Gdx.graphics.getWidth() / PIXELS_TO_METERS;
+		float h = Gdx.graphics.getHeight() / PIXELS_TO_METERS - 50 / PIXELS_TO_METERS;
 		bodyGround.position.set(0,0);
-		FixtureDef fixturGround = new FixtureDef();
+		FixtureDef fixtureGround = new FixtureDef();
 
 		EdgeShape edgeShape = new EdgeShape();
 		edgeShape.set(-w/2,-h/2,w/2,-h/2);
-		fixturGround.shape = edgeShape;
+		fixtureGround.shape = edgeShape;
 
-		bodyEdgeScreen = world.createBody(bodyGround);
-		bodyEdgeScreen.createFixture(fixturGround);
+		groundBody = world.createBody(bodyGround);
+		groundBody.createFixture(fixtureGround);
 		edgeShape.dispose();
 
 		Gdx.input.setInputProcessor(this);
@@ -140,60 +149,51 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		font = new BitmapFont();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
+		// You can savely ignore the rest of this method :)
 		world.setContactListener(new ContactListener() {
 			@Override
-			public void beginContact(Contact contact) {
-				// Check to see if the collision is between the second sprite and the bottom of the screen
-				// If so apply a random amount of upward force to both objects... just because
-				if((contact.getFixtureA().getBody() == bodyEdgeScreen &&
-						contact.getFixtureB().getBody() == body2)
-						||
-						(contact.getFixtureA().getBody() == body2 &&
-								contact.getFixtureB().getBody() == bodyEdgeScreen)) {
-
-					body.applyForceToCenter(0,MathUtils.random(20,50),true);
-					body2.applyForceToCenter(0, MathUtils.random(20, 50), true);
-				}
+			public void beginContact (Contact contact) {
+				Gdx.app.log(TAG, "begin contact");
 			}
 
 			@Override
-			public void endContact(Contact contact) {
+			public void endContact (Contact contact) {
+				Gdx.app.log(TAG, "end contact");
 			}
 
 			@Override
-			public void preSolve(Contact contact, Manifold oldManifold) {
+			public void preSolve (Contact contact, Manifold oldManifold) {
+				 Manifold.ManifoldType type = oldManifold.getType();
+				 Vector2 localPoint = oldManifold.getLocalPoint();
+				 Vector2 localNormal = oldManifold.getLocalNormal();
+				 int pointCount = oldManifold.getPointCount();
+				 Manifold.ManifoldPoint[] points = oldManifold.getPoints();
+				 Gdx.app.log(TAG, "pre solve, " + type +
+						 ", point: " + localPoint +
+						 ", local normal: " + localNormal +
+						 ", #points: " + pointCount +
+						 ", [" + points[0] + ", " + points[1] + "]");
 			}
 
 			@Override
-			public void postSolve(Contact contact, ContactImpulse impulse) {
+			public void postSolve (Contact contact, ContactImpulse impulse) {
+				float[] ni = impulse.getNormalImpulses();
+				float[] ti = impulse.getTangentImpulses();
+				Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
 			}
 		});
 	}
 
 	@Override
 	public void render () {
-		camera.update();
+		long start = TimeUtils.nanoTime();
 		// Step the physics simulation forward at a rate of 60hz
-		world.step(1f/60f, 6, 2);
+		world.step(1f / 60f, 6, 2);
+		float updateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 
-		// Apply torque to the physics body. At start this is 0 and will do nothing. Controlled with[] keys
-		// Torque is applied per frame instead of just once
-		body.applyTorque(torque,true);
+		camera.update();
 
-		// Set the sprite's position from the updated physics body location
-		sprite.setPosition(
-				(body.getPosition().x * PIXELS_TO_METERS) - sprite.getWidth() / 2,
-				(body.getPosition().y * PIXELS_TO_METERS) -sprite.getHeight() / 2
-		);
-		sprite.setRotation((float) Math.toDegrees(body.getAngle()));
-
-		sprite2.setPosition(
-				(body2.getPosition().x * PIXELS_TO_METERS) - sprite2.getWidth() / 2 ,
-				(body2.getPosition().y * PIXELS_TO_METERS) -sprite2.getHeight() / 2
-		);
-		sprite2.setRotation((float)Math.toDegrees(body2.getAngle()));
-
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(0, 0, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.setProjectionMatrix(camera.combined);
@@ -202,6 +202,25 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		debugMatrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, PIXELS_TO_METERS, 0);
 
 		batch.begin();
+
+		for (int i = 0; i < boxes.size(); i++) {
+			Body box = boxes.get(i);
+			Sprite currentSprite = ((Sprite)box.getUserData());
+
+			currentSprite.setPosition(
+					box.getPosition().x * PIXELS_TO_METERS - currentSprite.getWidth() / 2,
+					box.getPosition().y * PIXELS_TO_METERS - currentSprite.getHeight() / 2
+			);
+
+			currentSprite.setRotation((float) Math.toDegrees(box.getAngle()));
+
+			batch.draw(
+					currentSprite, currentSprite.getX(), currentSprite.getY(),
+					currentSprite.getOriginX(), currentSprite.getOriginY(),
+					currentSprite.getWidth(), currentSprite.getHeight(),
+					currentSprite.getScaleX(), currentSprite.getScaleY(),
+					currentSprite.getRotation());
+		}
 
 		if(drawSprite) {
 			batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(),
@@ -215,11 +234,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 							getScaleY(),sprite2.getRotation());
 		}
 
-		font.draw(batch,
-				"Restitution: " + body.getFixtureList().first().getRestitution(),
-				-Gdx.graphics.getWidth() / 2,
-				Gdx.graphics.getHeight() / 2 );
+		batch.end();
 
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.begin();
+		font.draw(batch, "fps: " + Gdx.graphics.getFramesPerSecond() + " update time: " + updateTime, 0, 20);
 		batch.end();
 
 		// Now render the physics world using our scaled down matrix
@@ -248,24 +267,94 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 
-	// On touch we apply force from the direction of the users touch.
-	// This could result in the object "spinning"
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		//body.applyForce(1f, 1f, screenX, screenY, true);
-		body.applyForceToCenter(0f,10f,true);
-		//body.applyForceToCenter(1.f, 1.f, true);
-		//body.applyTorque(0.4f,true);
-		return true;
-	}
+
+	/** we instantiate this vector and the callback here so we don't irritate the GC **/
+	Vector3 testPoint = new Vector3();
+	QueryCallback callback = new QueryCallback() {
+		@Override
+		public boolean reportFixture (Fixture fixture) {
+			Gdx.app.log(TAG, "reportFixture");
+			// if the hit fixture's body is the ground body
+			// we ignore it
+			if (fixture.getBody() == groundBody) {
+				Gdx.app.log(TAG, "It's the ground!");
+				return true;
+			}
+
+			// if the hit point is inside the fixture of the body
+			// we report it
+			if (fixture.testPoint(testPoint.x, testPoint.y)) {
+				Gdx.app.log(TAG, "IT'S INSIDE");
+				hitBody = fixture.getBody();
+				return false;
+			} else {
+				Gdx.app.log(TAG, "IT'S OUTSIDE");
+				return true;
+			}
+		}
+	};
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		Gdx.app.log(TAG, "TOUCHDOWN");
+
+		//body.applyForceToCenter(0f,10f,true);
+		//return true;
+
+		// translate the mouse coordinates to world coordinates
+		Gdx.app.log(TAG, "testPoint (before unproject): " + testPoint);
+
+		testPoint.set(screenX, screenY, 0);
+		camera.unproject(testPoint);
+		testPoint.set(testPoint.x / PIXELS_TO_METERS, testPoint.y / PIXELS_TO_METERS, 0);
+
+		Gdx.app.log(TAG, "testPoint (after unproject): " + testPoint);
+
+		// ask the world which bodies are within the given
+		// bounding box around the mouse pointer
+		hitBody = null;
+		float value = 0.1f;
+		world.QueryAABB(callback, testPoint.x - value, testPoint.y - value, testPoint.x + value, testPoint.y + value);
+		// if we hit something we create a new mouse joint
+		// and attach it to the hit body.
+		if (hitBody != null) {
+			Gdx.app.log(TAG, "hitBody != null");
+			MouseJointDef def = new MouseJointDef();
+			def.bodyA = groundBody;
+			def.bodyB = hitBody;
+			def.collideConnected = true;
+			def.target.set(testPoint.x, testPoint.y);
+			def.maxForce = (10000.0f / PIXELS_TO_METERS) * hitBody.getMass();
+
+			mouseJoint = (MouseJoint)world.createJoint(def);
+			hitBody.setAwake(true);
+		}
+
+		return false;
+	}
+
+	Vector2 target = new Vector2();
+
+	@Override
+	public boolean touchDragged (int x, int y, int pointer) {
+		// if a mouse joint exists we simply update
+		// the target of the joint based on the new
+		// mouse coordinates
+		if (mouseJoint != null) {
+			camera.unproject(testPoint.set(x, y, 0));
+			mouseJoint.setTarget(target.set(testPoint.x / PIXELS_TO_METERS, testPoint.y / PIXELS_TO_METERS));
+		}
+
 		return false;
 	}
 
 	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
+	public boolean touchUp (int x, int y, int pointer, int button) {
+		// if a mouse joint exists we simply destroy it
+		if (mouseJoint != null) {
+			world.destroyJoint(mouseJoint);
+			mouseJoint = null;
+		}
 		return false;
 	}
 

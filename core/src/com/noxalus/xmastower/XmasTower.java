@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -29,6 +31,7 @@ import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.ArrayList;
@@ -52,6 +55,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	Body hitBody = null;
 	boolean drawSprite = true;
 
+	// Particles
+	ParticleEffectPool snowRainEffectPool;
+	Array<ParticleEffectPool.PooledEffect> effects = new Array();
+
 	final float PIXELS_TO_METERS = 100f;
 
 	@Override
@@ -63,11 +70,31 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		sprite2 = new Sprite(img);
 		sprite2.setPosition(-sprite.getWidth() / 2 + 20,-sprite.getHeight() / 2 + 400);
 
+		// Music
 		music = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/music.mp3"));
 		music.setLooping(true);
 
 		music.play();
 
+		// Particles
+		//Set up the particle effect that will act as the pool's template
+		ParticleEffect snowRainEffect = new ParticleEffect();
+		snowRainEffect.load(Gdx.files.internal("graphics/particles/snow2.p"), Gdx.files.internal("graphics/pictures"));
+
+		//If your particle effect includes additive or pre-multiplied particle emitters
+		//you can turn off blend function clean-up to save a lot of draw calls, but
+		//remember to switch the Batch back to GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		//before drawing "regular" sprites or your Stage.
+		snowRainEffect.setEmittersCleanUpBlendFunction(true);
+
+		snowRainEffectPool = new ParticleEffectPool(snowRainEffect, 1, 2);
+
+		// Create effect:
+		ParticleEffectPool.PooledEffect effect = snowRainEffectPool.obtain();
+		effect.setPosition(0, Gdx.graphics.getHeight() / 2);
+		effects.add(effect);
+
+		// Physics
 		world = new World(new Vector2(0, -9.8f), true);
 
 		// Now create a BodyDefinition.  This defines the physics objects type and position in the simulation
@@ -130,7 +157,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
 		float w = Gdx.graphics.getWidth() / PIXELS_TO_METERS;
-		float h = Gdx.graphics.getHeight() / PIXELS_TO_METERS - 50 / PIXELS_TO_METERS;
+		float h = Gdx.graphics.getHeight() / PIXELS_TO_METERS - 250 / PIXELS_TO_METERS;
 		bodyGround.position.set(0,0);
 		FixtureDef fixtureGround = new FixtureDef();
 
@@ -193,7 +220,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		camera.update();
 
-		Gdx.gl.glClearColor(0, 0, 1, 1);
+		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.setProjectionMatrix(camera.combined);
@@ -202,6 +229,23 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		debugMatrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, PIXELS_TO_METERS, 0);
 
 		batch.begin();
+
+		// Update and draw effects:
+		for (int i = effects.size - 1; i >= 0; i--) {
+			ParticleEffectPool.PooledEffect effect = effects.get(i);
+			effect.draw(batch, Gdx.graphics.getDeltaTime());
+			if (effect.isComplete()) {
+				effect.free();
+				effects.removeIndex(i);
+			}
+		}
+
+		batch.end();
+
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		batch.begin();
+		//remember to switch the Batch back to GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		//before drawing "regular" sprites or your Stage.
 
 		for (int i = 0; i < boxes.size(); i++) {
 			Body box = boxes.get(i);

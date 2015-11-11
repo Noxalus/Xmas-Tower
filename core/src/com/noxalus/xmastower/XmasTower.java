@@ -99,7 +99,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		//Set up the particle effect that will act as the pool's template
 		ParticleEffect snowRainEffect = new ParticleEffect();
-		snowRainEffect.load(Gdx.files.internal("graphics/particles/snow2.p"), Gdx.files.internal("graphics/pictures"));
+		snowRainEffect.load(
+				Gdx.files.internal("graphics/particles/snow2.p"),
+				Gdx.files.internal("graphics/pictures")
+		);
 
 		//If your particle effect includes additive or pre-multiplied particle emitters
 		//you can turn off blend function clean-up to save a lot of draw calls, but
@@ -111,7 +114,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		// Create effect:
 		ParticleEffectPool.PooledEffect effect = snowRainEffectPool.obtain();
-		effect.setPosition(0, Gdx.graphics.getHeight() / 2);
+		effect.setPosition(Gdx.graphics.getWidth() / 2.f, Gdx.graphics.getHeight() + 200.f);
 		effects.add(effect);
 	}
 
@@ -217,11 +220,6 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		batch.setProjectionMatrix(camera.combined);
-
-		// Scale down the sprite batches projection matrix to box2D size
-		debugMatrix = batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
-
 		batch.begin();
 
 		// Update and draw effects:
@@ -235,6 +233,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		}
 
 		batch.end();
+
+		batch.setProjectionMatrix(camera.combined);
+		// Scale down the sprite batches projection matrix to box2D size
+		debugMatrix = batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 
 		batch.begin();
 

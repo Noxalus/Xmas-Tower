@@ -77,6 +77,7 @@ public class Gift {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
 //        Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
 
+        float linearVelocityThreshold = 0.01f;
         // Outside of the scene?
         if (_sprite.getX() < -Gdx.graphics.getWidth() / 2f - _sprite.getWidth() ||
                 _sprite.getX() > Gdx.graphics.getWidth() / 2 ||
@@ -85,7 +86,9 @@ public class Gift {
         {
             _game.reset();
         }
-        else if (!_isPlaced && !_isMovable && _body.getLinearVelocity().x == 0.f && _body.getLinearVelocity().y == 0.f) {
+        else if (!_isPlaced && !_isMovable &&
+                _body.getLinearVelocity().x < linearVelocityThreshold && _body.getLinearVelocity().x > -linearVelocityThreshold &&
+                _body.getLinearVelocity().y < linearVelocityThreshold && _body.getLinearVelocity().y > -linearVelocityThreshold) {
             Gdx.app.log("GIFT", "HAS STOP TO MOVE");
             _isPlaced = true;
 

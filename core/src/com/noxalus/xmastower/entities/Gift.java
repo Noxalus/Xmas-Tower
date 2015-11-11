@@ -26,6 +26,8 @@ public class Gift {
         _game = game;
         _sprite = new Sprite(Assets.giftTexture);
         _sprite.setPosition(position.x, position.y);
+        _sprite.setScale(0.5f, 0.5f);
+//        _sprite.setScale((float)Math.random(), (float)Math.random());
 
         Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
     }
@@ -52,7 +54,7 @@ public class Gift {
         shape.setAsBox(
                 (((_sprite.getWidth() / 2) - 11) * _sprite.getScaleX()) / Config.PIXELS_TO_METERS,
                 ((275f / 2) * _sprite.getScaleY()) / Config.PIXELS_TO_METERS,
-                new Vector2(0, -0.5f),
+                new Vector2(0 * _sprite.getScaleX(), -0.5f * _sprite.getScaleY()),
                 0f
         );
 
@@ -62,7 +64,7 @@ public class Gift {
         // If you are wondering, density and area are used to calculate over all mass
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 1f;
+        fixtureDef.density = 10f;
 //		fixtureDef.restitution = 0.5f;
 
         _body.createFixture(fixtureDef);
@@ -75,14 +77,15 @@ public class Gift {
 
     public void update(float delta) {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
-//        Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
+
+        if (_isSelected)
+            Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
 
         float linearVelocityThreshold = 0.01f;
         // Outside of the scene?
         if (_sprite.getX() < -Gdx.graphics.getWidth() / 2f - _sprite.getWidth() ||
                 _sprite.getX() > Gdx.graphics.getWidth() / 2 ||
-                _sprite.getY() < -Gdx.graphics.getHeight() ||
-                _sprite.getY() > Gdx.graphics.getHeight() + _sprite.getHeight())
+                _sprite.getY() < -Gdx.graphics.getHeight())
         {
             _game.reset();
         }
@@ -96,8 +99,6 @@ public class Gift {
 
             Vector3 coord = _game._camera.project(new Vector3(_sprite.getX(), _sprite.getY(), 0.f));
             Gdx.app.log("GIFT", "Sprite _camera position: " + coord.toString() + " (height: " + Gdx.graphics.getHeight() + ")");
-
-
 
             if (coord.y > Gdx.graphics.getWidth() / 2.f)//_sprite.getY() > -_sprite.getHeight())
                 _game.translateCamera(new Vector2(0f, _sprite.getHeight()));
@@ -128,10 +129,12 @@ public class Gift {
         return _isMovable;
     }
 
-    public void isSelected(boolean value) {
-        if (_isSelected && !value)
-            _isMovable = false;
+    public void isMovable(boolean value)
+    {
+        _isMovable = value;
+    }
 
+    public void isSelected(boolean value) {
         _isSelected = value;
     }
 

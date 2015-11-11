@@ -45,17 +45,18 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	boolean _cameraIsMoving;
 
 	// Physics
-	World world;
-	Body groundBody;
-	Box2DDebugRenderer debugRenderer;
-	Matrix4 debugMatrix;
-	private MouseJoint mouseJoint = null;
-	Body hitBody = null;
-	float physicsUpdateTime = 0f;
+	World _world;
+	Body _groundBody;
+	Box2DDebugRenderer _debugRenderer;
+	Matrix4 _debugMatrix;
+	private MouseJoint _mouseJoint = null;
+	Body _hitBody = null;
+	float _physicsUpdateTime = 0f;
 
 	// Particles
-	ParticleEffectPool snowRainEffectPool;
-	Array<ParticleEffectPool.PooledEffect> effects = new Array();
+	ParticleEffectPool _snowRainEffectPool;
+	Array<ParticleEffectPool.PooledEffect> _effects = new Array();
+	float _startParticlesTime = 8f;
 
 	@Override
 	public void create () {
@@ -83,7 +84,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		for (Gift g : _gifts)
 		{
-			world.destroyBody(g.getBody());
+			_world.destroyBody(g.getBody());
 		}
 
 		_gifts.clear();
@@ -106,16 +107,18 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		//before drawing "regular" sprites or your Stage.
 		snowRainEffect.setEmittersCleanUpBlendFunction(true);
 
-		snowRainEffectPool = new ParticleEffectPool(snowRainEffect, 1, 2);
+		_snowRainEffectPool = new ParticleEffectPool(snowRainEffect, 1, 2);
 
 		// Create effect:
-		ParticleEffectPool.PooledEffect effect = snowRainEffectPool.obtain();
+		ParticleEffectPool.PooledEffect effect = _snowRainEffectPool.obtain();
 		effect.setPosition(Gdx.graphics.getWidth() / 2.f, Gdx.graphics.getHeight() + 200.f);
-		effects.add(effect);
+		_effects.add(effect);
+
+		effect.update(_startParticlesTime);
 	}
 
 	private void initializePhysics() {
-		world = new World(new Vector2(0, -9.8f), true);
+		_world = new World(new Vector2(0, -9.8f), true);
 
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
@@ -128,18 +131,40 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		edgeShape.set(-w/2,-h/2,w/2,-h/2);
 		fixtureGround.shape = edgeShape;
 
-		groundBody = world.createBody(bodyGround);
-		groundBody.createFixture(fixtureGround);
+		_groundBody = _world.createBody(bodyGround);
+		_groundBody.createFixture(fixtureGround);
 		edgeShape.dispose();
 
 		// Create a Box2DDebugRenderer, this allows us to see the physics simulation controlling the scene
-		debugRenderer = new Box2DDebugRenderer();
+		_debugRenderer = new Box2DDebugRenderer();
 
 		// You can savely ignore the rest of this method :)
-		world.setContactListener(new ContactListener() {
+		_world.setContactListener(new ContactListener() {
 			@Override
 			public void beginContact(Contact contact) {
 				Gdx.app.log(TAG, "begin contact");
+
+				if (_mouseJoint != null && _hitBody != null) {
+					((Gift) (_hitBody.getUserData())).isSelected(false);
+					((Gift) (_hitBody.getUserData())).isMovable(false);
+					_world.destroyJoint(_mouseJoint);
+					_mouseJoint = null;
+				}
+
+				Fixture fixtureA = contact.getFixtureA();
+				Fixture fixtureB = contact.getFixtureB();
+
+				Gift giftA = (Gift)(fixtureA.getBody().getUserData());
+				if (giftA != null) {
+					giftA.isMovable(false);
+					giftA.isSelected(false);
+				}
+
+				Gift giftB = (Gift)(fixtureB.getBody().getUserData());
+				if (giftB != null) {
+					giftB.isMovable(false);
+					giftB.isSelected(false);
+				}
 			}
 
 			@Override
@@ -181,15 +206,15 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 				_camera.position.x + -Assets.giftTexture.getWidth() / 2f,
 				_camera.position.y + Assets.giftTexture.getHeight() / 2f)
 		);
-		gift.initializePhysics(world);
+		gift.initializePhysics(_world);
 		_gifts.add(gift);
 	}
 
 	public void update() {
 		long start = TimeUtils.nanoTime();
 		// Step the physics simulation forward at a rate of 60hz
-		world.step(1f / 60f, 6, 2);
-		physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
+		_world.step(1f / 60f, 6, 2);
+		_physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 
 		for (int i = 0; i < _gifts.size(); i++)
 		{
@@ -236,13 +261,13 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.begin();
 
-		// Update and draw effects:
-		for (int i = effects.size - 1; i >= 0; i--) {
-			ParticleEffectPool.PooledEffect effect = effects.get(i);
+		// Update and draw _effects:
+		for (int i = _effects.size - 1; i >= 0; i--) {
+			ParticleEffectPool.PooledEffect effect = _effects.get(i);
 			effect.draw(_batch, Gdx.graphics.getDeltaTime());
 			if (effect.isComplete()) {
 				effect.free();
-				effects.removeIndex(i);
+				_effects.removeIndex(i);
 			}
 		}
 
@@ -250,11 +275,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.setProjectionMatrix(_camera.combined);
 		// Scale down the sprite batches projection matrix to box2D size
-		debugMatrix = _batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
+		_debugMatrix = _batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 
 		_batch.begin();
 
-		for (int i = 0; i < _gifts.size(); i++)
+		for (int i = _gifts.size() - 1; i >= 0; i--)
 		{
 			_gifts.get(i).draw(Gdx.graphics.getDeltaTime(), _batch);
 		}
@@ -263,12 +288,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		_batch.begin();
-		_font.draw(_batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + physicsUpdateTime, 0, 20);
+		_font.draw(_batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + _physicsUpdateTime, 0, 20);
 		_batch.end();
 
-		// Now render the physics world using our scaled down matrix
+		// Now render the physics _world using our scaled down matrix
 		// Note, this is strictly optional and is, as the name suggests, just for debugging purposes
-		debugRenderer.render(world, debugMatrix);
+		_debugRenderer.render(_world, _debugMatrix);
 	}
 
 	@Override
@@ -279,7 +304,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public void dispose() {
-		world.dispose();
+		_world.dispose();
 	}
 
 	@Override
@@ -302,8 +327,6 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	QueryCallback callback = new QueryCallback() {
 		@Override
 		public boolean reportFixture (Fixture fixture) {
-			Gdx.app.log(TAG, "reportFixture");
-
 			Gift selectedGift = (Gift)(fixture.getBody().getUserData());
 
 			if (selectedGift == null || !selectedGift.isMovable())
@@ -313,7 +336,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 			// if the hit point is inside the fixture of the body we report it
 			if (fixture.testPoint(testPoint.x, testPoint.y)) {
-				hitBody = fixture.getBody();
+				_hitBody = fixture.getBody();
 				return false;
 			} else {
 				return true;
@@ -326,29 +349,29 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		//body.applyForceToCenter(0f,10f,true);
 		Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
 
-		// translate the mouse coordinates to world coordinates
+		// translate the mouse coordinates to _world coordinates
 		testPoint.set(x, y, 0);
 		_camera.unproject(testPoint);
 		testPoint.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS, 0);
 
-		// ask the world which bodies are within the given
+		// ask the _world which bodies are within the given
 		// bounding box around the mouse pointer
-		hitBody = null;
+		_hitBody = null;
 		float value = 0.1f;
-		world.QueryAABB(callback, testPoint.x - value, testPoint.y - value, testPoint.x + value, testPoint.y + value);
+		_world.QueryAABB(callback, testPoint.x - value, testPoint.y - value, testPoint.x + value, testPoint.y + value);
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.
-		if (hitBody != null) {
-			Gdx.app.log(TAG, "hitBody != null");
+		if (_hitBody != null) {
+			Gdx.app.log(TAG, "_hitBody != null");
 			MouseJointDef def = new MouseJointDef();
-			def.bodyA = groundBody;
-			def.bodyB = hitBody;
+			def.bodyA = _groundBody;
+			def.bodyB = _hitBody;
 			def.collideConnected = true;
 			def.target.set(testPoint.x, testPoint.y);
-			def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * hitBody.getMass();
+			def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * _hitBody.getMass();
 
-			mouseJoint = (MouseJoint)world.createJoint(def);
-			hitBody.setAwake(true);
+			_mouseJoint = (MouseJoint) _world.createJoint(def);
+			_hitBody.setAwake(true);
 		}
 
 		return false;
@@ -361,9 +384,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		// if a mouse joint exists we simply update
 		// the target of the joint based on the new
 		// mouse coordinates
-		if (mouseJoint != null) {
+		if (_mouseJoint != null) {
 			_camera.unproject(testPoint.set(x, y, 0));
-			mouseJoint.setTarget(target.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS));
+			_mouseJoint.setTarget(target.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS));
 		}
 
 		return false;
@@ -372,10 +395,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		// if a mouse joint exists we simply destroy it
-		if (mouseJoint != null) {
-			((Gift)(hitBody.getUserData())).isSelected(false);
-			world.destroyJoint(mouseJoint);
-			mouseJoint = null;
+		if (_mouseJoint != null) {
+			((Gift)(_hitBody.getUserData())).isSelected(false);
+			_world.destroyJoint(_mouseJoint);
+			_mouseJoint = null;
 		}
 
 		return false;

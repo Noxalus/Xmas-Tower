@@ -43,15 +43,18 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	BitmapFont _font;
 	boolean _needToAddNewGift;
 	boolean _cameraIsMoving;
+	public int _score;
 
 	// Physics
 	World _world;
 	Body _groundBody;
+	float _groundHeight = 0;
 	Box2DDebugRenderer _debugRenderer;
 	Matrix4 _debugMatrix;
 	private MouseJoint _mouseJoint = null;
 	Body _hitBody = null;
 	float _physicsUpdateTime = 0f;
+	boolean _destroyMouseJoint;
 
 	// Particles
 	ParticleEffectPool _snowRainEffectPool;
@@ -78,6 +81,8 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_camera.position.set(0, 0, 0);
 		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y);
 		_needToAddNewGift = false;
+		_score = 0;
+		_destroyMouseJoint = false;
 
 		Assets.music.stop();
 		Assets.music.play();
@@ -123,12 +128,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
 		float w = Gdx.graphics.getWidth() / Config.PIXELS_TO_METERS;
-		float h = Gdx.graphics.getHeight() / Config.PIXELS_TO_METERS - 250 / Config.PIXELS_TO_METERS;
+		float h = Gdx.graphics.getHeight() / Config.PIXELS_TO_METERS - _groundHeight / Config.PIXELS_TO_METERS;
 		bodyGround.position.set(0, 0);
 		FixtureDef fixtureGround = new FixtureDef();
 
 		EdgeShape edgeShape = new EdgeShape();
-		edgeShape.set(-w/2,-h/2,w/2,-h/2);
+		edgeShape.set(-w / 2, -h / 2, w / 2, -h / 2);
 		fixtureGround.shape = edgeShape;
 
 		_groundBody = _world.createBody(bodyGround);
@@ -145,10 +150,17 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 				Gdx.app.log(TAG, "begin contact");
 
 				if (_mouseJoint != null && _hitBody != null) {
-					((Gift) (_hitBody.getUserData())).isSelected(false);
-					((Gift) (_hitBody.getUserData())).isMovable(false);
-					_world.destroyJoint(_mouseJoint);
-					_mouseJoint = null;
+					Gdx.app.log(TAG, "Remove mouse joint from collision");
+
+					Gift selectedGift = (Gift)_hitBody.getUserData();
+					selectedGift.isSelected(false);
+					selectedGift.isMovable(false);
+
+					// We can't destroy a joint in this callback directly
+					// that's why it's delayed
+					_destroyMouseJoint = true;
+
+					_hitBody = null;
 				}
 
 				Fixture fixtureA = contact.getFixtureA();
@@ -221,6 +233,16 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
 		}
 
+		if (_destroyMouseJoint)
+		{
+			_destroyMouseJoint = false;
+
+			if (_mouseJoint != null) {
+				_world.destroyJoint(_mouseJoint);
+				_mouseJoint = null;
+			}
+		}
+
 		updateCamera(Gdx.graphics.getDeltaTime());
 	}
 
@@ -288,6 +310,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		_batch.begin();
+		_font.draw(_batch, Integer.toString(_score), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight());
 		_font.draw(_batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + _physicsUpdateTime, 0, 20);
 		_batch.end();
 
@@ -362,7 +385,6 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.
 		if (_hitBody != null) {
-			Gdx.app.log(TAG, "_hitBody != null");
 			MouseJointDef def = new MouseJointDef();
 			def.bodyA = _groundBody;
 			def.bodyB = _hitBody;
@@ -381,12 +403,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {
-		// if a mouse joint exists we simply update
-		// the target of the joint based on the new
-		// mouse coordinates
 		if (_mouseJoint != null) {
 			_camera.unproject(testPoint.set(x, y, 0));
-			_mouseJoint.setTarget(target.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS));
+			_mouseJoint.setTarget(target.set(
+				testPoint.x / Config.PIXELS_TO_METERS,
+				testPoint.y / Config.PIXELS_TO_METERS
+			));
 		}
 
 		return false;
@@ -394,11 +416,13 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
-		// if a mouse joint exists we simply destroy it
-		if (_mouseJoint != null) {
+		if (_mouseJoint != null && _hitBody != null) {
+			Gdx.app.log(TAG, "Remove mouse joint from touch up");
+
 			((Gift)(_hitBody.getUserData())).isSelected(false);
 			_world.destroyJoint(_mouseJoint);
 			_mouseJoint = null;
+			_hitBody = null;
 		}
 
 		return false;

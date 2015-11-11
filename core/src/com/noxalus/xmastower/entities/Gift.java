@@ -3,6 +3,7 @@ package com.noxalus.xmastower.entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -27,8 +28,7 @@ public class Gift {
         _sprite = new Sprite(Assets.giftTexture);
         _sprite.setPosition(position.x, position.y);
         _sprite.setScale(0.5f, 0.5f);
-//        _sprite.setScale((float)Math.random(), (float)Math.random());
-
+//        _sprite.setScale(MathUtils.random(0.5f, 1.25f), MathUtils.random(0.5f, 1.25f));
         Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
     }
 
@@ -79,7 +79,7 @@ public class Gift {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
 
         if (_isSelected)
-            Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
+        Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
 
         float linearVelocityThreshold = 0.01f;
         // Outside of the scene?
@@ -90,18 +90,21 @@ public class Gift {
             _game.reset();
         }
         else if (!_isPlaced && !_isMovable &&
-                _body.getLinearVelocity().x < linearVelocityThreshold && _body.getLinearVelocity().x > -linearVelocityThreshold &&
-                _body.getLinearVelocity().y < linearVelocityThreshold && _body.getLinearVelocity().y > -linearVelocityThreshold) {
+                _body.getLinearVelocity().x < linearVelocityThreshold &&
+                _body.getLinearVelocity().x > -linearVelocityThreshold &&
+                _body.getLinearVelocity().y < linearVelocityThreshold &&
+                _body.getLinearVelocity().y > -linearVelocityThreshold) {
             Gdx.app.log("GIFT", "HAS STOP TO MOVE");
             _isPlaced = true;
 
             Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
 
-            Vector3 coord = _game._camera.project(new Vector3(_sprite.getX(), _sprite.getY(), 0.f));
-            Gdx.app.log("GIFT", "Sprite _camera position: " + coord.toString() + " (height: " + Gdx.graphics.getHeight() + ")");
-
-            if (coord.y > Gdx.graphics.getWidth() / 2.f)//_sprite.getY() > -_sprite.getHeight())
+            Vector3 screenCoordinates = _game._camera.project(new Vector3(_sprite.getX(), _sprite.getY(), 0.f));
+            if (screenCoordinates.y > Gdx.graphics.getWidth() / 2.f)
                 _game.translateCamera(new Vector2(0f, _sprite.getHeight()));
+
+            if (_game._score < _sprite.getY() + 925)
+                _game._score = (int)_sprite.getY() + 925;
 
             _game.addGift();
         }
@@ -109,18 +112,18 @@ public class Gift {
 
     public void draw(float delta, Batch batch) {
         _sprite.setPosition(
-                _body.getPosition().x * Config.PIXELS_TO_METERS - _sprite.getWidth() / 2,
-                _body.getPosition().y * Config.PIXELS_TO_METERS - _sprite.getHeight() / 2
+            _body.getPosition().x * Config.PIXELS_TO_METERS - _sprite.getWidth() / 2,
+            _body.getPosition().y * Config.PIXELS_TO_METERS - _sprite.getHeight() / 2
         );
 
         _sprite.setRotation((float) Math.toDegrees(_body.getAngle()));
 
         batch.draw(
-                _sprite, _sprite.getX(), _sprite.getY(),
-                _sprite.getOriginX(), _sprite.getOriginY(),
-                _sprite.getWidth(), _sprite.getHeight(),
-                _sprite.getScaleX(), _sprite.getScaleY(),
-                _sprite.getRotation()
+            _sprite, _sprite.getX(), _sprite.getY(),
+            _sprite.getOriginX(), _sprite.getOriginY(),
+            _sprite.getWidth(), _sprite.getHeight(),
+            _sprite.getScaleX(), _sprite.getScaleY(),
+            _sprite.getRotation()
         );
     }
 

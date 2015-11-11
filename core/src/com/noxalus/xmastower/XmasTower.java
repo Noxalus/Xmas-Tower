@@ -3,16 +3,12 @@ package com.noxalus.xmastower;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -26,15 +22,12 @@ import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.noxalus.xmastower.entities.Gift;
 
 import java.util.ArrayList;
@@ -43,11 +36,13 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	private static final String TAG = "XmasTower";
 
-	SpriteBatch batch;
-	private ArrayList<Gift> gifts = new ArrayList<Gift>();
-	OrthographicCamera camera;
+	SpriteBatch _batch;
+	private ArrayList<Gift> _gifts = new ArrayList<Gift>();
+	public OrthographicCamera _camera;
 	Vector2 _cameraTarget;
-	BitmapFont font;
+	BitmapFont _font;
+	boolean _needToAddNewGift;
+	boolean _cameraIsMoving;
 
 	// Physics
 	World world;
@@ -64,7 +59,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
+		_batch = new SpriteBatch();
 		Assets.load();
 
 		initializeParticles();
@@ -72,25 +67,26 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		Gdx.input.setInputProcessor(this);
 
-		font = new BitmapFont();
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+		_font = new BitmapFont();
+		_camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
 		reset();
 	}
 
 	public void reset() {
-		camera.position.set(0, 0, 0);
-		_cameraTarget = new Vector2(camera.position.x, camera.position.y);
+		_camera.position.set(0, 0, 0);
+		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y);
+		_needToAddNewGift = false;
 
 		Assets.music.stop();
 		Assets.music.play();
 
-		for (Gift g : gifts)
+		for (Gift g : _gifts)
 		{
 			world.destroyBody(g.getBody());
 		}
 
-		gifts.clear();
+		_gifts.clear();
 
 		addGift();
 	}
@@ -175,12 +171,18 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	}
 
 	public void addGift() {
+
+		if (_cameraIsMoving) {
+			_needToAddNewGift = true;
+			return;
+		}
+
 		Gift gift = new Gift(this, new Vector2(
-				camera.position.x + -Assets.giftTexture.getWidth() / 2f,
-				camera.position.y + Assets.giftTexture.getHeight() / 2f)
+				_camera.position.x + -Assets.giftTexture.getWidth() / 2f,
+				_camera.position.y + Assets.giftTexture.getHeight() / 2f)
 		);
 		gift.initializePhysics(world);
-		gifts.add(gift);
+		_gifts.add(gift);
 	}
 
 	public void update() {
@@ -189,68 +191,80 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		world.step(1f / 60f, 6, 2);
 		physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 
-		for (int i = 0; i < gifts.size(); i++)
+		for (int i = 0; i < _gifts.size(); i++)
 		{
-			gifts.get(i).update(Gdx.graphics.getDeltaTime());
+			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
 		}
 
 		updateCamera(Gdx.graphics.getDeltaTime());
 	}
 
 	private void updateCamera(float delta) {
-		Vector3 position = camera.position;
+		Vector3 position = _camera.position;
 
-		if (Math.abs(position.x - _cameraTarget.x) > 0.1f || Math.abs(position.y - _cameraTarget.y) > 0.1f) {
+		float cameraInterpolationThreshold = 10.f;
+		if (Math.abs(position.x - _cameraTarget.x) > cameraInterpolationThreshold ||
+			Math.abs(position.y - _cameraTarget.y) > cameraInterpolationThreshold) {
 			float lerp = 0.05f;
 
 			position.x = position.x + (_cameraTarget.x - position.x) * lerp;
 			position.y = position.y + (_cameraTarget.y - position.y) * lerp;
 
-			camera.position.set(position);
+			_camera.position.set(position);
+		}
+		else if (_cameraIsMoving) {
+			Gdx.app.log(TAG, "CAMERA STOP MOVING");
+			_cameraIsMoving = false;
+
+			if (_needToAddNewGift) {
+				_needToAddNewGift = false;
+				addGift();
+			}
 		}
 
-		camera.update();
+		_camera.update();
 	}
 
-	public void moveCamera(Vector2 target) {
-		_cameraTarget = target;
+	public void translateCamera(Vector2 target) {
+		_cameraIsMoving = true;
+		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y).add(target);
 	}
 
 	public void draw() {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		batch.begin();
+		_batch.begin();
 
 		// Update and draw effects:
 		for (int i = effects.size - 1; i >= 0; i--) {
 			ParticleEffectPool.PooledEffect effect = effects.get(i);
-			effect.draw(batch, Gdx.graphics.getDeltaTime());
+			effect.draw(_batch, Gdx.graphics.getDeltaTime());
 			if (effect.isComplete()) {
 				effect.free();
 				effects.removeIndex(i);
 			}
 		}
 
-		batch.end();
+		_batch.end();
 
-		batch.setProjectionMatrix(camera.combined);
+		_batch.setProjectionMatrix(_camera.combined);
 		// Scale down the sprite batches projection matrix to box2D size
-		debugMatrix = batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
+		debugMatrix = _batch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 
-		batch.begin();
+		_batch.begin();
 
-		for (int i = 0; i < gifts.size(); i++)
+		for (int i = 0; i < _gifts.size(); i++)
 		{
-			gifts.get(i).draw(Gdx.graphics.getDeltaTime(), batch);
+			_gifts.get(i).draw(Gdx.graphics.getDeltaTime(), _batch);
 		}
 
-		batch.end();
+		_batch.end();
 
-		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		batch.begin();
-		font.draw(batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + physicsUpdateTime, 0, 20);
-		batch.end();
+		_batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		_batch.begin();
+		_font.draw(_batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + physicsUpdateTime, 0, 20);
+		_batch.end();
 
 		// Now render the physics world using our scaled down matrix
 		// Note, this is strictly optional and is, as the name suggests, just for debugging purposes
@@ -314,7 +328,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		// translate the mouse coordinates to world coordinates
 		testPoint.set(x, y, 0);
-		camera.unproject(testPoint);
+		_camera.unproject(testPoint);
 		testPoint.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS, 0);
 
 		// ask the world which bodies are within the given
@@ -348,7 +362,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		// the target of the joint based on the new
 		// mouse coordinates
 		if (mouseJoint != null) {
-			camera.unproject(testPoint.set(x, y, 0));
+			_camera.unproject(testPoint.set(x, y, 0));
 			mouseJoint.setTarget(target.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS));
 		}
 

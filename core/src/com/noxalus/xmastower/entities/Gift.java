@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -89,7 +90,15 @@ public class Gift {
             _isPlaced = true;
 
             Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
-            _game.moveCamera(new Vector2(0f, _sprite.getHeight()));
+
+            Vector3 coord = _game._camera.project(new Vector3(_sprite.getX(), _sprite.getY(), 0.f));
+            Gdx.app.log("GIFT", "Sprite _camera position: " + coord.toString() + " (height: " + Gdx.graphics.getHeight() + ")");
+
+
+
+            if (coord.y > Gdx.graphics.getWidth() / 2.f)//_sprite.getY() > -_sprite.getHeight())
+                _game.translateCamera(new Vector2(0f, _sprite.getHeight()));
+
             _game.addGift();
         }
     }

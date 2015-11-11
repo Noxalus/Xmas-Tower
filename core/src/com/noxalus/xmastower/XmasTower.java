@@ -31,8 +31,10 @@ import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.noxalus.xmastower.entities.Gift;
 
 import java.util.ArrayList;
@@ -42,14 +44,16 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	private static final String TAG = "XmasTower";
 
 	SpriteBatch batch;
-	World world;
-	private ArrayList<Body> boxes = new ArrayList<Body>();
 	private ArrayList<Gift> gifts = new ArrayList<Gift>();
+	OrthographicCamera camera;
+	Vector2 _cameraTarget;
+	BitmapFont font;
+
+	// Physics
+	World world;
 	Body groundBody;
 	Box2DDebugRenderer debugRenderer;
 	Matrix4 debugMatrix;
-	OrthographicCamera camera;
-	BitmapFont font;
 	private MouseJoint mouseJoint = null;
 	Body hitBody = null;
 	float physicsUpdateTime = 0f;
@@ -63,9 +67,36 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		batch = new SpriteBatch();
 		Assets.load();
 
+		initializeParticles();
+		initializePhysics();
+
+		Gdx.input.setInputProcessor(this);
+
+		font = new BitmapFont();
+		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+
+		reset();
+	}
+
+	public void reset() {
+		camera.position.set(0, 0, 0);
+		_cameraTarget = new Vector2(camera.position.x, camera.position.y);
+
+		Assets.music.stop();
 		Assets.music.play();
 
-		// Particles
+		for (Gift g : gifts)
+		{
+			world.destroyBody(g.getBody());
+		}
+
+		gifts.clear();
+
+		addGift();
+	}
+
+	private void initializeParticles() {
+
 		//Set up the particle effect that will act as the pool's template
 		ParticleEffect snowRainEffect = new ParticleEffect();
 		snowRainEffect.load(Gdx.files.internal("graphics/particles/snow2.p"), Gdx.files.internal("graphics/pictures"));
@@ -82,22 +113,16 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		ParticleEffectPool.PooledEffect effect = snowRainEffectPool.obtain();
 		effect.setPosition(0, Gdx.graphics.getHeight() / 2);
 		effects.add(effect);
+	}
 
-		// Physics
+	private void initializePhysics() {
 		world = new World(new Vector2(0, -9.8f), true);
-
-
-		for (int i = 0; i < 20; i++)
-		{
-			Gift gift = new Gift(world);
-			gifts.add(gift);
-		}
 
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
 		float w = Gdx.graphics.getWidth() / Config.PIXELS_TO_METERS;
 		float h = Gdx.graphics.getHeight() / Config.PIXELS_TO_METERS - 250 / Config.PIXELS_TO_METERS;
-		bodyGround.position.set(0,0);
+		bodyGround.position.set(0, 0);
 		FixtureDef fixtureGround = new FixtureDef();
 
 		EdgeShape edgeShape = new EdgeShape();
@@ -108,46 +133,51 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		groundBody.createFixture(fixtureGround);
 		edgeShape.dispose();
 
-		Gdx.input.setInputProcessor(this);
-
 		// Create a Box2DDebugRenderer, this allows us to see the physics simulation controlling the scene
 		debugRenderer = new Box2DDebugRenderer();
-		font = new BitmapFont();
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
 		// You can savely ignore the rest of this method :)
 		world.setContactListener(new ContactListener() {
 			@Override
-			public void beginContact (Contact contact) {
+			public void beginContact(Contact contact) {
 				Gdx.app.log(TAG, "begin contact");
 			}
 
 			@Override
-			public void endContact (Contact contact) {
+			public void endContact(Contact contact) {
 				Gdx.app.log(TAG, "end contact");
 			}
 
 			@Override
-			public void preSolve (Contact contact, Manifold oldManifold) {
-				 Manifold.ManifoldType type = oldManifold.getType();
-				 Vector2 localPoint = oldManifold.getLocalPoint();
-				 Vector2 localNormal = oldManifold.getLocalNormal();
-				 int pointCount = oldManifold.getPointCount();
-				 Manifold.ManifoldPoint[] points = oldManifold.getPoints();
-				 Gdx.app.log(TAG, "pre solve, " + type +
-						 ", point: " + localPoint +
-						 ", local normal: " + localNormal +
-						 ", #points: " + pointCount +
-						 ", [" + points[0] + ", " + points[1] + "]");
+			public void preSolve(Contact contact, Manifold oldManifold) {
+				Manifold.ManifoldType type = oldManifold.getType();
+				Vector2 localPoint = oldManifold.getLocalPoint();
+				Vector2 localNormal = oldManifold.getLocalNormal();
+				int pointCount = oldManifold.getPointCount();
+				Manifold.ManifoldPoint[] points = oldManifold.getPoints();
+				Gdx.app.log(TAG, "pre solve, " + type +
+						", point: " + localPoint +
+						", local normal: " + localNormal +
+						", #points: " + pointCount +
+						", [" + points[0] + ", " + points[1] + "]");
 			}
 
 			@Override
-			public void postSolve (Contact contact, ContactImpulse impulse) {
+			public void postSolve(Contact contact, ContactImpulse impulse) {
 				float[] ni = impulse.getNormalImpulses();
 				float[] ti = impulse.getTangentImpulses();
 				Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
 			}
 		});
+	}
+
+	public void addGift() {
+		Gift gift = new Gift(this, new Vector2(
+				camera.position.x + -Assets.giftTexture.getWidth() / 2f,
+				camera.position.y + Assets.giftTexture.getHeight() / 2f)
+		);
+		gift.initializePhysics(world);
+		gifts.add(gift);
 	}
 
 	public void update() {
@@ -156,11 +186,31 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		world.step(1f / 60f, 6, 2);
 		physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 
-		for(Gift g : gifts) {
-			g.update(Gdx.graphics.getDeltaTime());
+		for (int i = 0; i < gifts.size(); i++)
+		{
+			gifts.get(i).update(Gdx.graphics.getDeltaTime());
+		}
+
+		updateCamera(Gdx.graphics.getDeltaTime());
+	}
+
+	private void updateCamera(float delta) {
+		Vector3 position = camera.position;
+
+		if (Math.abs(position.x - _cameraTarget.x) > 0.1f || Math.abs(position.y - _cameraTarget.y) > 0.1f) {
+			float lerp = 0.05f;
+
+			position.x = position.x + (_cameraTarget.x - position.x) * lerp;
+			position.y = position.y + (_cameraTarget.y - position.y) * lerp;
+
+			camera.position.set(position);
 		}
 
 		camera.update();
+	}
+
+	public void moveCamera(Vector2 target) {
+		_cameraTarget = target;
 	}
 
 	public void draw() {
@@ -188,8 +238,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		batch.begin();
 
-		for(Gift g : gifts) {
-			g.draw(Gdx.graphics.getDeltaTime(), batch);
+		for (int i = 0; i < gifts.size(); i++)
+		{
+			gifts.get(i).draw(Gdx.graphics.getDeltaTime(), batch);
 		}
 
 		batch.end();
@@ -230,39 +281,37 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 
-
 	/** we instantiate this vector and the callback here so we don't irritate the GC **/
 	Vector3 testPoint = new Vector3();
 	QueryCallback callback = new QueryCallback() {
 		@Override
 		public boolean reportFixture (Fixture fixture) {
 			Gdx.app.log(TAG, "reportFixture");
-			// if the hit fixture's body is the ground body
-			// we ignore it
-			if (fixture.getBody() == groundBody) {
-				Gdx.app.log(TAG, "It's the ground!");
-				return true;
-			}
 
-			// if the hit point is inside the fixture of the body
-			// we report it
+			Gift selectedGift = (Gift)(fixture.getBody().getUserData());
+
+			if (selectedGift == null || !selectedGift.isMovable())
+				return true;
+
+			selectedGift.isSelected(true);
+
+			// if the hit point is inside the fixture of the body we report it
 			if (fixture.testPoint(testPoint.x, testPoint.y)) {
-				Gdx.app.log(TAG, "IT'S INSIDE");
 				hitBody = fixture.getBody();
 				return false;
 			} else {
-				Gdx.app.log(TAG, "IT'S OUTSIDE");
 				return true;
 			}
 		}
 	};
 
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+	public boolean touchDown(int x, int y, int pointer, int button) {
 		//body.applyForceToCenter(0f,10f,true);
+		Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
 
 		// translate the mouse coordinates to world coordinates
-		testPoint.set(screenX, screenY, 0);
+		testPoint.set(x, y, 0);
 		camera.unproject(testPoint);
 		testPoint.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS, 0);
 
@@ -308,9 +357,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	public boolean touchUp (int x, int y, int pointer, int button) {
 		// if a mouse joint exists we simply destroy it
 		if (mouseJoint != null) {
+			((Gift)(hitBody.getUserData())).isSelected(false);
 			world.destroyJoint(mouseJoint);
 			mouseJoint = null;
 		}
+
 		return false;
 	}
 

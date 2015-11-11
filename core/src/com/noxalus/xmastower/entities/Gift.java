@@ -1,5 +1,6 @@
 package com.noxalus.xmastower.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
@@ -10,15 +11,25 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
+import com.noxalus.xmastower.XmasTower;
 
 public class Gift {
     Sprite _sprite;
     Body _body;
+    boolean _isPlaced = false;
+    boolean _isSelected = false;
+    boolean _isMovable = true;
+    private XmasTower _game;
 
-    public Gift(World world) {
+    public Gift(XmasTower game, Vector2 position) {
+        _game = game;
         _sprite = new Sprite(Assets.giftTexture);
-        _sprite.setPosition(-_sprite.getWidth() / 2, -_sprite.getHeight() / 2 + 200);
+        _sprite.setPosition(position.x, position.y);
 
+        Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
+    }
+
+    public void initializePhysics(World world) {
         // Now create a BodyDefinition.  This defines the physics objects type and position in the simulation
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -31,7 +42,7 @@ public class Gift {
 
         // Create a body in the world using our definition
         _body = world.createBody(bodyDef);
-        _body.setUserData(_sprite);
+        _body.setUserData(this);
 
         // Now define the dimensions of the physics shape
         PolygonShape shape = new PolygonShape();
@@ -39,7 +50,7 @@ public class Gift {
         // Basically set the physics polygon to a box with the same dimensions as our sprite
         shape.setAsBox(
                 (((_sprite.getWidth() / 2) - 11) * _sprite.getScaleX()) / Config.PIXELS_TO_METERS,
-                ((275 / 2) * _sprite.getScaleY()) / Config.PIXELS_TO_METERS,
+                ((275f / 2) * _sprite.getScaleY()) / Config.PIXELS_TO_METERS,
                 new Vector2(0, -0.5f),
                 0f
         );
@@ -55,11 +66,32 @@ public class Gift {
 
         _body.createFixture(fixtureDef);
 
+        _body.setAwake(false);
+
         // Shape is the only disposable of the lot, so get rid of it
         shape.dispose();
     }
 
     public void update(float delta) {
+//        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
+//        Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
+
+        // Outside of the scene?
+        if (_sprite.getX() < -Gdx.graphics.getWidth() / 2f - _sprite.getWidth() ||
+                _sprite.getX() > Gdx.graphics.getWidth() / 2 ||
+                _sprite.getY() < -Gdx.graphics.getHeight() ||
+                _sprite.getY() > Gdx.graphics.getHeight() + _sprite.getHeight())
+        {
+            _game.reset();
+        }
+        else if (!_isPlaced && !_isMovable && _body.getLinearVelocity().x == 0.f && _body.getLinearVelocity().y == 0.f) {
+            Gdx.app.log("GIFT", "HAS STOP TO MOVE");
+            _isPlaced = true;
+
+            Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
+            _game.moveCamera(new Vector2(0f, _sprite.getHeight()));
+            _game.addGift();
+        }
     }
 
     public void draw(float delta, Batch batch) {
@@ -77,5 +109,22 @@ public class Gift {
                 _sprite.getScaleX(), _sprite.getScaleY(),
                 _sprite.getRotation()
         );
+    }
+
+    public boolean isMovable()
+    {
+        return _isMovable;
+    }
+
+    public void isSelected(boolean value) {
+        if (_isSelected && !value)
+            _isMovable = false;
+
+        _isSelected = value;
+    }
+
+    public Body getBody()
+    {
+        return _body;
     }
 }

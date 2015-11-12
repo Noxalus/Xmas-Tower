@@ -86,6 +86,9 @@ public class Gift {
     public void update(float delta) {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
 
+        if (_game.GameWillReset)
+            return;
+
         if (_isSelected)
         Gdx.app.log("GIFT", "Sprite position: " + _sprite.getX() + ", " + _sprite.getY());
 
@@ -95,7 +98,7 @@ public class Gift {
                 _sprite.getX() > Gdx.graphics.getWidth() / 2 ||
                 _sprite.getY() < -Gdx.graphics.getHeight())
         {
-            _game.reset();
+            _game.gameFinished();
         }
         else if (!_isPlaced && !_isMovable &&
                 _body.getLinearVelocity().x < linearVelocityThreshold &&

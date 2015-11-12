@@ -30,11 +30,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
 
@@ -55,6 +51,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	private int _bestScore;
 	Sound _currentPlayedSound;
 	private Viewport _viewport;
+	public boolean GameWillReset;
 
 	// Physics
 	World _world;
@@ -66,6 +63,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	Body _hitBody = null;
 	float _physicsUpdateTime = 0f;
 	boolean _destroyMouseJoint;
+	boolean _physicsPaused;
 
 	// Particles
 	ParticleEffectPool _snowRainEffectPool;
@@ -98,12 +96,15 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_camera.position.set(0, 0, 0);
 		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y);
 		_needToAddNewGift = false;
+		GameWillReset = false;
 
 		if (_score > _bestScore)
 			_bestScore = _score;
 
 		_score = 0;
+
 		_destroyMouseJoint = false;
+		_physicsPaused = false;
 		_currentPlayedSound = null;
 
 		Assets.music.stop();
@@ -174,7 +175,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 				if (_mouseJoint != null && _hitBody != null) {
 					Gdx.app.log(TAG, "Remove mouse joint from collision");
 
-					Gift selectedGift = (Gift)_hitBody.getUserData();
+					Gift selectedGift = (Gift) _hitBody.getUserData();
 					selectedGift.isSelected(false);
 					selectedGift.isMovable(false);
 
@@ -188,13 +189,13 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 				Fixture fixtureA = contact.getFixtureA();
 				Fixture fixtureB = contact.getFixtureB();
 
-				Gift giftA = (Gift)(fixtureA.getBody().getUserData());
+				Gift giftA = (Gift) (fixtureA.getBody().getUserData());
 				if (giftA != null) {
 					giftA.isMovable(false);
 					giftA.isSelected(false);
 				}
 
-				Gift giftB = (Gift)(fixtureB.getBody().getUserData());
+				Gift giftB = (Gift) (fixtureB.getBody().getUserData());
 				if (giftB != null) {
 					giftB.isMovable(false);
 					giftB.isSelected(false);
@@ -244,11 +245,20 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_gifts.add(gift);
 	}
 
+	public void gameFinished() {
+		_physicsPaused = true;
+		translateCamera(new Vector2(0, -(_camera.position.y - _groundBody.getPosition().y)));
+		GameWillReset = true;
+	}
+
 	public void update() {
 		long start = TimeUtils.nanoTime();
-		// Step the physics simulation forward at a rate of 60hz
-		_world.step(1f / 60f, 6, 2);
-		_physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
+
+		if (!_physicsPaused) {
+			// Step the physics simulation forward at a rate of 60hz
+			_world.step(1f / 60f, 6, 2);
+			_physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
+		}
 
 		for (int i = 0; i < _gifts.size(); i++)
 		{
@@ -288,6 +298,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			if (_needToAddNewGift) {
 				_needToAddNewGift = false;
 				addGift();
+			}
+
+			if (GameWillReset) {
+				GameWillReset = false;
+				reset();
 			}
 		}
 

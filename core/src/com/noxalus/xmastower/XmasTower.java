@@ -52,6 +52,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	boolean _needToAddNewGift;
 	boolean _cameraIsMoving;
 	public int _score;
+	private int _bestScore;
 	Sound _currentPlayedSound;
 	private Viewport _viewport;
 
@@ -97,6 +98,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_camera.position.set(0, 0, 0);
 		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y);
 		_needToAddNewGift = false;
+
+		if (_score > _bestScore)
+			_bestScore = _score;
+
 		_score = 0;
 		_destroyMouseJoint = false;
 		_currentPlayedSound = null;
@@ -328,6 +333,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		_batch.begin();
 		_font.draw(_batch, Integer.toString(_score), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight());
+		_font.draw(_batch, Integer.toString(_bestScore), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - _font.getLineHeight());
 		_font.draw(_batch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + _physicsUpdateTime, 0, 20);
 		_batch.end();
 

@@ -107,6 +107,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		if (_score > _bestScore) {
 			_preferences.putInteger("highscore", _score);
+			_preferences.flush();
 			_bestScore = _score;
 		}
 

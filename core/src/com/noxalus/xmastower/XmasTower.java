@@ -3,12 +3,14 @@ package com.noxalus.xmastower;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -28,6 +30,12 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
 
 import java.util.ArrayList;
@@ -44,11 +52,13 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	boolean _needToAddNewGift;
 	boolean _cameraIsMoving;
 	public int _score;
+	Sound _currentPlayedSound;
+	private Viewport _viewport;
 
 	// Physics
 	World _world;
 	Body _groundBody;
-	float _groundHeight = 0;
+	float _groundHeight = 250f;
 	Box2DDebugRenderer _debugRenderer;
 	Matrix4 _debugMatrix;
 	private MouseJoint _mouseJoint = null;
@@ -73,8 +83,14 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_font = new BitmapFont();
 		_camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+		_viewport = new ScreenViewport(_camera);
 
 		reset();
+	}
+
+	public void resize(int width, int height) {
+		Gdx.app.log(TAG, "Resize: " + width + ", " + height);
+		_viewport.update(width, height);
 	}
 
 	public void reset() {
@@ -83,6 +99,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_needToAddNewGift = false;
 		_score = 0;
 		_destroyMouseJoint = false;
+		_currentPlayedSound = null;
 
 		Assets.music.stop();
 		Assets.music.play();
@@ -123,7 +140,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	}
 
 	private void initializePhysics() {
-		_world = new World(new Vector2(0, -9.8f), true);
+		_world = new World(new Vector2(0.f, -19.8f), true);
 
 		BodyDef bodyGround = new BodyDef();
 		bodyGround.type = BodyDef.BodyType.StaticBody;
@@ -385,6 +402,8 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.
 		if (_hitBody != null) {
+			_currentPlayedSound = Assets.grabSounds[MathUtils.random(0,  Assets.grabSounds.length - 1)];
+			_currentPlayedSound.play();
 			MouseJointDef def = new MouseJointDef();
 			def.bodyA = _groundBody;
 			def.bodyB = _hitBody;
@@ -416,6 +435,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchUp (int x, int y, int pointer, int button) {
+		if (_currentPlayedSound != null)
+		{
+			_currentPlayedSound.stop();
+			_currentPlayedSound = null;
+		}
 		if (_mouseJoint != null && _hitBody != null) {
 			Gdx.app.log(TAG, "Remove mouse joint from touch up");
 

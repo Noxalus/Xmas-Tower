@@ -27,7 +27,8 @@ public class Gift {
         _game = game;
         _sprite = new Sprite(Assets.giftTexture);
         _sprite.setPosition(position.x, position.y);
-        _sprite.setScale(0.5f, 0.5f);
+        //_sprite.setScale(0.5f, 0.5f);
+//        _sprite.setScale(5f, 5f);
 //        _sprite.setScale(MathUtils.random(0.5f, 1.25f), MathUtils.random(0.5f, 1.25f));
         Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
     }
@@ -39,8 +40,8 @@ public class Gift {
         // We are going to use 1 to 1 dimensions. Meaning 1 in physics engine is 1 pixel
         // Set our body to the same position as our sprite
         bodyDef.position.set(
-                (_sprite.getX() + _sprite.getWidth() / 2) / Config.PIXELS_TO_METERS,
-                (_sprite.getY() + _sprite.getHeight() / 2) / Config.PIXELS_TO_METERS
+            (_sprite.getX() + _sprite.getWidth() / 2) / Config.PIXELS_TO_METERS,
+            (_sprite.getY() + _sprite.getHeight() / 2) / Config.PIXELS_TO_METERS
         );
 
         // Create a body in the world using our definition
@@ -51,6 +52,13 @@ public class Gift {
         PolygonShape shape = new PolygonShape();
         // We are a box, so this makes sense, no?
         // Basically set the physics polygon to a box with the same dimensions as our sprite
+//        shape.setAsBox(
+//            (((_sprite.getWidth() / 2) - 1f) * _sprite.getScaleX()) / Config.PIXELS_TO_METERS,
+//            ((_sprite.getHeight() / 2) * _sprite.getScaleY()) / Config.PIXELS_TO_METERS,
+//            new Vector2(0, 0),
+//            0f
+//        );
+
         shape.setAsBox(
                 (((_sprite.getWidth() / 2) - 11) * _sprite.getScaleX()) / Config.PIXELS_TO_METERS,
                 ((275f / 2) * _sprite.getScaleY()) / Config.PIXELS_TO_METERS,
@@ -138,6 +146,11 @@ public class Gift {
     }
 
     public void isSelected(boolean value) {
+        if (value)
+            _sprite.setTexture(Assets.giftTexture2);
+        else
+            _sprite.setTexture(Assets.giftTexture);
+
         _isSelected = value;
     }
 

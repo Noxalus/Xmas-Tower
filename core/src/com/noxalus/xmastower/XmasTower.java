@@ -3,6 +3,7 @@ package com.noxalus.xmastower;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -36,6 +37,8 @@ import com.noxalus.xmastower.entities.Gift;
 
 import java.util.ArrayList;
 
+import javax.naming.Context;
+
 public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	private static final String TAG = "XmasTower";
@@ -52,6 +55,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	Sound _currentPlayedSound;
 	private Viewport _viewport;
 	public boolean GameWillReset;
+	private Preferences _preferences;
 
 	// Physics
 	World _world;
@@ -84,6 +88,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 		_viewport = new ScreenViewport(_camera);
 
+		_preferences = Gdx.app.getPreferences("xmas-tower");
+		_bestScore = _preferences.getInteger("highscore", 0);
+
 		reset();
 	}
 
@@ -98,8 +105,10 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_needToAddNewGift = false;
 		GameWillReset = false;
 
-		if (_score > _bestScore)
+		if (_score > _bestScore) {
+			_preferences.putInteger("highscore", _score);
 			_bestScore = _score;
+		}
 
 		_score = 0;
 

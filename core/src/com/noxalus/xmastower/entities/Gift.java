@@ -27,6 +27,8 @@ public class Gift {
         _game = game;
         _sprite = new Sprite(Assets.giftTexture);
         _sprite.setPosition(position.x, position.y);
+        float scale = MathUtils.random(0.5f, 1.2f);
+        _sprite.setScale(scale, scale);
         //_sprite.setScale(0.5f, 0.5f);
 //        _sprite.setScale(5f, 5f);
 //        _sprite.setScale(MathUtils.random(0.5f, 1.25f), MathUtils.random(0.5f, 1.25f));

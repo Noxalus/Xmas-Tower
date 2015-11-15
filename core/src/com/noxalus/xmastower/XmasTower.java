@@ -420,6 +420,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		//body.applyForceToCenter(0f,10f,true);
 		Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
 
+		if (pointer > 0 || _mouseJoint != null)
+			return false;
+
 		// translate the mouse coordinates to _world coordinates
 		testPoint.set(x, y, 0);
 		_camera.unproject(testPoint);
@@ -432,7 +435,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_world.QueryAABB(callback, testPoint.x - value, testPoint.y - value, testPoint.x + value, testPoint.y + value);
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.
-		if (_hitBody != null) {
+		if (_mouseJoint == null && _hitBody != null) {
 			_currentPlayedSound = Assets.grabSounds[MathUtils.random(0,  Assets.grabSounds.length - 1)];
 			_currentPlayedSound.play();
 			MouseJointDef def = new MouseJointDef();
@@ -442,6 +445,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			def.target.set(testPoint.x, testPoint.y);
 			def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * _hitBody.getMass();
 
+			Gdx.app.log(TAG, "Create a new mouse joint");
 			_mouseJoint = (MouseJoint) _world.createJoint(def);
 			_hitBody.setAwake(true);
 		}
@@ -453,6 +457,15 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDragged (int x, int y, int pointer) {
+
+		Gdx.app.log(TAG, "Touch dragged pointer: " + pointer);
+		Gdx.app.log(TAG, "Touch dragged: " + x + ", " + y);
+
+
+		if (pointer > 0)
+			return false;
+
+
 		if (_mouseJoint != null) {
 			_camera.unproject(testPoint.set(x, y, 0));
 			_mouseJoint.setTarget(target.set(

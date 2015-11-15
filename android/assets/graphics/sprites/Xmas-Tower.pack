@@ -1,0 +1,124 @@
+
+Xmas-Tower.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+giftbox1
+  rotate: false
+  xy: 1, 79
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox2
+  rotate: false
+  xy: 1, 29
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox3
+  rotate: false
+  xy: 67, 79
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox4
+  rotate: false
+  xy: 67, 29
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+largegiftbox1
+  rotate: false
+  xy: 1, 3
+  size: 84, 24
+  orig: 84, 24
+  offset: 0, 0
+  index: -1
+tallgiftbox1
+  rotate: false
+  xy: 133, 59
+  size: 26, 68
+  orig: 26, 68
+  offset: 0, 0
+  index: -1
+ribon1
+  rotate: false
+  xy: 161, 99
+  size: 63, 28
+  orig: 63, 28
+  offset: 0, 0
+  index: -1
+eye1
+  rotate: false
+  xy: 87, 12
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+mouth1
+  rotate: false
+  xy: 87, 1
+  size: 15, 9
+  orig: 15, 9
+  offset: 0, 0
+  index: -1
+eye5
+  rotate: false
+  xy: 133, 42
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+eye6
+  rotate: false
+  xy: 161, 82
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+mouth3
+  rotate: false
+  xy: 226, 116
+  size: 17, 11
+  orig: 17, 11
+  offset: 0, 0
+  index: -1
+eye3
+  rotate: false
+  xy: 245, 117
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+eye2
+  rotate: false
+  xy: 104, 16
+  size: 16, 11
+  orig: 16, 11
+  offset: 0, 0
+  index: -1
+mouth2
+  rotate: false
+  xy: 133, 30
+  size: 11, 10
+  orig: 11, 10
+  offset: 0, 0
+  index: -1
+eye4
+  rotate: false
+  xy: 161, 73
+  size: 11, 7
+  orig: 11, 7
+  offset: 0, 0
+  index: -1
+mouth4
+  rotate: false
+  xy: 150, 49
+  size: 5, 8
+  orig: 5, 8
+  offset: 0, 0
+  index: -1

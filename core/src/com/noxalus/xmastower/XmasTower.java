@@ -248,8 +248,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		}
 
 		Gift gift = new Gift(this, new Vector2(
-				_camera.position.x + -Assets.giftTexture.getWidth() / 2f,
-				_camera.position.y + Assets.giftTexture.getHeight() / 2f)
+				0f,
+				_camera.position.y + (Gdx.graphics.getHeight() / 2f) - 200f
+			)
 		);
 		gift.initializePhysics(_world);
 		_gifts.add(gift);
@@ -325,7 +326,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	}
 
 	public void draw() {
-		Gdx.gl.glClearColor(1, 1, 1, 1);
+		Gdx.gl.glClearColor(0.13f, 0.5f, 0.8f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		_batch.begin();

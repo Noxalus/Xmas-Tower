@@ -29,6 +29,7 @@ import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -44,6 +45,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	private static final String TAG = "XmasTower";
 
 	SpriteBatch _batch;
+	public Stage stage;
 	private ArrayList<Gift> _gifts = new ArrayList<Gift>();
 	public OrthographicCamera _camera;
 	Vector2 _cameraTarget;
@@ -87,6 +89,9 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_font = new BitmapFont();
 		_camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 		_viewport = new ScreenViewport(_camera);
+
+		stage = new Stage(_viewport);
+
 
 		_preferences = Gdx.app.getPreferences("xmas-tower");
 		_bestScore = _preferences.getInteger("highscore", 0);
@@ -271,10 +276,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			_physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 		}
 
-		for (int i = 0; i < _gifts.size(); i++)
-		{
-			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
-		}
+//		for (int i = 0; i < _gifts.size(); i++)
+//		{
+//			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
+//		}
+
+		stage.act(Gdx.graphics.getDeltaTime());
 
 		if (_destroyMouseJoint)
 		{
@@ -349,10 +356,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.begin();
 
-		for (int i = _gifts.size() - 1; i >= 0; i--)
-		{
-			_gifts.get(i).draw(Gdx.graphics.getDeltaTime(), _batch);
-		}
+		stage.draw();
+
+//		for (int i = _gifts.size() - 1; i >= 0; i--)
+//		{
+//			_gifts.get(i).draw(Gdx.graphics.getDeltaTime(), _batch);
+//		}
 
 		_batch.end();
 

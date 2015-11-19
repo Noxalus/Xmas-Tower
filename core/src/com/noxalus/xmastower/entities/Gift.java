@@ -13,13 +13,19 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 
-public class Gift {
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.parallel;
+
+public class Gift extends Actor {
     Sprite _boxSprite;
     Sprite _ribonSprite;
+    Actor _ribon;
     TextureRegion _boxTextureRegion;
     TextureRegion _ribonTextureRegion;
     Body _body;
@@ -34,15 +40,29 @@ public class Gift {
 
         _game = game;
         _boxSprite = new Sprite(Assets.normalBoxRegions[MathUtils.random(0, Assets.normalBoxRegions.length - 1)]);
-        _ribonSprite = new Sprite(Assets.ribonRegions[0]);
+
+        setBounds(getX(), getY(), _boxSprite.getWidth(), _boxSprite.getHeight());
+
+        _ribon = new Actor(){
+            public Sprite sprite = new Sprite(Assets.ribonRegions[0]);
+
+            public void draw(Batch batch, float alpha){
+                batch.draw(sprite,
+                    getX(), getY(),
+                    getOriginX(), getOriginY(),
+                    getWidth(), getHeight(),
+                    getScaleX(), getScaleY(),
+                    getRotation()
+                );
+            }
+        };
+
+        _ribon.setBounds(0, 0, Assets.ribonRegions[0].getRegionWidth(), Assets.ribonRegions[0].getRegionHeight());
+
+
 
 //        position.x +=  -_boxSprite.getWidth() / 2f;
 //        position.y +=  -_boxSprite.getHeight() / 2f;
-
-        _boxSprite.setPosition(
-            position.x - _boxSprite.getWidth() / 2f,
-            position.y - _boxSprite.getHeight()
-        );
 
 //        _ribonSprite.setOrigin(_boxSprite.getOriginX(), _boxSprite.getOriginY());
 
@@ -50,11 +70,26 @@ public class Gift {
         scale = 5f;
         //_boxSprite.setScale(scale, scale);
         //_boxSprite.setScale(0.5f, 0.5f);
-        _boxSprite.setScale(scale, scale);
-        _ribonSprite.setScale(scale, scale);
+//        _boxSprite.setScale(scale, scale);
+//        _ribonSprite.setScale(scale, scale);
 //        _boxSprite.setScale(MathUtils.random(0.5f, 1.25f), MathUtils.random(0.5f, 1.25f));
 
-        _ribonLocalPosition = new Vector2(0f * _boxSprite.getScaleX(), (_boxSprite.getHeight() / 2f) * _boxSprite.getScaleY());
+        _ribonLocalPosition = new Vector2(0f * getScaleX(), (_boxSprite.getHeight() / 2f) * getScaleY());
+        _ribon.setPosition(_ribonLocalPosition.x, _ribonLocalPosition.y);
+
+        Group group = new Group();
+        group.addActor(this);
+        group.addActor(_ribon);
+
+//        group.addAction(parallel(moveTo(200, 0, 5), rotateBy(90f, 5f)));
+
+        _game.stage.addActor(group);
+
+        this.setPosition(
+                position.x - _boxSprite.getWidth() / 2f,
+                position.y - _boxSprite.getHeight()
+        );
+        this.setScale(scale, scale);
 
         Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
     }
@@ -74,10 +109,10 @@ public class Gift {
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
-            (((_boxSprite.getWidth() / 2)) * _boxSprite.getScaleX()) / Config.PIXELS_TO_METERS,
-            ((_boxSprite.getHeight() / 2) * _boxSprite.getScaleY()) / Config.PIXELS_TO_METERS,
-            new Vector2(0, 0),
-            0f
+                (((_boxSprite.getWidth() / 2)) * getScaleX()) / Config.PIXELS_TO_METERS,
+                ((_boxSprite.getHeight() / 2) * getScaleY()) / Config.PIXELS_TO_METERS,
+                new Vector2(0, 0),
+                0f
         );
 
 //        shape.setAsBox(
@@ -134,13 +169,29 @@ public class Gift {
 
             Vector3 screenCoordinates = _game._camera.project(new Vector3(_boxSprite.getX(), _boxSprite.getY(), 0.f));
             if (screenCoordinates.y > Gdx.graphics.getWidth() / 2.f)
-                _game.translateCamera(new Vector2(0f, _boxSprite.getHeight() * _boxSprite.getScaleY()));
+                _game.translateCamera(new Vector2(0f, _boxSprite.getHeight() * getScaleY()));
 
             if (_game._score < _boxSprite.getY() + 925)
                 _game._score = (int) _boxSprite.getY() + 925;
 
             _game.addGift();
         }
+    }
+
+    public void draw(Batch batch, float alpha) {
+        this.setPosition(
+                _body.getPosition().x * Config.PIXELS_TO_METERS - _boxSprite.getWidth() / 2,
+                _body.getPosition().y * Config.PIXELS_TO_METERS - _boxSprite.getHeight() / 2
+        );
+        this.setRotation((float) Math.toDegrees(_body.getAngle()));
+
+        batch.draw(_boxSprite,
+            getX(), getY(),
+            getOriginX(), getOriginY(),
+            getWidth(), getHeight(),
+            getScaleX(), getScaleY(),
+            getRotation()
+        );
     }
 
     public void draw(float delta, Batch batch) {

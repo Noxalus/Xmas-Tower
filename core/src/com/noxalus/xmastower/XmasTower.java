@@ -38,8 +38,6 @@ import com.noxalus.xmastower.entities.Gift;
 
 import java.util.ArrayList;
 
-import javax.naming.Context;
-
 public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 	private static final String TAG = "XmasTower";
@@ -258,6 +256,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			)
 		);
 		gift.initializePhysics(_world);
+
 		_gifts.add(gift);
 	}
 
@@ -357,11 +356,6 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_batch.begin();
 
 		stage.draw();
-
-//		for (int i = _gifts.size() - 1; i >= 0; i--)
-//		{
-//			_gifts.get(i).draw(Gdx.graphics.getDeltaTime(), _batch);
-//		}
 
 		_batch.end();
 

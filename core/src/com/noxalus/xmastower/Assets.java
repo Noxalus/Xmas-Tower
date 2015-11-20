@@ -18,6 +18,8 @@ public class Assets {
     // Texture regions
     public static TextureRegion[] normalBoxRegions;
     public static TextureRegion[] ribonRegions;
+    public static TextureRegion[] eyeRegions;
+    public static TextureRegion[] mouthRegions;
 
     // Musics
     public static Music music;
@@ -47,6 +49,20 @@ public class Assets {
 
         ribonRegions = new TextureRegion[1];
         ribonRegions[0] = atlas.findRegion("ribon1");
+
+        eyeRegions = new TextureRegion[6];
+        eyeRegions[0] = atlas.findRegion("eye1");
+        eyeRegions[1] = atlas.findRegion("eye2");
+        eyeRegions[2] = atlas.findRegion("eye3");
+        eyeRegions[3] = atlas.findRegion("eye4");
+        eyeRegions[4] = atlas.findRegion("eye5");
+        eyeRegions[5] = atlas.findRegion("eye6");
+
+        mouthRegions = new TextureRegion[4];
+        mouthRegions[0] = atlas.findRegion("mouth1");
+        mouthRegions[1] = atlas.findRegion("mouth2");
+        mouthRegions[2] = atlas.findRegion("mouth3");
+        mouthRegions[3] = atlas.findRegion("mouth4");
 
         // Musics
         music = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/music.mp3"));

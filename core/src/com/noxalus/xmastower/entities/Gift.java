@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.noxalus.xmastower.Assets;
@@ -34,6 +35,7 @@ public class Gift extends Actor {
     boolean _isSelected = false;
     boolean _isMovable = true;
     private XmasTower _game;
+    private Group _group;
 
     public Gift(XmasTower game, Vector2 position) {
         Gdx.app.log("GIFT", "Gift initial position: " + position.toString());
@@ -74,24 +76,24 @@ public class Gift extends Actor {
 //        _ribonSprite.setScale(scale, scale);
 //        _boxSprite.setScale(MathUtils.random(0.5f, 1.25f), MathUtils.random(0.5f, 1.25f));
 
-        _ribonLocalPosition = new Vector2(0f * getScaleX(), (_boxSprite.getHeight() / 2f) * getScaleY());
+        _ribonLocalPosition = new Vector2(0f, (_boxSprite.getHeight() / 2f));
         _ribon.setPosition(_ribonLocalPosition.x, _ribonLocalPosition.y);
 
-        Group group = new Group();
-        group.addActor(this);
-        group.addActor(_ribon);
+        _group = new Group();
+        _group.addActor(this);
+        _group.addActor(_ribon);
 
 //        group.addAction(parallel(moveTo(200, 0, 5), rotateBy(90f, 5f)));
 
-        _game.stage.addActor(group);
+        _game.stage.addActor(_group);
 
-        this.setPosition(
-                position.x - _boxSprite.getWidth() / 2f,
-                position.y - _boxSprite.getHeight()
+        _group.setPosition(
+                position.x - (_boxSprite.getWidth() / 2f) * scale,
+                position.y - _boxSprite.getHeight() * scale
         );
-        this.setScale(scale, scale);
+        _group.setScale(scale, scale);
 
-        Gdx.app.log("GIFT", "Set initial gift position to: " + position.x + ", " + position.y);
+        Gdx.app.log("GIFT", "Set initial gift position to: " + _group.getX() + ", " + _group.getY());
     }
 
     public void initializePhysics(World world) {
@@ -100,8 +102,8 @@ public class Gift extends Actor {
         bodyDef.type = BodyDef.BodyType.DynamicBody;
 
         bodyDef.position.set(
-            (_boxSprite.getX() + _boxSprite.getWidth() / 2) / Config.PIXELS_TO_METERS,
-            (_boxSprite.getY() + _boxSprite.getHeight() / 2) / Config.PIXELS_TO_METERS
+            (_group.getX() + _boxSprite.getWidth() / 2) / Config.PIXELS_TO_METERS,
+            (_group.getY() + _boxSprite.getHeight() / 2) / Config.PIXELS_TO_METERS
         );
 
         _body = world.createBody(bodyDef);
@@ -109,8 +111,8 @@ public class Gift extends Actor {
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
-                (((_boxSprite.getWidth() / 2)) * getScaleX()) / Config.PIXELS_TO_METERS,
-                ((_boxSprite.getHeight() / 2) * getScaleY()) / Config.PIXELS_TO_METERS,
+                (((_boxSprite.getWidth() / 2)) * _group.getScaleX()) / Config.PIXELS_TO_METERS,
+                ((_boxSprite.getHeight() / 2) * _group.getScaleY()) / Config.PIXELS_TO_METERS,
                 new Vector2(0, 0),
                 0f
         );
@@ -139,21 +141,25 @@ public class Gift extends Actor {
         shape.dispose();
     }
 
-    public void update(float delta) {
+    public void act(float delta) {
 
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
 
         if (_game.GameWillReset)
             return;
 
-        if (_isSelected)
+        Gdx.app.log("GIFT", "Group position: " + _group.getX() + ", " + _group.getY());
         Gdx.app.log("GIFT", "Sprite position: " + _boxSprite.getX() + ", " + _boxSprite.getY());
+
+        if (_isSelected)
+            Gdx.app.log("GIFT", "Sprite position: " + _group.getX() + ", " + _group.getY());
+
 
         float linearVelocityThreshold = 0.01f;
         // Outside of the scene?
-        if (_boxSprite.getX() < -Gdx.graphics.getWidth() / 2f - _boxSprite.getWidth() ||
-                _boxSprite.getX() > Gdx.graphics.getWidth() / 2 ||
-                _boxSprite.getY() < -Gdx.graphics.getHeight())
+        if (_group.getX() < -Gdx.graphics.getWidth() / 2f - _group.getWidth() ||
+                _group.getX() > Gdx.graphics.getWidth() / 2 ||
+                _group.getY() < -Gdx.graphics.getHeight())
         {
             _game.gameFinished();
         }
@@ -167,24 +173,32 @@ public class Gift extends Actor {
 
             Gdx.app.log("GIFT", "Sprite position: " + _boxSprite.getX() + ", " + _boxSprite.getY());
 
-            Vector3 screenCoordinates = _game._camera.project(new Vector3(_boxSprite.getX(), _boxSprite.getY(), 0.f));
+            Vector3 screenCoordinates = _game._camera.project(new Vector3(_group.getX(), _group.getY(), 0.f));
             if (screenCoordinates.y > Gdx.graphics.getWidth() / 2.f)
-                _game.translateCamera(new Vector2(0f, _boxSprite.getHeight() * getScaleY()));
+                _game.translateCamera(new Vector2(0f, _group.getHeight()));
 
-            if (_game._score < _boxSprite.getY() + 925)
-                _game._score = (int) _boxSprite.getY() + 925;
+            if (_game._score < _group.getY() + 925)
+                _game._score = (int) _group.getY() + 925;
 
             _game.addGift();
         }
+
+        _group.setPosition(
+                (_body.getPosition().x * Config.PIXELS_TO_METERS) - _boxSprite.getWidth() / 2,
+                (_body.getPosition().y * Config.PIXELS_TO_METERS) - _boxSprite.getHeight() / 2
+        );
+
+        _group.setOrigin(
+                _boxSprite.getOriginX(),
+                _boxSprite.getOriginY()
+        );
+
+        Gdx.app.log("GIFT", "Group origin: " + _group.getOriginX() + ", " + _group.getOriginY());
+
+        _group.setRotation((float) Math.toDegrees(_body.getAngle()));
     }
 
     public void draw(Batch batch, float alpha) {
-        this.setPosition(
-                _body.getPosition().x * Config.PIXELS_TO_METERS - _boxSprite.getWidth() / 2,
-                _body.getPosition().y * Config.PIXELS_TO_METERS - _boxSprite.getHeight() / 2
-        );
-        this.setRotation((float) Math.toDegrees(_body.getAngle()));
-
         batch.draw(_boxSprite,
             getX(), getY(),
             getOriginX(), getOriginY(),

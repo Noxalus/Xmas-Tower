@@ -107,6 +107,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_cameraTarget = new Vector2(_camera.position.x, _camera.position.y);
 		_needToAddNewGift = false;
 		GameWillReset = false;
+		_stage.clear();
 
 		if (_score > _bestScore) {
 			_preferences.putInteger("highscore", _score);
@@ -227,18 +228,18 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 				Vector2 localNormal = oldManifold.getLocalNormal();
 				int pointCount = oldManifold.getPointCount();
 				Manifold.ManifoldPoint[] points = oldManifold.getPoints();
-				Gdx.app.log(TAG, "pre solve, " + type +
-						", point: " + localPoint +
-						", local normal: " + localNormal +
-						", #points: " + pointCount +
-						", [" + points[0] + ", " + points[1] + "]");
+//				Gdx.app.log(TAG, "pre solve, " + type +
+//						", point: " + localPoint +
+//						", local normal: " + localNormal +
+//						", #points: " + pointCount +
+//						", [" + points[0] + ", " + points[1] + "]");
 			}
 
 			@Override
 			public void postSolve(Contact contact, ContactImpulse impulse) {
 				float[] ni = impulse.getNormalImpulses();
 				float[] ti = impulse.getTangentImpulses();
-				Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
+//				Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
 			}
 		});
 	}
@@ -252,8 +253,8 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		Gift gift = new Gift(this, new Vector2(
 				0f,
-				_camera.position.y + (Gdx.graphics.getHeight() / 2f) - 200f
-		)
+				_camera.position.y + (Gdx.graphics.getHeight() / 2f) - 100f
+			)
 		);
 		gift.initializePhysics(_world);
 

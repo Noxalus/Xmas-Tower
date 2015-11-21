@@ -39,8 +39,6 @@ public class Gift extends Group {
     boolean _isMovable = true;
 
     public Gift(XmasTower game, Vector2 position) {
-        Gdx.app.log("GIFT", "Gift initial position: " + position.toString());
-
         _game = game;
 
         initializeActors();
@@ -54,8 +52,8 @@ public class Gift extends Group {
         addActor(_ribbon);
 
         setPosition(
-            position.x - (_box.getWidth() / 2f) * scale,
-            position.y - _box.getHeight() * scale
+                position.x - (_box.getWidth() / 2f) * scale,
+                position.y - _box.getHeight() * scale
         );
         setScale(scale, scale);
     }
@@ -78,8 +76,8 @@ public class Gift extends Group {
         bodyDef.type = BodyDef.BodyType.DynamicBody;
 
         bodyDef.position.set(
-                (getX() + (_box.sprite.getWidth() / 2f) * getScaleX()) / Config.PIXELS_TO_METERS,
-                (getY() + (_box.sprite.getHeight() / 2f) * getScaleY()) / Config.PIXELS_TO_METERS
+            (getX() + (_box.sprite.getWidth() / 2f) * getScaleX()) / Config.PIXELS_TO_METERS,
+            (getY() + (_box.sprite.getHeight() / 2f) * getScaleY()) / Config.PIXELS_TO_METERS
         );
 
         _body = world.createBody(bodyDef);
@@ -87,10 +85,10 @@ public class Gift extends Group {
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
-                (((_box.sprite.getWidth() / 2)) * getScaleX()) / Config.PIXELS_TO_METERS,
-                ((_box.sprite.getHeight() / 2) * getScaleY()) / Config.PIXELS_TO_METERS,
-                new Vector2(0, 0),
-                0f
+            (((_box.sprite.getWidth() / 2f)) * getScaleX()) / Config.PIXELS_TO_METERS,
+            ((_box.sprite.getHeight() / 2f) * getScaleY()) / Config.PIXELS_TO_METERS,
+            new Vector2(0, 0),
+            0f
         );
         // FixtureDef is a confusing expression for physical properties
         // Basically this is where you, in addition to defining the shape of the body
@@ -115,11 +113,9 @@ public class Gift extends Group {
         if (_game.GameWillReset)
             return;
 
-        if (_isSelected)
-            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
+//        if (_isSelected)
+//            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
 
-
-        float linearVelocityThreshold = 0.01f;
         // Outside of the scene?
         if (getX() < -Gdx.graphics.getWidth() / 2f - getWidth() ||
                 getX() > Gdx.graphics.getWidth() / 2 ||
@@ -128,22 +124,20 @@ public class Gift extends Group {
             _game.gameFinished();
         }
         else if (!_isPlaced && !_isMovable &&
-                _body.getLinearVelocity().x < linearVelocityThreshold &&
-                _body.getLinearVelocity().x > -linearVelocityThreshold &&
-                _body.getLinearVelocity().y < linearVelocityThreshold &&
-                _body.getLinearVelocity().y > -linearVelocityThreshold) {
+                _body.getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
+                _body.getLinearVelocity().x > -Config.LINEAR_VELOCITY_THRESHOLD &&
+                _body.getLinearVelocity().y < Config.LINEAR_VELOCITY_THRESHOLD &&
+                _body.getLinearVelocity().y > -Config.LINEAR_VELOCITY_THRESHOLD) {
             Gdx.app.log("GIFT", "HAS STOP TO MOVE");
             _isPlaced = true;
 
-//            Gdx.app.log("GIFT", "Sprite position: " + _boxSprite.getX() + ", " + _boxSprite.getY());
-
             Vector3 screenCoordinates = _game._camera.project(new Vector3(getX(), getY(), 0.f));
-            if (screenCoordinates.y > Gdx.graphics.getWidth() / 2.f)
-                _game.translateCamera(new Vector2(0f, getHeight()));
+            float limitThreshold = Gdx.graphics.getWidth() / 2.f;
 
-            if (_game._score < getY() + 925)
-                _game._score = (int) getY() + 925;
+            if (screenCoordinates.y > limitThreshold)
+                _game.translateCamera(new Vector2(0f, limitThreshold));
 
+            _game._score++;
             _game.addGift();
         }
 

@@ -205,20 +205,37 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 				Gift giftA = (Gift) (fixtureA.getBody().getUserData());
 				if (giftA != null) {
+					Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
 					giftA.isMovable(false);
 					giftA.isSelected(false);
+					giftA.switchState(State.COLLISIONING);
 				}
 
 				Gift giftB = (Gift) (fixtureB.getBody().getUserData());
 				if (giftB != null) {
+					Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
 					giftB.isMovable(false);
 					giftB.isSelected(false);
+					giftB.switchState(State.COLLISIONING);
 				}
 			}
 
 			@Override
 			public void endContact(Contact contact) {
 				Gdx.app.log(TAG, "end contact");
+
+				Fixture fixtureA = contact.getFixtureA();
+				Fixture fixtureB = contact.getFixtureB();
+
+				Gift giftA = (Gift) (fixtureA.getBody().getUserData());
+				if (giftA != null) {
+					giftA.switchState(State.IDLE);
+				}
+
+				Gift giftB = (Gift) (fixtureB.getBody().getUserData());
+				if (giftB != null) {
+					giftB.switchState(State.IDLE);
+				}
 			}
 
 			@Override

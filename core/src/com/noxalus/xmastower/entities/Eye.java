@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.noxalus.xmastower.Assets;
+import com.noxalus.xmastower.State;
 
 public class Eye extends StatableSpriteActor
 {

@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
+import com.noxalus.xmastower.State;
 
 
 public class Gift extends Group {
@@ -127,9 +128,7 @@ public class Gift extends Group {
             Gdx.app.log("GIFT", "HAS STOP TO MOVE");
             _isPlaced = true;
 
-            _leftEye.switchState(State.SLEEPING);
-            _rightEye.switchState(State.SLEEPING);
-            _mouth.switchState(State.SLEEPING);
+            switchState(State.SLEEPING);
 
             Vector3 screenCoordinates = _game._camera.project(new Vector3(getX(), getY(), 0.f));
             float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
@@ -159,15 +158,11 @@ public class Gift extends Group {
     public void isSelected(boolean value) {
         if (value)
         {
-            _leftEye.switchState(State.SELECTED);
-            _rightEye.switchState(State.SELECTED);
-            _mouth.switchState(State.SELECTED);
+            switchState(State.SELECTED);
         }
         else if (_isMovable)
         {
-            _leftEye.switchState(State.FALLING);
-            _rightEye.switchState(State.FALLING);
-            _mouth.switchState(State.FALLING);
+            switchState(State.FALLING);
         }
 
         _isSelected = value;
@@ -176,5 +171,12 @@ public class Gift extends Group {
     public Body getBody()
     {
         return _body;
+    }
+
+    public void switchState(State newState)
+    {
+        _leftEye.switchState(newState);
+        _rightEye.switchState(newState);
+        _mouth.switchState(newState);
     }
 }

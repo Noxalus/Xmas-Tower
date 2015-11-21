@@ -3,6 +3,7 @@ package com.noxalus.xmastower.entities;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.noxalus.xmastower.Assets;
+import com.noxalus.xmastower.State;
 
 public class Mouth extends StatableSpriteActor
 {

@@ -5,13 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 
-enum State{
-    IDLE,
-    SELECTED,
-    FALLING,
-    COLLISIONING,
-    SLEEPING
-};
+import com.noxalus.xmastower.State;
 
 public class StatableSpriteActor extends SpriteActor
 {

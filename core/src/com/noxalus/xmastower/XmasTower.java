@@ -370,7 +370,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		// Now render the physics _world using our scaled down matrix
 		// Note, this is strictly optional and is, as the name suggests, just for debugging purposes
-		_debugRenderer.render(_world, _debugMatrix);
+//		_debugRenderer.render(_world, _debugMatrix);
 	}
 
 	@Override

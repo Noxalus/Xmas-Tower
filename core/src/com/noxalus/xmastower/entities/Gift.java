@@ -43,7 +43,7 @@ public class Gift extends Group {
 
         initializeActors();
 
-        float scale = MathUtils.random(2f, 8f);
+        float scale = MathUtils.random(4f, 10f);
 
         addActor(_box);
         addActor(_leftEye);
@@ -52,8 +52,8 @@ public class Gift extends Group {
         addActor(_ribbon);
 
         setPosition(
-                position.x - (_box.getWidth() / 2f) * scale,
-                position.y - _box.getHeight() * scale
+            position.x - (_box.getWidth() / 2f) * scale,
+            position.y - _box.getHeight() * scale
         );
         setScale(scale, scale);
     }
@@ -132,10 +132,10 @@ public class Gift extends Group {
             _isPlaced = true;
 
             Vector3 screenCoordinates = _game._camera.project(new Vector3(getX(), getY(), 0.f));
-            float limitThreshold = Gdx.graphics.getWidth() / 2.f;
+            float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
 
             if (screenCoordinates.y > limitThreshold)
-                _game.translateCamera(new Vector2(0f, limitThreshold));
+                _game.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
             _game._score++;
             _game.addGift();

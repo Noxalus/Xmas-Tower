@@ -1,7 +1,6 @@
 package com.noxalus.xmastower.entities;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
@@ -23,14 +21,10 @@ public class Gift extends Group {
 
     SpriteActor _box;
     SpriteActor _ribbon;
-    SpriteActor _leftEye;
-    SpriteActor _rightEye;
-    SpriteActor _mouth;
+    Eye _leftEye;
+    Eye _rightEye;
+    Mouth _mouth;
 
-    Vector2 _ribbonLocalPosition;
-    Vector2 _leftEyeLocalPosition;
-    Vector2 _rightEyeLocalPosition;
-    Vector2 _mouthLocalPosition;
 
     Body _body;
 
@@ -63,13 +57,12 @@ public class Gift extends Group {
     public void initializeActors()
     {
         _box = new SpriteActor(new Sprite(Assets.normalBoxRegions[MathUtils.random(0, Assets.normalBoxRegions.length - 1)]));
-
-        _ribbon = new SpriteActor(new Sprite(Assets.ribonRegions[0]), new Vector2(0f, 28.f));
-        _leftEye = new SpriteActor(new Sprite(Assets.eyeRegions[0]), new Vector2(12f, 15f));
+        _ribbon = new SpriteActor(new Sprite(Assets.ribbonRegions[0]), new Vector2(0f, 28.f));
+        _leftEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(12f, 15f), false);
         _leftEye.setScale(0.75f, 0.75f);
-        _rightEye = new SpriteActor(new Sprite(Assets.eyeRegions[0]), new Vector2(40f, 15f));
+        _rightEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(40f, 15f), true);
         _rightEye.setScale(0.75f, 0.75f);
-        _mouth = new SpriteActor(new Sprite(Assets.mouthRegions[0]), new Vector2(26f, 8f));
+        _mouth = new Mouth(new Sprite(Assets.mouthRegions[0]), new Vector2(26f, 8f));
         _mouth.setScale(0.75f, 0.75f);
     }
 
@@ -120,9 +113,9 @@ public class Gift extends Group {
 //            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
 
         // Outside of the scene?
-        if (getX() < -Gdx.graphics.getWidth() / 2f - getWidth() ||
-                getX() > Gdx.graphics.getWidth() / 2 ||
-                getY() < -Gdx.graphics.getHeight())
+        if (getX() < -Gdx.graphics.getWidth() / 2f - _box.sprite.getWidth() ||
+            getX() > Gdx.graphics.getWidth() / 2 ||
+            getY() < -Gdx.graphics.getHeight())
         {
             _game.gameFinished();
         }
@@ -133,6 +126,10 @@ public class Gift extends Group {
                 _body.getLinearVelocity().y > -Config.LINEAR_VELOCITY_THRESHOLD) {
             Gdx.app.log("GIFT", "HAS STOP TO MOVE");
             _isPlaced = true;
+
+            _leftEye.switchState(State.SLEEPING);
+            _rightEye.switchState(State.SLEEPING);
+            _mouth.switchState(State.SLEEPING);
 
             Vector3 screenCoordinates = _game._camera.project(new Vector3(getX(), getY(), 0.f));
             float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
@@ -160,10 +157,18 @@ public class Gift extends Group {
     }
 
     public void isSelected(boolean value) {
-//        if (value)
-//            _boxSprite.setTexture(Assets.giftTexture2);
-//        else
-//            _boxSprite.setTexture(Assets.giftTexture);
+        if (value)
+        {
+            _leftEye.switchState(State.SELECTED);
+            _rightEye.switchState(State.SELECTED);
+            _mouth.switchState(State.SELECTED);
+        }
+        else if (_isMovable)
+        {
+            _leftEye.switchState(State.FALLING);
+            _rightEye.switchState(State.FALLING);
+            _mouth.switchState(State.FALLING);
+        }
 
         _isSelected = value;
     }

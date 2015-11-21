@@ -8,16 +8,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Assets {
-    // Textures
-    public static Texture giftTexture;
-    public static Texture giftTexture2;
-
     // Texture atlas
     public static TextureAtlas atlas;
 
     // Texture regions
     public static TextureRegion[] normalBoxRegions;
-    public static TextureRegion[] ribonRegions;
+    public static TextureRegion[] ribbonRegions;
     public static TextureRegion[] eyeRegions;
     public static TextureRegion[] mouthRegions;
 
@@ -33,10 +29,6 @@ public class Assets {
     }
 
     public static void load() {
-        // Textures
-        giftTexture = loadTexture("graphics/sprites/gift.png");
-        giftTexture2 = loadTexture("graphics/sprites/gift2.png");
-
         // Texture atlas
         atlas = new TextureAtlas("graphics/sprites/Xmas-Tower.pack");
 
@@ -47,8 +39,8 @@ public class Assets {
         normalBoxRegions[2] = atlas.findRegion("giftbox3");
         normalBoxRegions[3] = atlas.findRegion("giftbox4");
 
-        ribonRegions = new TextureRegion[1];
-        ribonRegions[0] = atlas.findRegion("ribon1");
+        ribbonRegions = new TextureRegion[1];
+        ribbonRegions[0] = atlas.findRegion("ribon1");
 
         eyeRegions = new TextureRegion[6];
         eyeRegions[0] = atlas.findRegion("eye1");

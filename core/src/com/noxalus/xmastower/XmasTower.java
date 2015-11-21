@@ -257,8 +257,8 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			)
 		);
 		gift.initializePhysics(_world);
-
 		_stage.addActor(gift);
+		gift.setZIndex(0);
 		_gifts.add(gift);
 	}
 

@@ -43,7 +43,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 	private static final String TAG = "XmasTower";
 
 	SpriteBatch _batch;
-	public Stage stage;
+	private Stage _stage;
 	private ArrayList<Gift> _gifts = new ArrayList<Gift>();
 	public OrthographicCamera _camera;
 	Vector2 _cameraTarget;
@@ -88,7 +88,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		_camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 		_viewport = new ScreenViewport(_camera);
 
-		stage = new Stage(_viewport);
+		_stage = new Stage(_viewport);
 
 
 		_preferences = Gdx.app.getPreferences("xmas-tower");
@@ -253,10 +253,11 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		Gift gift = new Gift(this, new Vector2(
 				0f,
 				_camera.position.y + (Gdx.graphics.getHeight() / 2f) - 200f
-			)
+		)
 		);
 		gift.initializePhysics(_world);
 
+		_stage.addActor(gift);
 		_gifts.add(gift);
 	}
 
@@ -275,12 +276,12 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 			_physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
 		}
 
-//		for (int i = 0; i < _gifts.size(); i++)
-//		{
-//			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
-//		}
+		for (int i = 0; i < _gifts.size(); i++)
+		{
+			_gifts.get(i).update(Gdx.graphics.getDeltaTime());
+		}
 
-		stage.act(Gdx.graphics.getDeltaTime());
+		_stage.act(Gdx.graphics.getDeltaTime());
 
 		if (_destroyMouseJoint)
 		{
@@ -300,7 +301,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		float cameraInterpolationThreshold = 10.f;
 		if (Math.abs(position.x - _cameraTarget.x) > cameraInterpolationThreshold ||
-			Math.abs(position.y - _cameraTarget.y) > cameraInterpolationThreshold) {
+				Math.abs(position.y - _cameraTarget.y) > cameraInterpolationThreshold) {
 			float lerp = 0.05f;
 
 			position.x = position.x + (_cameraTarget.x - position.x) * lerp;
@@ -355,7 +356,7 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 
 		_batch.begin();
 
-		stage.draw();
+		_stage.draw();
 
 		_batch.end();
 
@@ -473,8 +474,8 @@ public class XmasTower extends ApplicationAdapter implements InputProcessor {
 		if (_mouseJoint != null) {
 			_camera.unproject(testPoint.set(x, y, 0));
 			_mouseJoint.setTarget(target.set(
-				testPoint.x / Config.PIXELS_TO_METERS,
-				testPoint.y / Config.PIXELS_TO_METERS
+					testPoint.x / Config.PIXELS_TO_METERS,
+					testPoint.y / Config.PIXELS_TO_METERS
 			));
 		}
 

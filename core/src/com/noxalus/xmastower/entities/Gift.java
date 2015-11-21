@@ -43,7 +43,9 @@ public class Gift extends Group {
 
         initializeActors();
 
-        float scale = MathUtils.random(4f, 10f);
+        float minScale = Config.GIFT_MIN_SIZE / _box.sprite.getWidth();
+        float maxScale = Config.GIFT_MAX_SIZE / _box.sprite.getWidth();
+        float scale = MathUtils.random(minScale, maxScale);
 
         addActor(_box);
         addActor(_leftEye);
@@ -61,6 +63,7 @@ public class Gift extends Group {
     public void initializeActors()
     {
         _box = new SpriteActor(new Sprite(Assets.normalBoxRegions[MathUtils.random(0, Assets.normalBoxRegions.length - 1)]));
+
         _ribbon = new SpriteActor(new Sprite(Assets.ribonRegions[0]), new Vector2(0f, 28.f));
         _leftEye = new SpriteActor(new Sprite(Assets.eyeRegions[0]), new Vector2(12f, 15f));
         _leftEye.setScale(0.75f, 0.75f);
@@ -141,10 +144,7 @@ public class Gift extends Group {
             _game.addGift();
         }
 
-        setPosition(
-            (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
-            (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
-        );
+        setPosition((_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f, (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f);
         setOrigin(_box.sprite.getOriginX(), _box.sprite.getOriginY());
         setRotation((float) Math.toDegrees(_body.getAngle()));
     }

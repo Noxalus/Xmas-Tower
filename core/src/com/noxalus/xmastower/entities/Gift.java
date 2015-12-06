@@ -15,10 +15,11 @@ import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.State;
+import com.noxalus.xmastower.screens.GameScreen;
 
 
 public class Gift extends Group {
-    private XmasTower _game;
+    private GameScreen _gameScreen;
 
     SpriteActor _box;
     SpriteActor _ribbon;
@@ -33,8 +34,8 @@ public class Gift extends Group {
     boolean _isSelected = false;
     boolean _isMovable = true;
 
-    public Gift(XmasTower game, Vector2 position) {
-        _game = game;
+    public Gift(GameScreen gameScreen, Vector2 position) {
+        _gameScreen = gameScreen;
 
         initializeActors();
 
@@ -107,7 +108,7 @@ public class Gift extends Group {
     public void update(float delta) {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
 
-        if (_game.GameWillReset)
+        if (_gameScreen.GameWillReset)
             return;
 
 //        if (_isSelected)
@@ -118,7 +119,7 @@ public class Gift extends Group {
             getX() > Gdx.graphics.getWidth() / 2 ||
             getY() < -Gdx.graphics.getHeight())
         {
-            _game.gameFinished();
+            _gameScreen.gameFinished();
         }
         else if (!_isPlaced && !_isMovable &&
                 _body.getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
@@ -130,14 +131,14 @@ public class Gift extends Group {
 
             switchState(State.SLEEPING);
 
-            Vector3 screenCoordinates = _game._camera.project(new Vector3(getX(), getY(), 0.f));
+            Vector3 screenCoordinates = _gameScreen._camera.project(new Vector3(getX(), getY(), 0.f));
             float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
 
             if (screenCoordinates.y > limitThreshold)
-                _game.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
+                _gameScreen.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
-            _game._score++;
-            _game.addGift();
+            _gameScreen._score++;
+            _gameScreen.addGift();
         }
 
         setPosition((_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f, (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f);

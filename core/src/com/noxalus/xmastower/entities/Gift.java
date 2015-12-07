@@ -27,7 +27,6 @@ public class Gift extends Group {
     Eye _rightEye;
     Mouth _mouth;
 
-
     Body _body;
 
     boolean _isPlaced = false;
@@ -69,7 +68,6 @@ public class Gift extends Group {
     }
 
     public void initializePhysics(World world) {
-        // Now create a BodyDefinition.  This defines the physics objects type and position in the simulation
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
 
@@ -83,11 +81,12 @@ public class Gift extends Group {
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
-            (((_box.sprite.getWidth() / 2f)) * getScaleX()) / Config.PIXELS_TO_METERS,
+            (((_box.sprite.getWidth() / 2f) - 1f) * getScaleX()) / Config.PIXELS_TO_METERS,
             ((_box.sprite.getHeight() / 2f) * getScaleY()) / Config.PIXELS_TO_METERS,
             new Vector2(0, 0),
             0f
         );
+
         // FixtureDef is a confusing expression for physical properties
         // Basically this is where you, in addition to defining the shape of the body
         // you also define it's properties like density, restitution and others we will see shortly
@@ -97,11 +96,10 @@ public class Gift extends Group {
         fixtureDef.density = 1f;
 //		fixtureDef.restitution = 0.5f;
 
+        _body.setLinearDamping(1.f);
         _body.createFixture(fixtureDef);
-
         _body.setAwake(false);
 
-        // Shape is the only disposable of the lot, so get rid of it
         shape.dispose();
     }
 

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -25,10 +26,12 @@ import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -39,6 +42,7 @@ import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.entities.SpriteActor;
 
 import java.util.ArrayList;
 
@@ -60,6 +64,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     private Viewport _viewport;
     public boolean GameWillReset;
     private Preferences _preferences;
+    private SpriteActor _groundSpriteActor;
 
     // Physics
     World _world;
@@ -73,18 +78,13 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     boolean _destroyMouseJoint;
     boolean _physicsPaused;
 
-    // Particles
-    ParticleEffectPool _snowRainEffectPool;
-    Array<ParticleEffectPool.PooledEffect> _effects = new Array();
-    float _startParticlesTime = 8f;
-
     public GameScreen(XmasTower game)
     {
         _game = game;
+    }
 
-        initializeParticles();
-        initializePhysics();
-
+    @Override
+    public void show() {
         Gdx.input.setInputProcessor(this);
 
         _font = new BitmapFont();
@@ -93,9 +93,17 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
 
         _stage = new Stage(_viewport);
 
+        _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
+        _groundSpriteActor.setScale(1f, 1f);
+        _groundSpriteActor.setPosition(
+                -(_groundSpriteActor.getWidth() * _groundSpriteActor.getScaleX()) / 2f,
+                -Gdx.graphics.getHeight() / 2f
+        );
 
         _preferences = Gdx.app.getPreferences("xmas-tower");
         _bestScore = _preferences.getInteger("highscore", 0);
+
+        initializePhysics();
 
         reset();
     }
@@ -106,6 +114,8 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         _needToAddNewGift = false;
         GameWillReset = false;
         _stage.clear();
+
+        _stage.addActor(_groundSpriteActor);
 
         if (_score > _bestScore) {
             _preferences.putInteger("highscore", _score);
@@ -119,8 +129,9 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         _physicsPaused = false;
         _currentPlayedSound = null;
 
-        Assets.music.stop();
-        Assets.music.play();
+        Assets.gameMusicLoop.stop();
+        Assets.gameMusicIntro.stop();
+        Assets.gameMusicIntro.play();
 
         for (Gift g : _gifts)
         {
@@ -132,48 +143,33 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         addGift();
     }
 
-    private void initializeParticles() {
-
-        //Set up the particle effect that will act as the pool's template
-        ParticleEffect snowRainEffect = new ParticleEffect();
-        snowRainEffect.load(
-                Gdx.files.internal("graphics/particles/snow2.p"),
-                Gdx.files.internal("graphics/pictures")
-        );
-
-        //If your particle effect includes additive or pre-multiplied particle emitters
-        //you can turn off blend function clean-up to save a lot of draw calls, but
-        //remember to switch the Batch back to GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
-        //before drawing "regular" sprites or your Stage.
-        snowRainEffect.setEmittersCleanUpBlendFunction(true);
-
-        _snowRainEffectPool = new ParticleEffectPool(snowRainEffect, 1, 2);
-
-        // Create effect:
-        ParticleEffectPool.PooledEffect effect = _snowRainEffectPool.obtain();
-        effect.setPosition(Gdx.graphics.getWidth() / 2.f, Gdx.graphics.getHeight() + 200.f);
-        _effects.add(effect);
-
-        effect.update(_startParticlesTime);
-    }
-
     private void initializePhysics() {
         _world = new World(new Vector2(0.f, -19.8f), true);
 
-        BodyDef bodyGround = new BodyDef();
-        bodyGround.type = BodyDef.BodyType.StaticBody;
-        float w = Gdx.graphics.getWidth() / Config.PIXELS_TO_METERS;
-        float h = Gdx.graphics.getHeight() / Config.PIXELS_TO_METERS - _groundHeight / Config.PIXELS_TO_METERS;
-        bodyGround.position.set(0, 0);
-        FixtureDef fixtureGround = new FixtureDef();
+        BodyDef groundBodyDef = new BodyDef();
+        groundBodyDef.type = BodyDef.BodyType.StaticBody;
 
-        EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(-w / 2, -h / 2, w / 2, -h / 2);
-        fixtureGround.shape = edgeShape;
+        groundBodyDef.position.set(
+            (_groundSpriteActor.getX() + (_groundSpriteActor.sprite.getWidth() / 2f) *
+                    _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
+            (_groundSpriteActor.getY() + (_groundSpriteActor.sprite.getHeight() / 2f) *
+                    _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS
+        );
 
-        _groundBody = _world.createBody(bodyGround);
-        _groundBody.createFixture(fixtureGround);
-        edgeShape.dispose();
+        _groundBody = _world.createBody(groundBodyDef);
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(
+            (((_groundSpriteActor.sprite.getWidth() / 2f)) * _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
+            ((_groundSpriteActor.sprite.getHeight() / 2f) * _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS,
+            new Vector2(0, 0),
+            0f
+        );
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        _groundBody.createFixture(fixtureDef);
+        shape.dispose();
 
         // Create a Box2DDebugRenderer, this allows us to see the physics simulation controlling the scene
         _debugRenderer = new Box2DDebugRenderer();
@@ -202,16 +198,24 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
                 Fixture fixtureB = contact.getFixtureB();
 
                 Gift giftA = (Gift) (fixtureA.getBody().getUserData());
+                Gift giftB = (Gift) (fixtureB.getBody().getUserData());
+
                 if (giftA != null) {
-                    Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                    if (giftA.getBody().getLinearVelocity().y < -10)
+                        Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+
+                    Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
+
                     giftA.isMovable(false);
                     giftA.isSelected(false);
                     giftA.switchState(State.COLLISIONING);
                 }
 
-                Gift giftB = (Gift) (fixtureB.getBody().getUserData());
                 if (giftB != null) {
-                    Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                    if (giftB.getBody().getLinearVelocity().y < -10)
+                        Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                    Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
+
                     giftB.isMovable(false);
                     giftB.isSelected(false);
                     giftB.switchState(State.COLLISIONING);
@@ -254,7 +258,11 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
             public void postSolve(Contact contact, ContactImpulse impulse) {
                 float[] ni = impulse.getNormalImpulses();
                 float[] ti = impulse.getTangentImpulses();
-//				Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
+
+                if (ti[1] > 1.f)
+                {
+                    Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
+                }
             }
         });
     }
@@ -269,7 +277,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         Gift gift = new Gift(this, new Vector2(
                 0f,
                 _camera.position.y + (Gdx.graphics.getHeight() / 2f) - 100f
-        )
+            )
         );
         gift.initializePhysics(_world);
         _stage.addActor(gift);
@@ -283,13 +291,12 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         GameWillReset = true;
     }
 
-    @Override
-    public void show() {
-
-    }
-
     public void update(float delta) {
         long start = TimeUtils.nanoTime();
+
+        // Music intro will finish?
+//        if (!Assets.gameMusicLoop.isPlaying() && Assets.gameMusicIntro.getPosition() > 3.75f)
+//            Assets.gameMusicLoop.play();
 
         if (!_physicsPaused) {
             // Step the physics simulation forward at a rate of 60hz
@@ -354,31 +361,12 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     }
 
     public void draw(float delta) {
-        Gdx.gl.glClearColor(0.13f, 0.5f, 0.8f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        _game.SpriteBatch.begin();
-
-        // Update and draw _effects:
-        for (int i = _effects.size - 1; i >= 0; i--) {
-            ParticleEffectPool.PooledEffect effect = _effects.get(i);
-            effect.draw(_game.SpriteBatch, Gdx.graphics.getDeltaTime());
-            if (effect.isComplete()) {
-                effect.free();
-                _effects.removeIndex(i);
-            }
-        }
-
-        _game.SpriteBatch.end();
-
         _game.SpriteBatch.setProjectionMatrix(_camera.combined);
         // Scale down the sprite batches projection matrix to box2D size
         _debugMatrix = _game.SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 
         _game.SpriteBatch.begin();
-
         _stage.draw();
-
         _game.SpriteBatch.end();
 
         _game.SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

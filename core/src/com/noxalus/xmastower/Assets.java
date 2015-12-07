@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class Assets {
     // Texture atlas
@@ -17,8 +19,21 @@ public class Assets {
     public static TextureRegion[] eyeRegions;
     public static TextureRegion[] mouthRegions;
 
+    public static Texture groundTexture;
+
+    // Fonts
+    public static BitmapFont normalFont;
+    public static BitmapFont bigFont;
+
+    // UI
+    public static Skin menuSkin;
+    public static Texture playButtonUp;
+    public static Texture playButtonDown;
+
     // Musics
-    public static Music music;
+    public static Music menuMusic;
+    public static Music gameMusicIntro;
+    public static Music gameMusicLoop;
 
     // SFX
     public static Sound[] grabSounds;
@@ -30,7 +45,7 @@ public class Assets {
 
     public static void load() {
         // Texture atlas
-        atlas = new TextureAtlas("graphics/sprites/Xmas-Tower.pack");
+        atlas = new TextureAtlas("graphics/sprites/atlas.pack");
 
         // Texture regions
         normalBoxRegions = new TextureRegion[4];
@@ -56,9 +71,40 @@ public class Assets {
         mouthRegions[2] = atlas.findRegion("mouth3");
         mouthRegions[3] = atlas.findRegion("mouth4");
 
+        groundTexture = new Texture(Gdx.files.internal("graphics/sprites/ground.png"));
+
+        // Fonts
+        normalFont = new BitmapFont(
+            Gdx.files.internal("fonts/normalfont.fnt"),
+            Gdx.files.internal("fonts/normalfont_00.png"),
+            false
+        );
+
+        bigFont = new BitmapFont(
+                Gdx.files.internal("fonts/bigfont.fnt"),
+                Gdx.files.internal("fonts/bigfont_00.png"),
+                false
+        );
+
+        // Skins
+        menuSkin = new Skin(Gdx.files.internal("ui/menu.json"));
+        playButtonUp = new Texture(Gdx.files.internal("graphics/ui/playbuttonup.png"));
+        playButtonDown = new Texture(Gdx.files.internal("graphics/ui/playbuttondown.png"));
+
         // Musics
-        music = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/music.mp3"));
-        Assets.music.setLooping(true);
+        menuMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/menu.ogg"));
+        gameMusicIntro = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/intro.ogg"));
+        gameMusicLoop = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/music.ogg"));
+
+        gameMusicIntro.setOnCompletionListener(new Music.OnCompletionListener() {
+            @Override
+            public void onCompletion(Music music) {
+                Assets.gameMusicLoop.play();
+            }
+        });
+
+        menuMusic.setLooping(true);
+        gameMusicLoop.setLooping(true);
 
         // SFX
         grabSounds = new Sound[3];

@@ -19,9 +19,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
@@ -31,7 +28,7 @@ import com.noxalus.xmastower.entities.SpriteActor;
 
 import java.util.ArrayList;
 
-public class GameScreen extends ApplicationAdapter implements InputProcessor, Screen {
+public class GameScreen extends ApplicationAdapter implements Screen {
 
     private static final String TAG = "GameScreen";
 
@@ -59,7 +56,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(this);
+        Gdx.input.setInputProcessor(_game.CustomInputProcessor);
 
         _font = new BitmapFont();
 
@@ -84,6 +81,8 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         _needToAddNewGift = false;
         GameWillReset = false;
         _game.Stage.clear();
+        _game.MouseJoint = null;
+        _game.HitBody = null;
 
         _game.Stage.addActor(_groundSpriteActor);
 
@@ -174,7 +173,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
                 if (currentGift.getX() < -Gdx.graphics.getWidth() / 2f - currentGift.getBox().sprite.getWidth() ||
                         currentGift.getX() > Gdx.graphics.getWidth() / 2 ||
                         currentGift.getY() < -Gdx.graphics.getHeight()) {
-                    _game.GameScreen.gameFinished();
+                    gameFinished();
                 } else if (!currentGift.isPlaced() && !currentGift.isMovable() &&
                         currentGift.getBody().getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
                         currentGift.getBody().getLinearVelocity().x > -Config.LINEAR_VELOCITY_THRESHOLD &&
@@ -191,13 +190,13 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
                     float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
 
                     if (screenCoordinates.y > limitThreshold)
-                        _game.GameScreen.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
+                        translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
-                    _game.GameScreen._score++;
-                    _game.GameScreen.addGift();
+                    _score++;
+                    addGift();
                 }
 
-                currentGift.update(Gdx.graphics.getDeltaTime());
+                currentGift.update(delta);
             }
         }
 
@@ -275,133 +274,5 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
 
     @Override
     public void dispose() {
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    /** we instantiate this vector and the callback here so we don't irritate the GC **/
-    Vector3 testPoint = new Vector3();
-    QueryCallback callback = new QueryCallback() {
-        @Override
-        public boolean reportFixture (Fixture fixture) {
-            Gift selectedGift = (Gift)(fixture.getBody().getUserData());
-
-            if (selectedGift == null || !selectedGift.isMovable())
-                return true;
-
-            selectedGift.isSelected(true);
-
-            // if the hit point is inside the fixture of the body we report it
-            if (fixture.testPoint(testPoint.x, testPoint.y)) {
-                _game.HitBody = fixture.getBody();
-                return false;
-            } else {
-                return true;
-            }
-        }
-    };
-
-    @Override
-    public boolean touchDown(int x, int y, int pointer, int button) {
-        //body.applyForceToCenter(0f,10f,true);
-        Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
-
-        if (pointer > 0 || _game.MouseJoint != null)
-            return false;
-
-        // translate the mouse coordinates to World coordinates
-        testPoint.set(x, y, 0);
-        _game.Camera.unproject(testPoint);
-        testPoint.set(testPoint.x / Config.PIXELS_TO_METERS, testPoint.y / Config.PIXELS_TO_METERS, 0);
-
-        // ask the World which bodies are within the given
-        // bounding box around the mouse pointer
-        _game.HitBody = null;
-        float value = 0.1f;
-        _game.World.QueryAABB(callback, testPoint.x - value, testPoint.y - value, testPoint.x + value, testPoint.y + value);
-        // if we hit something we create a new mouse joint
-        // and attach it to the hit body.
-        if (_game.MouseJoint == null && _game.HitBody != null) {
-            _currentPlayedSound = Assets.grabSounds[MathUtils.random(0,  Assets.grabSounds.length - 1)];
-            _currentPlayedSound.play();
-            MouseJointDef def = new MouseJointDef();
-            def.bodyA = _groundBody;
-            def.bodyB = _game.HitBody;
-            def.collideConnected = true;
-            def.target.set(testPoint.x, testPoint.y);
-            def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * _game.HitBody.getMass();
-
-            Gdx.app.log(TAG, "Create a new mouse joint");
-            _game.MouseJoint = (MouseJoint) _game.World.createJoint(def);
-            _game.HitBody.setAwake(true);
-        }
-
-        return false;
-    }
-
-    Vector2 target = new Vector2();
-
-    @Override
-    public boolean touchDragged (int x, int y, int pointer) {
-
-        Gdx.app.log(TAG, "Touch dragged pointer: " + pointer);
-        Gdx.app.log(TAG, "Touch dragged: " + x + ", " + y);
-
-
-        if (pointer > 0)
-            return false;
-
-
-        if (_game.MouseJoint != null) {
-            _game.Camera.unproject(testPoint.set(x, y, 0));
-            _game.MouseJoint.setTarget(target.set(
-                    testPoint.x / Config.PIXELS_TO_METERS,
-                    testPoint.y / Config.PIXELS_TO_METERS
-            ));
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean touchUp (int x, int y, int pointer, int button) {
-        if (_currentPlayedSound != null)
-        {
-            _currentPlayedSound.stop();
-            _currentPlayedSound = null;
-        }
-        if (_game.MouseJoint != null && _game.HitBody != null) {
-            Gdx.app.log(TAG, "Remove mouse joint from touch up");
-
-            ((Gift)(_game.HitBody.getUserData())).isSelected(false);
-            _game.World.destroyJoint(_game.MouseJoint);
-            _game.MouseJoint = null;
-            _game.HitBody = null;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -44,6 +46,9 @@ public class XmasTower extends Game {
     // Camera
     public OrthographicCamera Camera;
 
+    // Inputs
+    public CustomInputProcessor CustomInputProcessor;
+
     // Fonts
     BitmapFont _font;
 
@@ -60,6 +65,27 @@ public class XmasTower extends Game {
     private boolean _physicsPaused = false;
     private float _physicsUpdateTime = 0f;
     public boolean DestroyMouseJoint = false;
+    public Vector2 MouseJointTarget = new Vector2();
+    public Vector3 FixtureTestPoint = new Vector3();
+    public QueryCallback FixtureQueryCallback = new QueryCallback() {
+        @Override
+        public boolean reportFixture (Fixture fixture) {
+            Gift selectedGift = (Gift)(fixture.getBody().getUserData());
+
+            if (selectedGift == null || !selectedGift.isMovable())
+                return true;
+
+            selectedGift.isSelected(true);
+
+            // if the hit point is inside the fixture of the body we report it
+            if (fixture.testPoint(FixtureTestPoint.x, FixtureTestPoint.y)) {
+                HitBody = fixture.getBody();
+                return false;
+            } else {
+                return true;
+            }
+        }
+    };
 
     public void pausePhysics(boolean value)
     {
@@ -74,15 +100,19 @@ public class XmasTower extends Game {
         Camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         Viewport = new ScreenViewport(Camera);
         Stage = new Stage(Viewport);
+        Camera.position.set(0, 0, 0);
+
         _font = new BitmapFont();
+
+        CustomInputProcessor = new CustomInputProcessor(this);
+
+        initializeParticles();
+        initializePhysics();
 
         MenuScreen = new MenuScreen(this);
 		GameScreen = new GameScreen(this);
 
-		setScreen(MenuScreen);
-
-        initializeParticles();
-        initializePhysics();
+        setScreen(MenuScreen);
     }
 
     @Override

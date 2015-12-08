@@ -109,7 +109,10 @@ public class Gift extends Group {
 //        if (_isSelected)
 //            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
 
-        setPosition((_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f, (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f);
+        setPosition(
+                (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
+                (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
+        );
         setOrigin(_box.sprite.getOriginX(), _box.sprite.getOriginY());
         setRotation((float) Math.toDegrees(_body.getAngle()));
     }
@@ -133,7 +136,6 @@ public class Gift extends Group {
     {
         _isPlaced = value;
     }
-
 
     public void isSelected(boolean value) {
         if (value)

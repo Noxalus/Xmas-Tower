@@ -19,6 +19,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.XmasTower;
+import com.noxalus.xmastower.entities.Gift;
+
+import java.util.ArrayList;
 
 public class MenuScreen implements InputProcessor, Screen {
 
@@ -26,16 +29,13 @@ public class MenuScreen implements InputProcessor, Screen {
 
     private XmasTower _game;
 
-    private OrthographicCamera _camera;
-    private Stage _stage;
+    private ArrayList<Gift> _gifts = new ArrayList<Gift>();
+
     private Label _titleLabel;
     private Button _playButton;
 
     public MenuScreen(XmasTower game) {
         _game = game;
-
-        _camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        _stage = new Stage(new ScreenViewport(_camera));
 
         _titleLabel = new Label("Xmas Tower", Assets.menuSkin);
         _titleLabel.setAlignment(Align.center);
@@ -68,8 +68,8 @@ public class MenuScreen implements InputProcessor, Screen {
 //            Gdx.graphics.getHeight() - _titleLabel.getHeight() * 1.5f
 //        );
 
-        _stage.addActor(_titleLabel);
-        _stage.addActor(_playButton);
+        _game.Stage.addActor(_titleLabel);
+        _game.Stage.addActor(_playButton);
 
         Gdx.input.setInputProcessor(this);
     }
@@ -80,12 +80,11 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     public void update(float delta) {
-        _stage.act(delta);
+
     }
 
     public void draw(float delta) {
         _game.SpriteBatch.begin();
-        _stage.draw();
         _game.SpriteBatch.end();
 
         _game.SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

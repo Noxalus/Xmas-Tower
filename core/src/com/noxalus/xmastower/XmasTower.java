@@ -147,24 +147,27 @@ public class XmasTower extends Game {
                 Gift giftB = (Gift) (fixtureB.getBody().getUserData());
 
                 if (giftA != null) {
-                    if (giftA.getBody().getLinearVelocity().y < -10)
+                    if (giftA.getBody().getLinearVelocity().y < -10) {
                         Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                        giftA.switchState(State.COLLISIONING);
+                    }
 
                     Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
 
                     giftA.isMovable(false);
                     giftA.isSelected(false);
-                    giftA.switchState(State.COLLISIONING);
                 }
 
                 if (giftB != null) {
-                    if (giftB.getBody().getLinearVelocity().y < -10)
+                    if (giftB.getBody().getLinearVelocity().y < -10) {
                         Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                        giftB.switchState(State.COLLISIONING);
+                    }
+
                     Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
 
                     giftB.isMovable(false);
                     giftB.isSelected(false);
-                    giftB.switchState(State.COLLISIONING);
                 }
             }
 

@@ -105,39 +105,9 @@ public class Gift extends Group {
 
     public void update(float delta) {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
-
-        if (_game.GameScreen.GameWillReset)
-            return;
-
+        
 //        if (_isSelected)
 //            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
-
-        // Outside of the scene?
-        if (getX() < -Gdx.graphics.getWidth() / 2f - _box.sprite.getWidth() ||
-            getX() > Gdx.graphics.getWidth() / 2 ||
-            getY() < -Gdx.graphics.getHeight())
-        {
-            _game.GameScreen.gameFinished();
-        }
-        else if (!_isPlaced && !_isMovable &&
-                _body.getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
-                _body.getLinearVelocity().x > -Config.LINEAR_VELOCITY_THRESHOLD &&
-                _body.getLinearVelocity().y < Config.LINEAR_VELOCITY_THRESHOLD &&
-                _body.getLinearVelocity().y > -Config.LINEAR_VELOCITY_THRESHOLD) {
-            Gdx.app.log("GIFT", "HAS STOP TO MOVE");
-            _isPlaced = true;
-
-            switchState(State.SLEEPING);
-
-            Vector3 screenCoordinates = _game.Camera.project(new Vector3(getX(), getY(), 0.f));
-            float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
-
-            if (screenCoordinates.y > limitThreshold)
-                _game.GameScreen.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
-
-            _game.GameScreen._score++;
-            _game.GameScreen.addGift();
-        }
 
         setPosition((_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f, (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f);
         setOrigin(_box.sprite.getOriginX(), _box.sprite.getOriginY());
@@ -153,6 +123,17 @@ public class Gift extends Group {
     {
         _isMovable = value;
     }
+
+    public boolean isPlaced()
+    {
+        return _isPlaced;
+    }
+
+    public void isPlaced(boolean value)
+    {
+        _isPlaced = value;
+    }
+
 
     public void isSelected(boolean value) {
         if (value)
@@ -170,6 +151,10 @@ public class Gift extends Group {
     public Body getBody()
     {
         return _body;
+    }
+
+    public SpriteActor getBox() {
+        return _box;
     }
 
     public void switchState(State newState)

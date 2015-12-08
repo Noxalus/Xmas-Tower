@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
+import com.noxalus.xmastower.State;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
@@ -164,9 +165,40 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     }
 
     public void update(float delta) {
-        for (int i = 0; i < _gifts.size(); i++)
-        {
-            _gifts.get(i).update(Gdx.graphics.getDeltaTime());
+
+        if (!GameWillReset) {
+            for (int i = 0; i < _gifts.size(); i++) {
+                Gift currentGift = _gifts.get(i);
+
+                // Outside of the scene?
+                if (currentGift.getX() < -Gdx.graphics.getWidth() / 2f - currentGift.getBox().sprite.getWidth() ||
+                        currentGift.getX() > Gdx.graphics.getWidth() / 2 ||
+                        currentGift.getY() < -Gdx.graphics.getHeight()) {
+                    _game.GameScreen.gameFinished();
+                } else if (!currentGift.isPlaced() && !currentGift.isMovable() &&
+                        currentGift.getBody().getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
+                        currentGift.getBody().getLinearVelocity().x > -Config.LINEAR_VELOCITY_THRESHOLD &&
+                        currentGift.getBody().getLinearVelocity().y < Config.LINEAR_VELOCITY_THRESHOLD &&
+                        currentGift.getBody().getLinearVelocity().y > -Config.LINEAR_VELOCITY_THRESHOLD) {
+                    Gdx.app.log("GIFT", "HAS STOP TO MOVE");
+                    currentGift.isPlaced(true);
+
+                    currentGift.switchState(State.SLEEPING);
+
+                    Vector3 screenCoordinates = _game.Camera.project(
+                            new Vector3(currentGift.getX(), currentGift.getY(), 0.f)
+                    );
+                    float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
+
+                    if (screenCoordinates.y > limitThreshold)
+                        _game.GameScreen.translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
+
+                    _game.GameScreen._score++;
+                    _game.GameScreen.addGift();
+                }
+
+                currentGift.update(Gdx.graphics.getDeltaTime());
+            }
         }
 
         updateCamera(Gdx.graphics.getDeltaTime());

@@ -20,8 +20,11 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.screens.MenuScreen;
 import com.noxalus.xmastower.screens.GameScreen;
@@ -34,6 +37,9 @@ public class XmasTower extends Game {
 
 	public MenuScreen MenuScreen;
 	public GameScreen GameScreen;
+
+    public Stage Stage;
+    public Viewport Viewport;
 
     // Camera
     public OrthographicCamera Camera;
@@ -66,6 +72,8 @@ public class XmasTower extends Game {
 		Assets.load();
 
         Camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        Viewport = new ScreenViewport(Camera);
+        Stage = new Stage(Viewport);
         _font = new BitmapFont();
 
         MenuScreen = new MenuScreen(this);
@@ -75,6 +83,12 @@ public class XmasTower extends Game {
 
         initializeParticles();
         initializePhysics();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        Gdx.app.log(TAG, "Resize: " + width + ", " + height);
+        Viewport.update(width, height);
     }
 
     private void initializeParticles() {
@@ -207,6 +221,18 @@ public class XmasTower extends Game {
             _physicsUpdateTime = (TimeUtils.nanoTime() - start) / 1000000000.0f;
         }
 
+        Stage.act(Gdx.graphics.getDeltaTime());
+
+        if (DestroyMouseJoint)
+        {
+            DestroyMouseJoint = false;
+
+            if (MouseJoint != null) {
+                World.destroyJoint(MouseJoint);
+                MouseJoint = null;
+            }
+        }
+
         Camera.update();
     }
 
@@ -224,6 +250,8 @@ public class XmasTower extends Game {
         }
 
         SpriteBatch.end();
+
+        Stage.draw();
 
         SpriteBatch.setProjectionMatrix(Camera.combined);
         // Scale down the sprite batches projection matrix to box2D size

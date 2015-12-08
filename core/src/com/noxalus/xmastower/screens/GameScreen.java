@@ -6,7 +6,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -36,7 +35,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     private static final String TAG = "GameScreen";
 
     private XmasTower _game;
-    private Stage _stage;
+
     private ArrayList<Gift> _gifts = new ArrayList<Gift>();
     Vector2 _cameraTarget;
     BitmapFont _font;
@@ -45,7 +44,6 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     public int _score;
     private int _bestScore;
     Sound _currentPlayedSound;
-    private Viewport _viewport;
     public boolean GameWillReset;
     private Preferences _preferences;
     private SpriteActor _groundSpriteActor;
@@ -63,9 +61,6 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         Gdx.input.setInputProcessor(this);
 
         _font = new BitmapFont();
-        _viewport = new ScreenViewport(_game.Camera);
-
-        _stage = new Stage(_viewport);
 
         _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
         _groundSpriteActor.setScale(1f, 1f);
@@ -87,9 +82,9 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
         _needToAddNewGift = false;
         GameWillReset = false;
-        _stage.clear();
+        _game.Stage.clear();
 
-        _stage.addActor(_groundSpriteActor);
+        _game.Stage.addActor(_groundSpriteActor);
 
         if (_score > _bestScore) {
             _preferences.putInteger("highscore", _score);
@@ -157,7 +152,7 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
             )
         );
         gift.initializePhysics(_game.World);
-        _stage.addActor(gift);
+        _game.Stage.addActor(gift);
         gift.setZIndex(0);
         _gifts.add(gift);
     }
@@ -172,18 +167,6 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
         for (int i = 0; i < _gifts.size(); i++)
         {
             _gifts.get(i).update(Gdx.graphics.getDeltaTime());
-        }
-
-        _stage.act(Gdx.graphics.getDeltaTime());
-
-        if (_game.DestroyMouseJoint)
-        {
-            _game.DestroyMouseJoint = false;
-
-            if (_game.MouseJoint != null) {
-                _game.World.destroyJoint(_game.MouseJoint);
-                _game.MouseJoint = null;
-            }
         }
 
         updateCamera(Gdx.graphics.getDeltaTime());
@@ -226,8 +209,6 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
     public void draw(float delta) {
         _game.SpriteBatch.setProjectionMatrix(_game.Camera.combined);
 
-        _stage.draw();
-
         _game.SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         _game.SpriteBatch.begin();
         _font.draw(_game.SpriteBatch, Integer.toString(_score), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight());
@@ -243,8 +224,6 @@ public class GameScreen extends ApplicationAdapter implements InputProcessor, Sc
 
     @Override
     public void resize(int width, int height) {
-        Gdx.app.log(TAG, "Resize: " + width + ", " + height);
-        _viewport.update(width, height);
     }
 
     @Override

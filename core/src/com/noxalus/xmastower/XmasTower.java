@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.inputs.GameInputProcessor;
 import com.noxalus.xmastower.screens.MenuScreen;
 import com.noxalus.xmastower.screens.GameScreen;
 
@@ -45,9 +46,6 @@ public class XmasTower extends Game {
 
     // Camera
     public OrthographicCamera Camera;
-
-    // Inputs
-    public CustomInputProcessor CustomInputProcessor;
 
     // Fonts
     BitmapFont _font;
@@ -87,6 +85,8 @@ public class XmasTower extends Game {
         }
     };
 
+    public boolean OnMenu = false;
+
     public void pausePhysics(boolean value)
     {
         _physicsPaused = value;
@@ -103,8 +103,6 @@ public class XmasTower extends Game {
         Camera.position.set(0, 0, 0);
 
         _font = new BitmapFont();
-
-        CustomInputProcessor = new CustomInputProcessor(this);
 
         initializeParticles();
         initializePhysics();
@@ -156,7 +154,7 @@ public class XmasTower extends Game {
             public void beginContact(Contact contact) {
                 Gdx.app.log(TAG, "begin contact");
 
-                if (MouseJoint != null && HitBody != null) {
+                if (!OnMenu && MouseJoint != null && HitBody != null) {
                     Gdx.app.log(TAG, "Remove mouse joint from collision");
 
                     Gift selectedGift = (Gift) HitBody.getUserData();
@@ -184,8 +182,10 @@ public class XmasTower extends Game {
 
                     Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
 
-                    giftA.isMovable(false);
-                    giftA.isSelected(false);
+                    if (!OnMenu) {
+                        giftA.isMovable(false);
+                        giftA.isSelected(false);
+                    }
                 }
 
                 if (giftB != null) {
@@ -196,8 +196,10 @@ public class XmasTower extends Game {
 
                     Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
 
-                    giftB.isMovable(false);
-                    giftB.isSelected(false);
+                    if (!OnMenu) {
+                        giftB.isMovable(false);
+                        giftB.isSelected(false);
+                    }
                 }
             }
 

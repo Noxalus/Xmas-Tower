@@ -2,29 +2,24 @@ package com.noxalus.xmastower.screens;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
-import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
-import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
+import com.noxalus.xmastower.inputs.GameInputProcessor;
 
 import java.util.ArrayList;
 
@@ -33,6 +28,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     private static final String TAG = "GameScreen";
 
     private XmasTower _game;
+
+    GameInputProcessor _gameInputProcessor;
 
     private ArrayList<Gift> _gifts = new ArrayList<Gift>();
     Vector2 _cameraTarget;
@@ -52,13 +49,10 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     public GameScreen(XmasTower game)
     {
         _game = game;
-    }
-
-    @Override
-    public void show() {
-        Gdx.input.setInputProcessor(_game.CustomInputProcessor);
 
         _font = new BitmapFont();
+
+        _gameInputProcessor = new GameInputProcessor(_game);
 
         _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
         _groundSpriteActor.setScale(1f, 1f);
@@ -69,7 +63,12 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _preferences = Gdx.app.getPreferences("xmas-tower");
         _bestScore = _preferences.getInteger("highscore", 0);
+    }
 
+    @Override
+    public void show() {
+        _game.OnMenu = false;
+        Gdx.input.setInputProcessor(_gameInputProcessor);
         initializePhysics();
 
         reset();

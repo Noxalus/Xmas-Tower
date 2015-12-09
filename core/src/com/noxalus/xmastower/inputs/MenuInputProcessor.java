@@ -1,4 +1,4 @@
-package com.noxalus.xmastower;
+package com.noxalus.xmastower.inputs;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -6,15 +6,18 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.noxalus.xmastower.Assets;
+import com.noxalus.xmastower.Config;
+import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 
-public class CustomInputProcessor implements InputProcessor{
+public class MenuInputProcessor implements InputProcessor{
 
-    private final String TAG = "CustomInputProcessor";
+    private final String TAG = "MenuInputProcessor";
     private XmasTower _game;
     private Sound _currentPlayedSound;
 
-    public CustomInputProcessor(XmasTower game)
+    public MenuInputProcessor(XmasTower game)
     {
         _game = game;
     }
@@ -36,9 +39,6 @@ public class CustomInputProcessor implements InputProcessor{
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-        //body.applyForceToCenter(0f,10f,true);
-        Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
-
         if (pointer > 0 || _game.MouseJoint != null)
             return false;
 
@@ -71,7 +71,6 @@ public class CustomInputProcessor implements InputProcessor{
             def.target.set(_game.FixtureTestPoint.x, _game.FixtureTestPoint.y);
             def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * _game.HitBody.getMass();
 
-            Gdx.app.log(TAG, "Create a new mouse joint");
             _game.MouseJoint = (MouseJoint) _game.World.createJoint(def);
             _game.HitBody.setAwake(true);
         }
@@ -111,7 +110,7 @@ public class CustomInputProcessor implements InputProcessor{
         if (_game.MouseJoint != null && _game.HitBody != null) {
             Gdx.app.log(TAG, "Remove mouse joint from touch up");
 
-            ((Gift)(_game.HitBody.getUserData())).isSelected(false);
+//            ((Gift)(_game.HitBody.getUserData())).isSelected(false);
             _game.World.destroyJoint(_game.MouseJoint);
             _game.MouseJoint = null;
             _game.HitBody = null;

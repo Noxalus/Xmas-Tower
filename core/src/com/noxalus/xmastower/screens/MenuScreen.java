@@ -18,6 +18,7 @@ import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.inputs.MenuInputProcessor;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,8 @@ public class MenuScreen implements InputProcessor, Screen {
     private static final String TAG = "MenuScreen";
 
     private XmasTower _game;
+
+    InputMultiplexer _inputMultiplexer;
 
     private ArrayList<Gift> _gifts = new ArrayList<Gift>();
 
@@ -74,11 +77,11 @@ public class MenuScreen implements InputProcessor, Screen {
         _game.Stage.addActor(_titleLabel);
         _game.Stage.addActor(_playButton);
 
-        InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(_game.CustomInputProcessor);
-        inputMultiplexer.addProcessor(this);
+        _inputMultiplexer = new InputMultiplexer();
+        _inputMultiplexer.addProcessor(new MenuInputProcessor(_game));
+        _inputMultiplexer.addProcessor(this);
 
-        Gdx.input.setInputProcessor(inputMultiplexer);
+
 
         initializePhysics();
     }
@@ -126,8 +129,11 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public void show() {
+        _game.OnMenu = true;
         Assets.menuMusic.play();
         addGift();
+
+        Gdx.input.setInputProcessor(_inputMultiplexer);
     }
 
     private void launchGame()
@@ -218,6 +224,7 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        Gdx.app.log(TAG, "COUCOUCOUCOUC");
         float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
         float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
 

@@ -223,9 +223,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                 Gift currentGift = _gifts.get(i);
 
                 // Outside of the scene?
-                if (currentGift.getX() < -currentGift.getBox().sprite.getWidth() ||
-                        currentGift.getX() > Gdx.graphics.getWidth() ||
-                        currentGift.getY() < 0.f) {
+                if (currentGift.getX() < -(currentGift.getBox().sprite.getWidth() * 2f) ||
+                    currentGift.getX() > (Gdx.graphics.getWidth() + currentGift.getBox().sprite.getWidth()) ||
+                    currentGift.getY() < 0) {
                     gameFinished();
                 } else if (!currentGift.isPlaced() && !currentGift.isMovable() &&
                         currentGift.getBody().getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
@@ -237,19 +237,20 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                     currentGift.switchState(State.SLEEPING);
 
                     Vector3 screenCoordinates = _game.Camera.project(
-                            new Vector3(currentGift.getX(), currentGift.getY(), 0.f)
+                        new Vector3(currentGift.getX(), currentGift.getY(), 0.f)
                     );
                     float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
 
                     if (screenCoordinates.y > limitThreshold)
                         translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
-                    float currentHeight = ((currentGift.getY() - _groundSpriteActor.sprite.getHeight()));
-                    Gdx.app.log(TAG, "Current gift Y position: " + (currentGift.getY()));
-                    Gdx.app.log(TAG, "Current gift Y position from ground: " + (currentGift.getY() - _groundSpriteActor.sprite.getHeight()));
-                    Gdx.app.log(TAG, "Current gift box Y position: " + currentGift.getBox().sprite.getY());
-                    if (currentHeight > _score) {
-                        _score = (Math.round(currentHeight * 10)) / 10f; // Round to 1 decimal after comma
+                    float currentScore = (
+                            (currentGift.getY() * currentGift.getScaleY()) -
+                            _groundSpriteActor.sprite.getHeight()
+                    ) / 50f;
+
+                    if (currentScore > _score) {
+                        _score = ((Math.round(currentScore * 10f)) / 10f); // Round to 1 decimal after comma
                         _scoreLabel.setText(Float.toString(_score) + " cm");
                     }
 

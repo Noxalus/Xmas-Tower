@@ -157,8 +157,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _scoreLabel.setText(Config.SCORE_LABEL_PLACEHOLDER);
 
         if (_bestScore > 0f) {
-            _bestScoreLine.setPosition(0, _bestScore + _groundSpriteActor.sprite.getHeight());
-            _bestScoreLabel.setPosition(0, _bestScore + (_bestScoreLine.getHeight() * 2f) + _bestScoreLabel.getPrefHeight() / 2f);
+            _bestScoreLine.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) + _groundSpriteActor.sprite.getHeight());
+            _bestScoreLabel.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) + (_bestScoreLine.getHeight() * 2f) + _bestScoreLabel.getPrefHeight() / 2f);
             _game.Stage.addActor(_bestScoreLabel);
         }
     }
@@ -244,9 +244,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                         translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
                     float currentScore = (
-                            (currentGift.getY() * currentGift.getScaleY()) -
-                            _groundSpriteActor.sprite.getHeight()
-                    ) / 50f;
+                        (currentGift.getY()) -
+                        _groundSpriteActor.sprite.getHeight()
+                    ) / Config.HEIGHT_UNIT_FACTOR;
 
                     if (currentScore > _score) {
                         _score = ((Math.round(currentScore * 10f)) / 10f); // Round to 1 decimal after comma

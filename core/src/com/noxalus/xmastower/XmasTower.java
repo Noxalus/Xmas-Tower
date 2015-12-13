@@ -277,7 +277,7 @@ public class XmasTower extends Game {
 
     public void draw() {
         SpriteBatch.begin();
-        SpriteBatch.draw(Assets.backgrounds[0], 0, 0);
+        SpriteBatch.draw(Assets.backgrounds[0], 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         // Update and draw _effects:
         for (int i = _effects.size - 1; i >= 0; i--) {

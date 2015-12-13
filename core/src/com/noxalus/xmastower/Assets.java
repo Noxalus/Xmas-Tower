@@ -52,11 +52,31 @@ public class Assets {
         atlas = new TextureAtlas("graphics/sprites/atlas.pack");
 
         // Texture regions
-        normalBoxRegions = new TextureRegion[4];
-        normalBoxRegions[0] = atlas.findRegion("giftbox1");
-        normalBoxRegions[1] = atlas.findRegion("giftbox2");
-        normalBoxRegions[2] = atlas.findRegion("giftbox3");
-        normalBoxRegions[3] = atlas.findRegion("giftbox4");
+        normalBoxRegions = new TextureRegion[20];
+        normalBoxRegions[0] = atlas.findRegion("giftbox_pink_red");
+        normalBoxRegions[1] = atlas.findRegion("giftbox_pink_yellow");
+        normalBoxRegions[2] = atlas.findRegion("giftbox_pink_green");
+        normalBoxRegions[3] = atlas.findRegion("giftbox_pink_white");
+
+        normalBoxRegions[4] = atlas.findRegion("giftbox_red_pink");
+        normalBoxRegions[5] = atlas.findRegion("giftbox_red_yellow");
+        normalBoxRegions[6] = atlas.findRegion("giftbox_red_green");
+        normalBoxRegions[7] = atlas.findRegion("giftbox_red_white");
+
+        normalBoxRegions[8] = atlas.findRegion("giftbox_yellow_pink");
+        normalBoxRegions[9] = atlas.findRegion("giftbox_yellow_red");
+        normalBoxRegions[10] = atlas.findRegion("giftbox_yellow_green");
+        normalBoxRegions[11] = atlas.findRegion("giftbox_yellow_white");
+
+        normalBoxRegions[12] = atlas.findRegion("giftbox_green_pink");
+        normalBoxRegions[13] = atlas.findRegion("giftbox_green_yellow");
+        normalBoxRegions[14] = atlas.findRegion("giftbox_green_red");
+        normalBoxRegions[15] = atlas.findRegion("giftbox_green_white");
+
+        normalBoxRegions[16] = atlas.findRegion("giftbox_white_pink");
+        normalBoxRegions[17] = atlas.findRegion("giftbox_white_yellow");
+        normalBoxRegions[18] = atlas.findRegion("giftbox_white_green");
+        normalBoxRegions[19] = atlas.findRegion("giftbox_white_red");
 
         ribbonRegions = new TextureRegion[4];
         ribbonRegions[0] = atlas.findRegion("ribbon1");

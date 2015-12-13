@@ -19,10 +19,14 @@ public class Assets {
     public static TextureRegion[] eyeRegions;
     public static TextureRegion[] mouthRegions;
 
+    public static Texture title;
     public static Texture groundTexture;
+    public static Texture whitePixel;
+    public static Texture[] backgrounds;
 
     // Fonts
     public static BitmapFont normalFont;
+    public static BitmapFont mediumFont;
     public static BitmapFont bigFont;
 
     // UI
@@ -54,8 +58,11 @@ public class Assets {
         normalBoxRegions[2] = atlas.findRegion("giftbox3");
         normalBoxRegions[3] = atlas.findRegion("giftbox4");
 
-        ribbonRegions = new TextureRegion[1];
-        ribbonRegions[0] = atlas.findRegion("ribon1");
+        ribbonRegions = new TextureRegion[4];
+        ribbonRegions[0] = atlas.findRegion("ribbon1");
+        ribbonRegions[1] = atlas.findRegion("ribbon2");
+        ribbonRegions[2] = atlas.findRegion("ribbon3");
+        ribbonRegions[3] = atlas.findRegion("ribbon4");
 
         eyeRegions = new TextureRegion[6];
         eyeRegions[0] = atlas.findRegion("eye1");
@@ -71,7 +78,12 @@ public class Assets {
         mouthRegions[2] = atlas.findRegion("mouth3");
         mouthRegions[3] = atlas.findRegion("mouth4");
 
+        title = new Texture(Gdx.files.internal("graphics/pictures/title.png"));
+        whitePixel = new Texture(Gdx.files.internal("graphics/pictures/white.png"));
         groundTexture = new Texture(Gdx.files.internal("graphics/sprites/ground.png"));
+
+        backgrounds = new Texture[1];
+        backgrounds[0] = new Texture(Gdx.files.internal("graphics/pictures/background1.png"));
 
         // Fonts
         normalFont = new BitmapFont(
@@ -80,10 +92,16 @@ public class Assets {
             false
         );
 
+        mediumFont = new BitmapFont(
+            Gdx.files.internal("fonts/mediumfont.fnt"),
+            Gdx.files.internal("fonts/mediumfont_00.png"),
+            false
+        );
+
         bigFont = new BitmapFont(
-                Gdx.files.internal("fonts/bigfont.fnt"),
-                Gdx.files.internal("fonts/bigfont_00.png"),
-                false
+            Gdx.files.internal("fonts/bigfont.fnt"),
+            Gdx.files.internal("fonts/bigfont_00.png"),
+            false
         );
 
         // Skins

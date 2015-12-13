@@ -140,6 +140,10 @@ public class XmasTower extends Game {
         ParticleEffectPool.PooledEffect effect = _snowRainEffectPool.obtain();
         effect.setPosition(Gdx.graphics.getWidth() / 2.f, Gdx.graphics.getHeight() + 200.f);
         _effects.add(effect);
+
+        // To begin with snow on the screen
+        for (int i = 0; i < 20; i++)
+            effect.update(1);
     }
 
     private void initializePhysics() {
@@ -273,6 +277,7 @@ public class XmasTower extends Game {
 
     public void draw() {
         SpriteBatch.begin();
+        SpriteBatch.draw(Assets.backgrounds[0], 0, 0);
 
         // Update and draw _effects:
         for (int i = _effects.size - 1; i >= 0; i--) {
@@ -289,6 +294,7 @@ public class XmasTower extends Game {
         Stage.draw();
 
         SpriteBatch.setProjectionMatrix(Camera.combined);
+
         // Scale down the sprite batches projection matrix to box2D size
         _debugMatrix = SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 

@@ -19,8 +19,6 @@ import com.noxalus.xmastower.screens.GameScreen;
 
 
 public class Gift extends Group {
-    private XmasTower _game;
-
     SpriteActor _box;
     SpriteActor _ribbon;
     Eye _leftEye;
@@ -33,9 +31,7 @@ public class Gift extends Group {
     boolean _isSelected = false;
     boolean _isMovable = true;
 
-    public Gift(XmasTower game, Vector2 position) {
-        _game = game;
-
+    public Gift(Vector2 position) {
         initializeActors();
 
         float minScale = Config.GIFT_MIN_SIZE / _box.sprite.getWidth();
@@ -58,7 +54,8 @@ public class Gift extends Group {
     public void initializeActors()
     {
         _box = new SpriteActor(new Sprite(Assets.normalBoxRegions[MathUtils.random(0, Assets.normalBoxRegions.length - 1)]));
-        _ribbon = new SpriteActor(new Sprite(Assets.ribbonRegions[0]), new Vector2(0f, 28.f));
+        _ribbon = new SpriteActor(new Sprite(Assets.ribbonRegions[MathUtils.random(0, Assets.ribbonRegions.length - 1)]), new Vector2(0f, 28.f));
+        _ribbon.setScale(0.525f, 0.525f);
         _leftEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(12f, 15f), false);
         _leftEye.setScale(0.75f, 0.75f);
         _rightEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(40f, 15f), true);
@@ -106,8 +103,8 @@ public class Gift extends Group {
     public void update(float delta) {
 //        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
         
-//        if (_isSelected)
-//            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
+        if (_isSelected)
+            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
 
         setPosition(
                 (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,

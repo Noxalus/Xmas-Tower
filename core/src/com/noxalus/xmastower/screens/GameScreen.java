@@ -5,14 +5,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
@@ -36,33 +44,69 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     BitmapFont _font;
     boolean _needToAddNewGift;
     boolean _cameraIsMoving;
-    public int _score;
-    private int _bestScore;
+    public float _score;
+    private float _bestScore;
+    private Sprite _bestScoreLine;
     Sound _currentPlayedSound;
     public boolean GameWillReset;
     private Preferences _preferences;
     private SpriteActor _groundSpriteActor;
 
+    // UI
+    OrthographicCamera _uiCamera;
+    Viewport _uiViewport;
+    Stage _uiStage;
+    Label _bestScoreLabel;
+    Label _scoreLabel;
+    Label _distanceToBestScoreLabel;
+    Boolean _showDistanceToBestScore = false;
+
     // Physics
     Body _groundBody;
 
-    public GameScreen(XmasTower game)
-    {
+    public GameScreen(XmasTower game) {
         _game = game;
-
         _font = new BitmapFont();
 
         _gameInputProcessor = new GameInputProcessor(_game);
 
         _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
-        _groundSpriteActor.setScale(1f, 1f);
-        _groundSpriteActor.setPosition(
-                -(_groundSpriteActor.getWidth() * _groundSpriteActor.getScaleX()) / 2f,
-                -Gdx.graphics.getHeight() / 2f
-        );
+        float minGroundScale = 1.f;
+        float maxGroundScale = (Gdx.graphics.getWidth() / _groundSpriteActor.sprite.getWidth()) / 1.5f;
+        float groundScale = MathUtils.random(minGroundScale, maxGroundScale);
+
+        float groundRealWidth = _groundSpriteActor.sprite.getWidth() * groundScale;
+        float xPosition = (Gdx.graphics.getWidth() - groundRealWidth) / 2f;
+
+        Gdx.app.log(TAG, "Ground scale: " + groundScale);
+        _groundSpriteActor.setScale(groundScale, 1f);
+        _groundSpriteActor.setPosition(xPosition, 0);
 
         _preferences = Gdx.app.getPreferences("xmas-tower");
-        _bestScore = _preferences.getInteger("highscore", 0);
+        _bestScore = _preferences.getFloat("highscore", 0f);
+
+        _bestScoreLine = new Sprite(Assets.whitePixel, Gdx.graphics.getWidth(), 10);
+        _bestScoreLine.setColor(Color.RED);
+
+        // UI
+        _uiCamera = new OrthographicCamera();
+        _uiViewport = new ScreenViewport(_uiCamera);
+        _uiCamera.position.set(0, 0, 0);
+        _uiStage = new Stage(_uiViewport);
+
+        Label.LabelStyle normalLabelStyle = new Label.LabelStyle(Assets.normalFont, Color.WHITE);
+        Label.LabelStyle mediumLabelStyle = new Label.LabelStyle(Assets.mediumFont, Color.WHITE);
+
+        _scoreLabel = new Label(Config.SCORE_LABEL_PLACEHOLDER, Assets.menuSkin);
+        _scoreLabel.setStyle(mediumLabelStyle);
+        _scoreLabel.setAlignment(Align.center);
+        _scoreLabel.setWidth(Gdx.graphics.getWidth());
+        _scoreLabel.setPosition(0, (Gdx.graphics.getHeight() - _scoreLabel.getHeight() / 2f) - (Gdx.graphics.getHeight() / 30f));
+
+        _bestScoreLabel = new Label("Best", Assets.menuSkin);
+        _bestScoreLabel.setStyle(normalLabelStyle);
+
+        _uiStage.addActor(_scoreLabel);
     }
 
     @Override
@@ -75,7 +119,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     public void reset() {
-        _game.Camera.position.set(0, 0, 0);
+        _game.Camera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
+//        _game.Camera.zoom = 5.f;
         _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
         _needToAddNewGift = false;
         GameWillReset = false;
@@ -86,7 +131,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _game.Stage.addActor(_groundSpriteActor);
 
         if (_score > _bestScore) {
-            _preferences.putInteger("highscore", _score);
+            _preferences.putFloat("highscore", _score);
             _preferences.flush();
             _bestScore = _score;
         }
@@ -109,6 +154,14 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _gifts.clear();
 
         addGift();
+
+        _scoreLabel.setText(Config.SCORE_LABEL_PLACEHOLDER);
+
+        if (_bestScore > 0f) {
+            _bestScoreLine.setPosition(0, _bestScore + _groundSpriteActor.sprite.getHeight());
+            _bestScoreLabel.setPosition(0, _bestScore + (_bestScoreLine.getHeight() * 2f) + _bestScoreLabel.getPrefHeight() / 2f);
+            _game.Stage.addActor(_bestScoreLabel);
+        }
     }
 
     private void initializePhysics() {
@@ -145,40 +198,40 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             return;
         }
 
-        Gift gift = new Gift(_game, new Vector2(
-                0f,
+        Gift gift = new Gift(new Vector2(
+                Gdx.graphics.getWidth() / 2f,
                 _game.Camera.position.y + (Gdx.graphics.getHeight() / 2f) - 100f
             )
         );
+
         gift.initializePhysics(_game.World);
         _game.Stage.addActor(gift);
         gift.setZIndex(0);
+        _groundSpriteActor.setZIndex(0);
         _gifts.add(gift);
     }
 
     public void gameFinished() {
         _game.pausePhysics(true);
-        translateCamera(new Vector2(0, -(_game.Camera.position.y - _groundBody.getPosition().y)));
+        translateCamera(new Vector2(0, -(_game.Camera.position.y - Gdx.graphics.getHeight() / 2f)));
         GameWillReset = true;
     }
 
     public void update(float delta) {
-
         if (!GameWillReset) {
             for (int i = 0; i < _gifts.size(); i++) {
                 Gift currentGift = _gifts.get(i);
 
                 // Outside of the scene?
-                if (currentGift.getX() < -Gdx.graphics.getWidth() / 2f - currentGift.getBox().sprite.getWidth() ||
-                        currentGift.getX() > Gdx.graphics.getWidth() / 2 ||
-                        currentGift.getY() < -Gdx.graphics.getHeight()) {
+                if (currentGift.getX() < -currentGift.getBox().sprite.getWidth() ||
+                        currentGift.getX() > Gdx.graphics.getWidth() ||
+                        currentGift.getY() < 0.f) {
                     gameFinished();
                 } else if (!currentGift.isPlaced() && !currentGift.isMovable() &&
                         currentGift.getBody().getLinearVelocity().x < Config.LINEAR_VELOCITY_THRESHOLD &&
                         currentGift.getBody().getLinearVelocity().x > -Config.LINEAR_VELOCITY_THRESHOLD &&
                         currentGift.getBody().getLinearVelocity().y < Config.LINEAR_VELOCITY_THRESHOLD &&
                         currentGift.getBody().getLinearVelocity().y > -Config.LINEAR_VELOCITY_THRESHOLD) {
-                    Gdx.app.log("GIFT", "HAS STOP TO MOVE");
                     currentGift.isPlaced(true);
 
                     currentGift.switchState(State.SLEEPING);
@@ -191,7 +244,15 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                     if (screenCoordinates.y > limitThreshold)
                         translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
 
-                    _score++;
+                    float currentHeight = ((currentGift.getY() - _groundSpriteActor.sprite.getHeight()));
+                    Gdx.app.log(TAG, "Current gift Y position: " + (currentGift.getY()));
+                    Gdx.app.log(TAG, "Current gift Y position from ground: " + (currentGift.getY() - _groundSpriteActor.sprite.getHeight()));
+                    Gdx.app.log(TAG, "Current gift box Y position: " + currentGift.getBox().sprite.getY());
+                    if (currentHeight > _score) {
+                        _score = (Math.round(currentHeight * 10)) / 10f; // Round to 1 decimal after comma
+                        _scoreLabel.setText(Float.toString(_score) + " cm");
+                    }
+
                     addGift();
                 }
 
@@ -200,6 +261,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         }
 
         updateCamera(Gdx.graphics.getDeltaTime());
+
+        _uiStage.act(delta);
     }
 
     private void updateCamera(float delta) {
@@ -239,11 +302,15 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     public void draw(float delta) {
         _game.SpriteBatch.setProjectionMatrix(_game.Camera.combined);
 
+        if (_bestScore > 0f) {
+            _game.SpriteBatch.begin();
+            _bestScoreLine.draw(_game.SpriteBatch, 1f);
+            _game.SpriteBatch.end();
+        }
+
+        _uiStage.draw();
+
         _game.SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        _game.SpriteBatch.begin();
-        _font.draw(_game.SpriteBatch, Integer.toString(_score), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight());
-        _font.draw(_game.SpriteBatch, Integer.toString(_bestScore), Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - _font.getLineHeight());
-        _game.SpriteBatch.end();
     }
 
     @Override

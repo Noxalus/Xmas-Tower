@@ -120,7 +120,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
     public void reset() {
         _game.Camera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
-//        _game.Camera.zoom = 5.f;
         _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
         _needToAddNewGift = false;
         GameWillReset = false;

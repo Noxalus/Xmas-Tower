@@ -5,280 +5,357 @@ filter: Nearest,Nearest
 repeat: none
 ribbon1
   rotate: false
-  xy: 1, 64
+  xy: 1, 197
   size: 120, 58
   orig: 120, 58
   offset: 0, 0
   index: -1
 ribbon2
   rotate: false
-  xy: 1, 4
+  xy: 1, 137
   size: 120, 58
   orig: 120, 58
   offset: 0, 0
   index: -1
 ribbon3
   rotate: false
-  xy: 123, 64
+  xy: 123, 197
   size: 120, 58
   orig: 120, 58
   offset: 0, 0
   index: -1
 ribbon4
   rotate: false
-  xy: 123, 4
+  xy: 1, 77
   size: 120, 58
   orig: 120, 58
   offset: 0, 0
   index: -1
 ribbon5
   rotate: false
-  xy: 245, 64
+  xy: 123, 137
   size: 120, 58
   orig: 120, 58
   offset: 0, 0
   index: -1
+ribbon6
+  rotate: false
+  xy: 245, 197
+  size: 120, 58
+  orig: 120, 58
+  offset: 0, 0
+  index: -1
+giftbox_blue_green
+  rotate: false
+  xy: 1, 27
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_blue_pink
+  rotate: false
+  xy: 123, 87
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_blue_red
+  rotate: false
+  xy: 245, 147
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_blue_white
+  rotate: false
+  xy: 367, 207
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_blue_yellow
+  rotate: false
+  xy: 433, 207
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_green_blue
+  rotate: false
+  xy: 499, 207
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
 giftbox_green_pink
   rotate: false
-  xy: 245, 14
+  xy: 565, 207
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_green_red
   rotate: false
-  xy: 367, 74
+  xy: 631, 207
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_green_white
   rotate: false
-  xy: 433, 74
+  xy: 697, 207
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_green_yellow
   rotate: false
-  xy: 499, 74
+  xy: 763, 207
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_pink_blue
+  rotate: false
+  xy: 829, 207
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_pink_green
   rotate: false
-  xy: 565, 74
+  xy: 895, 207
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_pink_red
   rotate: false
-  xy: 631, 74
+  xy: 67, 27
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_pink_white
   rotate: false
-  xy: 697, 74
+  xy: 189, 87
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_pink_yellow
   rotate: false
-  xy: 763, 74
+  xy: 311, 147
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_red_blue
+  rotate: false
+  xy: 133, 37
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_red_green
   rotate: false
-  xy: 829, 74
+  xy: 255, 97
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_red_pink
   rotate: false
-  xy: 895, 74
+  xy: 377, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_red_white
   rotate: false
-  xy: 311, 14
+  xy: 443, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_red_yellow
   rotate: false
-  xy: 377, 24
+  xy: 509, 157
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_white_blue
+  rotate: false
+  xy: 575, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_white_green
   rotate: false
-  xy: 443, 24
+  xy: 641, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_white_pink
   rotate: false
-  xy: 509, 24
+  xy: 707, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_white_red
   rotate: false
-  xy: 575, 24
+  xy: 773, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_white_yellow
   rotate: false
-  xy: 641, 24
+  xy: 839, 157
+  size: 64, 48
+  orig: 64, 48
+  offset: 0, 0
+  index: -1
+giftbox_yellow_blue
+  rotate: false
+  xy: 199, 37
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_yellow_green
   rotate: false
-  xy: 707, 24
+  xy: 321, 97
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_yellow_pink
   rotate: false
-  xy: 773, 24
+  xy: 905, 157
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_yellow_red
   rotate: false
-  xy: 839, 24
+  xy: 265, 47
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 giftbox_yellow_white
   rotate: false
-  xy: 905, 24
+  xy: 387, 107
   size: 64, 48
   orig: 64, 48
   offset: 0, 0
   index: -1
 eye1
   rotate: false
-  xy: 961, 107
+  xy: 1, 10
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
+eye4
+  rotate: false
+  xy: 1, 1
+  size: 11, 7
+  orig: 11, 7
+  offset: 0, 0
+  index: -1
 eye3
   rotate: false
-  xy: 961, 90
+  xy: 961, 240
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
 eye5
   rotate: false
-  xy: 978, 107
+  xy: 331, 80
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
 eye6
   rotate: false
-  xy: 978, 90
+  xy: 453, 140
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
 eye7
   rotate: false
-  xy: 995, 107
+  xy: 18, 10
   size: 15, 15
   orig: 15, 15
-  offset: 0, 0
-  index: -1
-mouth6
-  rotate: false
-  xy: 1012, 111
-  size: 11, 11
-  orig: 11, 11
   offset: 0, 0
   index: -1
 eye8
   rotate: false
-  xy: 995, 90
+  xy: 961, 223
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
-mouth2
-  rotate: false
-  xy: 1012, 99
-  size: 11, 10
-  orig: 11, 10
-  offset: 0, 0
-  index: -1
-mouth5
-  rotate: false
-  xy: 1012, 87
-  size: 11, 10
-  orig: 11, 10
-  offset: 0, 0
-  index: -1
 mouth3
   rotate: false
-  xy: 961, 77
+  xy: 978, 244
   size: 17, 11
   orig: 17, 11
   offset: 0, 0
   index: -1
 mouth7
   rotate: false
-  xy: 980, 77
+  xy: 348, 84
   size: 17, 11
   orig: 17, 11
   offset: 0, 0
   index: -1
 eye2
   rotate: false
-  xy: 245, 1
+  xy: 470, 144
   size: 16, 11
   orig: 16, 11
   offset: 0, 0
   index: -1
 mouth1
   rotate: false
-  xy: 263, 3
+  xy: 331, 69
   size: 15, 9
   orig: 15, 9
   offset: 0, 0
   index: -1
-eye4
+mouth6
   rotate: false
-  xy: 999, 81
-  size: 11, 7
-  orig: 11, 7
+  xy: 453, 127
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+mouth2
+  rotate: false
+  xy: 35, 15
+  size: 11, 10
+  orig: 11, 10
+  offset: 0, 0
+  index: -1
+mouth5
+  rotate: false
+  xy: 961, 211
+  size: 11, 10
+  orig: 11, 10
   offset: 0, 0
   index: -1
 mouth4
   rotate: false
-  xy: 367, 64
+  xy: 123, 77
   size: 5, 8
   orig: 5, 8
   offset: 0, 0

@@ -1,6 +1,8 @@
 package com.noxalus.xmastower.entities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -14,9 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
-import com.noxalus.xmastower.XmasTower;
-import com.noxalus.xmastower.screens.GameScreen;
-
 
 public class Gift extends Group {
     SpriteActor _box;
@@ -30,6 +29,14 @@ public class Gift extends Group {
     boolean _isPlaced = false;
     boolean _isSelected = false;
     boolean _isMovable = true;
+    boolean _isFalling = false;
+    boolean _isSick = false;
+
+    Sound _fallSound;
+
+    public SpriteActor getRibbon() {
+        return  _ribbon;
+    }
 
     public Gift(Vector2 position) {
         initializeActors();
@@ -53,9 +60,13 @@ public class Gift extends Group {
 
     public void initializeActors()
     {
-        _box = new SpriteActor(new Sprite(Assets.normalBoxRegions[MathUtils.random(0, Assets.normalBoxRegions.length - 1)]));
-        _ribbon = new SpriteActor(new Sprite(Assets.ribbonRegions[MathUtils.random(0, Assets.ribbonRegions.length - 1)]), new Vector2(0f, 28.f));
+        int boxId = MathUtils.random(0, Assets.normalBoxRegions.length - 1);
+        int ribbonId = boxId / 5; // Link ribbon and box colors
+
+        _box = new SpriteActor(new Sprite(Assets.normalBoxRegions[boxId]));
+        _ribbon = new SpriteActor(new Sprite(Assets.ribbonRegions[ribbonId]), new Vector2(0f, 28.f));
         _ribbon.setScale(0.525f, 0.525f);
+        _ribbon.setVisible(false);
         _leftEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(12f, 15f), false);
         _leftEye.setScale(0.75f, 0.75f);
         _rightEye = new Eye(new Sprite(Assets.eyeRegions[0]), new Vector2(40f, 15f), true);
@@ -92,19 +103,34 @@ public class Gift extends Group {
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
 //		fixtureDef.restitution = 0.5f;
+        fixtureDef.friction = 0.4f;
 
         _body.setLinearDamping(1.f);
         _body.createFixture(fixtureDef);
         _body.setAwake(false);
+//        _body.setSleepingAllowed(true);
 
         shape.dispose();
     }
 
     public void update(float delta) {
-//        Gdx.app.log("GIFT", "Linear velocity: " + _body.getLinearVelocity());
-        
-        if (_isSelected)
-            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
+        if (_isFalling && _body.getLinearVelocity().y < -10 && _fallSound == null)
+        {
+            _fallSound = Assets.fallSounds[MathUtils.random(Assets.fallSounds.length - 1)];
+            _fallSound.setLooping(0, false);
+            _fallSound.play();
+        }
+
+        if (!_isSick && (getRotation() > 360 || getRotation() < -360))
+        {
+            switchState(State.SICK);
+            _isSick = true;
+        }
+
+        if (_isSelected) {
+//            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
+//            Gdx.app.log("GIFT", "Sprite rotation: " + getRotation() % 360);
+        }
 
         setPosition(
                 (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
@@ -121,6 +147,9 @@ public class Gift extends Group {
 
     public void isMovable(boolean value)
     {
+        if (!value)
+            switchState(State.IDLE);
+
         _isMovable = value;
     }
 
@@ -131,16 +160,21 @@ public class Gift extends Group {
 
     public void isPlaced(boolean value)
     {
+        if (value)
+            _isFalling = false;
+
         _isPlaced = value;
     }
 
     public void isSelected(boolean value) {
         if (value)
         {
+            _isFalling = false;
             switchState(State.SELECTED);
         }
         else if (_isMovable)
         {
+            _isFalling = true;
             switchState(State.FALLING);
         }
 
@@ -158,8 +192,28 @@ public class Gift extends Group {
 
     public void switchState(State newState)
     {
+        if (_isSick)
+            return;
+
         _leftEye.switchState(newState);
         _rightEye.switchState(newState);
         _mouth.switchState(newState);
+    }
+
+    public void applyTransform(Batch batch) {
+        this.applyTransform(batch, computeTransform());
+    }
+
+    public void resetTransform(Batch batch) {
+        super.resetTransform(batch);
+    }
+
+    public void drawRibbon(Batch batch)
+    {
+        this.applyTransform(batch, computeTransform());
+        _ribbon.setVisible(true);
+        _ribbon.draw(batch, 1);
+        _ribbon.setVisible(false);
+        super.resetTransform(batch);
     }
 }

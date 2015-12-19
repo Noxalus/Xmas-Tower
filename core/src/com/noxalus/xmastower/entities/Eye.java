@@ -59,6 +59,12 @@ public class Eye extends StatableSpriteActor
             float lag = _flipped ? -1f : 3f;
             setPosition(localPosition.x + lag, localPosition.y + 3f);
         }
+        else if (newState == State.SICK)
+        {
+            sprite = _sprites.get(6);
+            float lag = _flipped ? -1f : 3f;
+            setPosition(localPosition.x + lag, localPosition.y + 3f);
+        }
         else
         {
             sprite = _sprites.get(0);
@@ -66,16 +72,5 @@ public class Eye extends StatableSpriteActor
         }
 
         super.switchState(newState);
-    }
-
-    @Override
-    public void draw(Batch batch, float alpha){
-        batch.draw(sprite,
-            getX(), getY(),
-            getOriginX(), getOriginY(),
-            getWidth(), getHeight(),
-            getScaleX(), getScaleY(),
-            getRotation()
-        );
     }
 }

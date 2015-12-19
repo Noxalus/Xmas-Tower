@@ -6,5 +6,9 @@ public enum State
     SELECTED,
     FALLING,
     COLLISIONING,
-    SLEEPING
+    SLEEPING,
+    SICK,
+    ANGRY,
+    POUTING,
+    HURT
 }

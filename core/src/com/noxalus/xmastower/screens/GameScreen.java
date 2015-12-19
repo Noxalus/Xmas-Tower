@@ -2,6 +2,7 @@ package com.noxalus.xmastower.screens;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
@@ -17,7 +18,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -30,6 +35,9 @@ import com.noxalus.xmastower.entities.SpriteActor;
 import com.noxalus.xmastower.inputs.GameInputProcessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+
+import javafx.scene.Camera;
 
 public class GameScreen extends ApplicationAdapter implements Screen {
 
@@ -39,7 +47,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
     GameInputProcessor _gameInputProcessor;
 
-    private ArrayList<Gift> _gifts = new ArrayList<Gift>();
     Vector2 _cameraTarget;
     BitmapFont _font;
     boolean _needToAddNewGift;
@@ -49,8 +56,15 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     private Sprite _bestScoreLine;
     Sound _currentPlayedSound;
     public boolean GameWillReset;
+    public boolean GameIsFinished;
     private Preferences _preferences;
     private SpriteActor _groundSpriteActor;
+    private float _currentMaxHeight;
+    private float _cameraSavedYPosition;
+    public float CameraSpeedY;
+    private boolean _zooming;
+
+    InputMultiplexer _inputMultiplexer;
 
     // UI
     OrthographicCamera _uiCamera;
@@ -60,6 +74,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     Label _scoreLabel;
     Label _distanceToBestScoreLabel;
     Boolean _showDistanceToBestScore = false;
+    private Button _playAgainButton;
+    private Button _zoomButton;
 
     // Physics
     Body _groundBody;
@@ -68,25 +84,15 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _game = game;
         _font = new BitmapFont();
 
-        _gameInputProcessor = new GameInputProcessor(_game);
+        _gameInputProcessor = new GameInputProcessor(_game, this);
 
         _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
-        float minGroundScale = 1.f;
-        float maxGroundScale = (Gdx.graphics.getWidth() / _groundSpriteActor.sprite.getWidth()) / 1.5f;
-        float groundScale = MathUtils.random(minGroundScale, maxGroundScale);
-
-        float groundRealWidth = _groundSpriteActor.sprite.getWidth() * groundScale;
-        float xPosition = (Gdx.graphics.getWidth() - groundRealWidth) / 2f;
-
-        Gdx.app.log(TAG, "Ground scale: " + groundScale);
-        _groundSpriteActor.setScale(groundScale, 1f);
-        _groundSpriteActor.setPosition(xPosition, 0);
 
         _preferences = Gdx.app.getPreferences("xmas-tower");
         _bestScore = _preferences.getFloat("highscore", 0f);
 
-        _bestScoreLine = new Sprite(Assets.whitePixel, Gdx.graphics.getWidth(), 10);
-        _bestScoreLine.setColor(Color.RED);
+        _bestScoreLine = new Sprite(Assets.barleySugarTexture);
+        _bestScoreLine.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         // UI
         _uiCamera = new OrthographicCamera();
@@ -101,33 +107,90 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _scoreLabel.setStyle(mediumLabelStyle);
         _scoreLabel.setAlignment(Align.center);
         _scoreLabel.setWidth(Gdx.graphics.getWidth());
-        _scoreLabel.setPosition(0, (Gdx.graphics.getHeight() - _scoreLabel.getHeight() / 2f) - (Gdx.graphics.getHeight() / 30f));
+        _scoreLabel.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+        _scoreLabel.setPosition(
+                0,
+                (Gdx.graphics.getHeight() -
+                (_scoreLabel.getHeight()) / 2f) -
+                (Gdx.graphics.getHeight() / 30f)
+        );
 
         _bestScoreLabel = new Label("Best", Assets.menuSkin);
         _bestScoreLabel.setStyle(normalLabelStyle);
+        _bestScoreLabel.setFontScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
+        SpriteDrawable playButtonUpSprite = new SpriteDrawable(new Sprite(Assets.playButtonUp));
+        SpriteDrawable playButtonDownSprite = new SpriteDrawable(new Sprite(Assets.playButtonDown));
+
+        _playAgainButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
+        _playAgainButton.setPosition(
+            (Gdx.graphics.getWidth() / 2f) - (_playAgainButton.getWidth() / 2f),
+            0
+        );
+        _playAgainButton.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+
+        _zoomButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
+        _zoomButton.setPosition(
+            (Gdx.graphics.getWidth()) - (_playAgainButton.getWidth()),
+            0
+        );
+        _zoomButton.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+
+//        Table table = new Table();
+//
+//        table.add(_playAgainButton).size(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+//        table.add(_zoomButton);
+//        table.add(_scoreLabel);
+//        table.setFillParent(true);
+
+//        table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+//        _uiStage.addActor(table);
+        _uiStage.addActor(_playAgainButton);
+        _uiStage.addActor(_zoomButton);
         _uiStage.addActor(_scoreLabel);
+
+        _inputMultiplexer = new InputMultiplexer();
+        _inputMultiplexer.addProcessor(_uiStage);
+        _inputMultiplexer.addProcessor(_gameInputProcessor);
     }
 
     @Override
     public void show() {
         _game.OnMenu = false;
-        Gdx.input.setInputProcessor(_gameInputProcessor);
-        initializePhysics();
-
+        Gdx.input.setInputProcessor(_inputMultiplexer);
         reset();
     }
 
     public void reset() {
-        _game.Camera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
         _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
         _needToAddNewGift = false;
+        _currentMaxHeight = 0f;
+        CameraSpeedY = 0f;
+        _zooming = false;
         GameWillReset = false;
+        GameIsFinished = false;
         _game.Stage.clear();
         _game.MouseJoint = null;
         _game.HitBody = null;
+        _cameraIsMoving = false;
+
+        float minGroundScale = 1.f;
+        float maxGroundScale = (Gdx.graphics.getWidth() / _groundSpriteActor.sprite.getWidth()) / 1.5f;
+        float groundScale = MathUtils.random(minGroundScale, maxGroundScale);
+
+        float groundRealWidth = _groundSpriteActor.sprite.getWidth() * groundScale;
+        float xPosition = (Gdx.graphics.getWidth() - groundRealWidth) / 2f;
+
+        _groundSpriteActor.setScale(groundScale, 1f);
+        _groundSpriteActor.setPosition(xPosition, 0);
 
         _game.Stage.addActor(_groundSpriteActor);
+
+        if (_groundBody != null)
+            _game.World.destroyBody(_groundBody);
+
+        initializePhysics();
 
         if (_score > _bestScore) {
             _preferences.putFloat("highscore", _score);
@@ -145,22 +208,29 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         Assets.gameMusicIntro.stop();
         Assets.gameMusicIntro.play();
 
-        for (Gift g : _gifts)
+        for (Gift g : _game.Gifts)
         {
             _game.World.destroyBody(g.getBody());
         }
 
-        _gifts.clear();
+        _game.Gifts.clear();
 
         addGift();
 
         _scoreLabel.setText(Config.SCORE_LABEL_PLACEHOLDER);
 
         if (_bestScore > 0f) {
-            _bestScoreLine.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) + _groundSpriteActor.sprite.getHeight());
-            _bestScoreLabel.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) + (_bestScoreLine.getHeight() * 2f) + _bestScoreLabel.getPrefHeight() / 2f);
+            _bestScoreLine.setPosition(0,
+                    (_bestScore * Config.HEIGHT_UNIT_FACTOR) +
+                    _groundSpriteActor.sprite.getHeight());
+            _bestScoreLabel.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) +
+                    ((_bestScoreLine.getHeight()) * 2f) +
+                    (_bestScoreLabel.getPrefHeight() * _bestScoreLabel.getFontScaleY()) / 2f);
             _game.Stage.addActor(_bestScoreLabel);
         }
+
+        _playAgainButton.setVisible(false);
+        _playAgainButton.setChecked(false);
     }
 
     private void initializePhysics() {
@@ -168,20 +238,20 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         groundBodyDef.type = BodyDef.BodyType.StaticBody;
 
         groundBodyDef.position.set(
-                (_groundSpriteActor.getX() + (_groundSpriteActor.sprite.getWidth() / 2f) *
-                        _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
-                (_groundSpriteActor.getY() + (_groundSpriteActor.sprite.getHeight() / 2f) *
-                        _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS
+            (_groundSpriteActor.getX() + (_groundSpriteActor.sprite.getWidth() / 2f) *
+                    _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
+            (_groundSpriteActor.getY() + (_groundSpriteActor.sprite.getHeight() / 2f) *
+                    _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS
         );
 
         _groundBody = _game.World.createBody(groundBodyDef);
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(
-                (((_groundSpriteActor.sprite.getWidth() / 2f)) * _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
-                ((_groundSpriteActor.sprite.getHeight() / 2f) * _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS,
-                new Vector2(0, 0),
-                0f
+            (((_groundSpriteActor.sprite.getWidth() / 2f)) * _groundSpriteActor.getScaleX()) / Config.PIXELS_TO_METERS,
+            ((_groundSpriteActor.sprite.getHeight() / 2f) * _groundSpriteActor.getScaleY()) / Config.PIXELS_TO_METERS,
+            new Vector2(0, 0),
+            0f
         );
 
         FixtureDef fixtureDef = new FixtureDef();
@@ -197,17 +267,14 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             return;
         }
 
-        Gift gift = new Gift(new Vector2(
-                Gdx.graphics.getWidth() / 2f,
-                _game.Camera.position.y + (Gdx.graphics.getHeight() / 2f) - 100f
-            )
+        Vector2 giftPosition = new Vector2(
+            Gdx.graphics.getWidth() / 2f,
+            _game.Camera.position.y +
+            (Gdx.graphics.getHeight() / 2f) -
+            (Gdx.graphics.getHeight() / 10f)
         );
 
-        gift.initializePhysics(_game.World);
-        _game.Stage.addActor(gift);
-        gift.setZIndex(0);
-        _groundSpriteActor.setZIndex(0);
-        _gifts.add(gift);
+        _game.addGift(giftPosition);
     }
 
     public void gameFinished() {
@@ -217,9 +284,42 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     public void update(float delta) {
+        if (GameIsFinished && _playAgainButton.isChecked())
+        {
+            reset();
+        }
+
+        if (_zoomButton.isChecked())
+        {
+            if (_zooming)
+            {
+                _zooming = false;
+                _game.Camera.zoom = 1f;
+                _game.Camera.position.y = _cameraSavedYPosition;
+            }
+            else
+            {
+                float ratio = (_currentMaxHeight + Gdx.graphics.getHeight()) / Gdx.graphics.getHeight();
+
+                Gdx.app.log(TAG, "Camera position: " + _game.Camera.position.y);
+                Gdx.app.log(TAG, "Camera position (ratio): " + (_game.Camera.position.y - (Gdx.graphics.getHeight() / 2f)));
+                Gdx.app.log(TAG, "Current max height: " + _currentMaxHeight);
+                Gdx.app.log(TAG, "Ratio: " + ratio);
+
+                if (ratio > 1f) {
+                    _cameraSavedYPosition = _game.Camera.position.y;
+                    _game.Camera.zoom = ratio;
+                    _game.Camera.position.y = _currentMaxHeight / 2f;
+                    _zooming = true;
+                }
+            }
+
+            _zoomButton.setChecked(false);
+        }
+
         if (!GameWillReset) {
-            for (int i = 0; i < _gifts.size(); i++) {
-                Gift currentGift = _gifts.get(i);
+            for (int i = 0; i < _game.Gifts.size(); i++) {
+                Gift currentGift = _game.Gifts.get(i);
 
                 // Outside of the scene?
                 if (currentGift.getX() < -(currentGift.getBox().sprite.getWidth() * 2f) ||
@@ -242,6 +342,15 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                     if (screenCoordinates.y > limitThreshold)
                         translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
+
+                    currentGift.getBox().getHeight();
+
+
+                    if (_currentMaxHeight < currentGift.getY())
+                    {
+                        _currentMaxHeight = currentGift.getY();
+                        Gdx.app.log(TAG, "Current max height: " + _currentMaxHeight);
+                    }
 
                     float currentScore = (
                         (currentGift.getY()) -
@@ -266,15 +375,35 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     private void updateCamera(float delta) {
+
+        if (_zooming)
+            return;
+
+        if (GameIsFinished) {
+            // Camera inertia
+            CameraSpeedY *= Config.CAMERA_INERTIA;
+
+            if (CameraSpeedY < 0 && _game.Camera.position.y <= Gdx.graphics.getHeight() / 2f) {
+                CameraSpeedY = 0;
+                _game.Camera.position.set(
+                        _game.Camera.position.x,
+                        Gdx.graphics.getHeight() / 2f,
+                        _game.Camera.position.z
+                );
+            }
+            else
+                _game.Camera.position.y += CameraSpeedY;
+
+            return;
+        }
+
         Vector3 position = _game.Camera.position;
 
-        float cameraInterpolationThreshold = 10.f;
-        if (Math.abs(position.x - _cameraTarget.x) > cameraInterpolationThreshold ||
-                Math.abs(position.y - _cameraTarget.y) > cameraInterpolationThreshold) {
-            float lerp = 0.05f;
+        if (Math.abs(position.x - _cameraTarget.x) > Config.CAMERA_INTERPOLATION_THRESHOLD ||
+            Math.abs(position.y - _cameraTarget.y) > Config.CAMERA_INTERPOLATION_THRESHOLD) {
 
-            position.x = position.x + (_cameraTarget.x - position.x) * lerp;
-            position.y = position.y + (_cameraTarget.y - position.y) * lerp;
+            position.x = position.x + (_cameraTarget.x - position.x) * Config.CAMERA_TRANSLATION_INTERPOLATION;
+            position.y = position.y + (_cameraTarget.y - position.y) * Config.CAMERA_TRANSLATION_INTERPOLATION;
 
             _game.Camera.position.set(position);
         }
@@ -289,7 +418,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
             if (GameWillReset) {
                 GameWillReset = false;
-                reset();
+                GameIsFinished = true;
+                _playAgainButton.setVisible(true);
             }
         }
     }

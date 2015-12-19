@@ -47,8 +47,17 @@ public class Mouth extends StatableSpriteActor
             sprite = _sprites.get(0);
             setPosition(26f, 8f);
         }
-        else
+        else if (newState == State.FALLING)
         {
+            sprite = _sprites.get(4);
+            setPosition(27f, 8f);
+        }
+        else if (newState == State.SICK)
+        {
+            sprite = _sprites.get(6);
+            setPosition(26f, 8f);
+        }
+        else {
             sprite = _sprites.get(0);
             setPosition(26f, 8f);
         }

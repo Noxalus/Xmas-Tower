@@ -2,10 +2,12 @@ package com.noxalus.xmastower.entities;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 
-public class SpriteActor extends Actor {
+public class SpriteActor extends Group {
     public Sprite sprite;
     public Vector2 localPosition;
 

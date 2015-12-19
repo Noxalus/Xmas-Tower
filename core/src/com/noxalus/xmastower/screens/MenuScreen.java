@@ -11,11 +11,13 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -25,9 +27,8 @@ import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.entities.SpriteActor;
 import com.noxalus.xmastower.inputs.MenuInputProcessor;
-
-import java.util.ArrayList;
 
 public class MenuScreen implements InputProcessor, Screen {
 
@@ -37,8 +38,6 @@ public class MenuScreen implements InputProcessor, Screen {
 
     InputMultiplexer _inputMultiplexer;
 
-    private ArrayList<Gift> _gifts = new ArrayList<Gift>();
-
     // Physics
     Body _leftWallBody;
     Body _rightWallBody;
@@ -46,27 +45,76 @@ public class MenuScreen implements InputProcessor, Screen {
     Body _groundBody;
 
     // UI
+    private Stage _uiStage;
+    private SpriteActor _title;
     private Button _playButton;
+    private Button _achievementButton;
+    private Button _leaderboardButton;
 
     public MenuScreen(XmasTower game) {
         _game = game;
 
         // UI
+        _uiStage = new Stage(new ScreenViewport());
+
+        Sprite titleSprite = new Sprite(Assets.title);
+
+        _title = new SpriteActor(titleSprite);
+
         SpriteDrawable playButtonUpSprite = new SpriteDrawable(new Sprite(Assets.playButtonUp));
         SpriteDrawable playButtonDownSprite = new SpriteDrawable(new Sprite(Assets.playButtonDown));
 
+        SpriteDrawable achievementsButtonUpSprite = new SpriteDrawable(new Sprite(Assets.achievementsButtonUp));
+        SpriteDrawable achievementsButtonDownSprite = new SpriteDrawable(new Sprite(Assets.achievementsButtonDown));
+
+        SpriteDrawable leaderboardButtonUpSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonUp));
+        SpriteDrawable leaderboardButtonDownSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonDown));
+
+        Gdx.app.log(TAG, "Resolution scale ratio: " + Config.RESOLUTION_SCALE_RATIO.toString());
+
         _playButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
-        _playButton.setPosition(
-                -_playButton.getWidth() / 2f,
-                -Gdx.graphics.getHeight() / 2.2f
+        _achievementButton = new ImageButton(achievementsButtonUpSprite, achievementsButtonDownSprite);
+        _leaderboardButton = new ImageButton(leaderboardButtonUpSprite, leaderboardButtonDownSprite);
+
+        _uiStage.setDebugAll(true);
+
+        Gdx.app.log(TAG, "UI Stage width: " + _uiStage.getWidth());
+
+        Table titleTable = new Table();
+        titleTable.setFillParent(true);
+        titleTable.setSize(_uiStage.getWidth(), _uiStage.getHeight());
+        titleTable.align(Align.top | Align.center);
+        titleTable.add(_title);
+
+        Table playButtonTable = new Table();
+        playButtonTable.setFillParent(true);
+        playButtonTable.align(Align.center | Align.bottom);
+        playButtonTable.padBottom(Gdx.graphics.getHeight() / 20f);
+        playButtonTable.add(_achievementButton).pad(
+            Gdx.graphics.getHeight() / 10f,
+            0,
+            0,
+            Gdx.graphics.getWidth() / 40f
+        );
+        playButtonTable.add(_playButton);
+        playButtonTable.add(_leaderboardButton).pad(
+            Gdx.graphics.getHeight() / 10f,
+            Gdx.graphics.getWidth() / 40f,
+            0,
+            0
         );
 
-        _game.Stage.addActor(_playButton);
+        _uiStage.addActor(titleTable);
+        _uiStage.addActor(playButtonTable);
 
-        _inputMultiplexer = new InputMultiplexer();
-        _inputMultiplexer.addProcessor(new MenuInputProcessor(_game));
-        _inputMultiplexer.addProcessor(_game.Stage);
+        _playButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                launchGame();
+            }
+        });
 
+        _inputMultiplexer = new InputMultiplexer(new MenuInputProcessor(_game), _uiStage, this);
         initializePhysics();
     }
 
@@ -75,7 +123,6 @@ public class MenuScreen implements InputProcessor, Screen {
         float w = Gdx.graphics.getWidth() / Config.PIXELS_TO_METERS;
         float h = Gdx.graphics.getHeight() / Config.PIXELS_TO_METERS;
 
-        // Create ground
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
@@ -85,25 +132,25 @@ public class MenuScreen implements InputProcessor, Screen {
         EdgeShape edgeShape = new EdgeShape();
 
         // Left wall
-        edgeShape.set(-w / 2f, -h / 2f, -w / 2f, h / 2f);
+        edgeShape.set(0, 0, 0, h);
         fixtureDef.shape = edgeShape;
         _leftWallBody = _game.World.createBody(bodyDef);
         _leftWallBody.createFixture(fixtureDef);
 
         // Right wall
-        edgeShape.set(w / 2f, -h / 2f, w / 2f, h / 2f);
+        edgeShape.set(w, 0, w, h);
         fixtureDef.shape = edgeShape;
         _rightWallBody = _game.World.createBody(bodyDef);
         _rightWallBody.createFixture(fixtureDef);
 
         // Roof
-        edgeShape.set(-w / 2f, h / 2f, w / 2f, h / 2f);
+        edgeShape.set(0, h, w, h);
         fixtureDef.shape = edgeShape;
         _roofBody = _game.World.createBody(bodyDef);
         _roofBody.createFixture(fixtureDef);
 
         // Ground
-        edgeShape.set(-w / 2f, -h / 2f, w / 2f, -h / 2f);
+        edgeShape.set(0, 0, w, 0);
         fixtureDef.shape = edgeShape;
         _groundBody = _game.World.createBody(bodyDef);
         _groundBody.createFixture(fixtureDef);
@@ -123,45 +170,42 @@ public class MenuScreen implements InputProcessor, Screen {
     private void launchGame()
     {
         Assets.menuMusic.stop();
-        _game.setScreen(_game.GameScreen);
 
-        for (Gift g : _gifts)
+        for (Gift g : _game.Gifts)
         {
             _game.World.destroyBody(g.getBody());
         }
+
+        _game.Gifts.clear();
 
         _game.World.destroyBody(_leftWallBody);
         _game.World.destroyBody(_rightWallBody);
         _game.World.destroyBody(_roofBody);
         _game.World.destroyBody(_groundBody);
-    }
 
-    public void update(float delta) {
-        for (int i = 0; i < _gifts.size(); i++) {
-            Gift currentGift = _gifts.get(i);
-            currentGift.update(delta);
-        }
-
-        if (_playButton.isChecked())
-            launchGame();
+        _game.setScreen(_game.GameScreen);
     }
 
     public void addGift() {
-        Gift gift = new Gift(new Vector2(0f, 0f));
+        Vector2 giftPosition = new Vector2(
+                Gdx.graphics.getWidth() / 2f,
+                Gdx.graphics.getHeight() / 2f
+        );
 
-        gift.initializePhysics(_game.World);
-        _game.Stage.addActor(gift);
-        gift.setZIndex(0);
-        _gifts.add(gift);
+        _game.addGift(giftPosition);
+    }
+
+    public void update(float delta) {
+        for (int i = 0; i < _game.Gifts.size(); i++) {
+            Gift currentGift = _game.Gifts.get(i);
+            currentGift.update(delta);
+        }
+
+        _uiStage.act(delta);
     }
 
     public void draw(float delta) {
-        _game.SpriteBatch.begin();
-        _game.SpriteBatch.draw(Assets.title,
-            Gdx.graphics.getWidth() / 2f - Assets.title.getWidth() / 2f,
-            Gdx.graphics.getHeight() - Assets.title.getHeight()
-        );
-        _game.SpriteBatch.end();
+        _uiStage.draw();
     }
 
     @Override
@@ -172,7 +216,6 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public void resize(int width, int height) {
-
     }
 
     @Override
@@ -215,11 +258,8 @@ public class MenuScreen implements InputProcessor, Screen {
         float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
         float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
 
-//        if (screenXRatio < 0.25f && screenYRatio > 0.85f)
-//            launchGame();
-//
-//        if (screenXRatio > 0.85f && screenYRatio > 0.85f)
-//            addGift();
+        if (screenYRatio < 0.25f)
+            addGift();
 
         return true;
     }

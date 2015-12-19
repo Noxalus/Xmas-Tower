@@ -10,16 +10,20 @@ import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.screens.GameScreen;
 
 public class GameInputProcessor implements InputProcessor{
 
     private final String TAG = "GameInputProcessor";
     private XmasTower _game;
+    private GameScreen _gameScreen;
     private Sound _currentPlayedSound;
+    private int _oldY;
 
-    public GameInputProcessor(XmasTower game)
+    public GameInputProcessor(XmasTower game, GameScreen gameScreen)
     {
         _game = game;
+        _gameScreen = gameScreen;
     }
 
     @Override
@@ -39,9 +43,6 @@ public class GameInputProcessor implements InputProcessor{
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-        //body.applyForceToCenter(0f,10f,true);
-        Gdx.app.log(TAG, "Touch position: " + x + ", " + y);
-
         if (pointer > 0 || _game.MouseJoint != null)
             return false;
 
@@ -74,10 +75,11 @@ public class GameInputProcessor implements InputProcessor{
             def.target.set(_game.FixtureTestPoint.x, _game.FixtureTestPoint.y);
             def.maxForce = (10000.0f / Config.PIXELS_TO_METERS) * _game.HitBody.getMass();
 
-            Gdx.app.log(TAG, "Create a new mouse joint");
             _game.MouseJoint = (MouseJoint) _game.World.createJoint(def);
             _game.HitBody.setAwake(true);
         }
+
+        _oldY = y;
 
         return false;
     }
@@ -85,26 +87,32 @@ public class GameInputProcessor implements InputProcessor{
 
     @Override
     public boolean touchDragged (int x, int y, int pointer) {
-
-        Gdx.app.log(TAG, "Touch dragged pointer: " + pointer);
-        Gdx.app.log(TAG, "Touch dragged: " + x + ", " + y);
-
         if (pointer > 0)
             return false;
 
-        if (_game.MouseJoint != null) {
-            _game.Camera.unproject(_game.FixtureTestPoint.set(x, y, 0));
-            _game.MouseJoint.setTarget(_game.MouseJointTarget.set(
-                    _game.FixtureTestPoint.x / Config.PIXELS_TO_METERS,
-                    _game.FixtureTestPoint.y / Config.PIXELS_TO_METERS
-            ));
+        if (_gameScreen.GameIsFinished) {
+            int deltaY = y - _oldY;
+
+            _gameScreen.CameraSpeedY = deltaY;
         }
+        else {
+            if (_game.MouseJoint != null) {
+                _game.Camera.unproject(_game.FixtureTestPoint.set(x, y, 0));
+                _game.MouseJoint.setTarget(_game.MouseJointTarget.set(
+                        _game.FixtureTestPoint.x / Config.PIXELS_TO_METERS,
+                        _game.FixtureTestPoint.y / Config.PIXELS_TO_METERS
+                ));
+            }
+        }
+
+        _oldY = y;
 
         return false;
     }
 
     @Override
     public boolean touchUp (int x, int y, int pointer, int button) {
+
         if (_currentPlayedSound != null)
         {
             _currentPlayedSound.stop();
@@ -112,8 +120,6 @@ public class GameInputProcessor implements InputProcessor{
         }
 
         if (_game.MouseJoint != null && _game.HitBody != null) {
-            Gdx.app.log(TAG, "Remove mouse joint from touch up");
-
             ((Gift)(_game.HitBody.getUserData())).isSelected(false);
             _game.World.destroyJoint(_game.MouseJoint);
             _game.MouseJoint = null;

@@ -28,9 +28,24 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
-import com.noxalus.xmastower.inputs.GameInputProcessor;
 import com.noxalus.xmastower.screens.MenuScreen;
 import com.noxalus.xmastower.screens.GameScreen;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+class GiftComparator implements Comparator<Gift> {
+    @Override
+    public int compare(Gift gift1, Gift gift2) {
+        if (gift1.getScaleX() > gift2.getScaleX())
+            return 1;
+        else if (gift1.getScaleX() < gift2.getScaleX())
+            return -1;
+
+        return 0;
+    }
+}
 
 public class XmasTower extends Game {
 
@@ -49,6 +64,11 @@ public class XmasTower extends Game {
 
     // Fonts
     BitmapFont _font;
+
+    // Entities
+    public ArrayList<Gift> Gifts = new ArrayList<Gift>();
+
+    public GiftComparator _giftComparator;
 
     // Particles
     ParticleEffectPool _snowRainEffectPool;
@@ -100,9 +120,12 @@ public class XmasTower extends Game {
         Camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         Viewport = new ScreenViewport(Camera);
         Stage = new Stage(Viewport);
-        Camera.position.set(0, 0, 0);
+        Camera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
 
+        Gifts = new ArrayList<Gift>();
         _font = new BitmapFont();
+
+        _giftComparator = new GiftComparator();
 
         initializeParticles();
         initializePhysics();
@@ -156,11 +179,9 @@ public class XmasTower extends Game {
         World.setContactListener(new ContactListener() {
             @Override
             public void beginContact(Contact contact) {
-                Gdx.app.log(TAG, "begin contact");
+//                Gdx.app.log(TAG, "begin contact");
 
                 if (!OnMenu && MouseJoint != null && HitBody != null) {
-                    Gdx.app.log(TAG, "Remove mouse joint from collision");
-
                     Gift selectedGift = (Gift) HitBody.getUserData();
                     selectedGift.isSelected(false);
                     selectedGift.isMovable(false);
@@ -184,7 +205,7 @@ public class XmasTower extends Game {
                         giftA.switchState(State.COLLISIONING);
                     }
 
-                    Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
+//                    Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
 
                     if (!OnMenu) {
                         giftA.isMovable(false);
@@ -198,7 +219,7 @@ public class XmasTower extends Game {
                         giftB.switchState(State.COLLISIONING);
                     }
 
-                    Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
+//                    Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
 
                     if (!OnMenu) {
                         giftB.isMovable(false);
@@ -209,7 +230,7 @@ public class XmasTower extends Game {
 
             @Override
             public void endContact(Contact contact) {
-                Gdx.app.log(TAG, "end contact");
+//                Gdx.app.log(TAG, "end contact");
 
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -227,11 +248,11 @@ public class XmasTower extends Game {
 
             @Override
             public void preSolve(Contact contact, Manifold oldManifold) {
-                Manifold.ManifoldType type = oldManifold.getType();
-                Vector2 localPoint = oldManifold.getLocalPoint();
-                Vector2 localNormal = oldManifold.getLocalNormal();
-                int pointCount = oldManifold.getPointCount();
-                Manifold.ManifoldPoint[] points = oldManifold.getPoints();
+//                Manifold.ManifoldType type = oldManifold.getType();
+//                Vector2 localPoint = oldManifold.getLocalPoint();
+//                Vector2 localNormal = oldManifold.getLocalNormal();
+//                int pointCount = oldManifold.getPointCount();
+//                Manifold.ManifoldPoint[] points = oldManifold.getPoints();
 //				Gdx.app.log(TAG, "pre solve, " + type +
 //						", point: " + localPoint +
 //						", local normal: " + localNormal +
@@ -241,14 +262,24 @@ public class XmasTower extends Game {
 
             @Override
             public void postSolve(Contact contact, ContactImpulse impulse) {
-                float[] ni = impulse.getNormalImpulses();
-                float[] ti = impulse.getTangentImpulses();
+//                float[] ni = impulse.getNormalImpulses();
+//                float[] ti = impulse.getTangentImpulses();
 
-                if (ti[1] > 1.f) {
-                    Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
-                }
+//                if (ti[1] > 1.f) {
+//                    Gdx.app.log(TAG, "post solve, normal impulses: " + ni[0] + ", " + ni[1] + ", tangent impulses: " + ti[0] + ", " + ti[1]);
+//                }
             }
         });
+    }
+
+    public void addGift(Vector2 position)
+    {
+        Gift gift = new Gift(position);
+
+        gift.initializePhysics(World);
+        Gifts.add(gift);
+
+        Collections.sort(Gifts, _giftComparator);
     }
 
     public void update() {
@@ -291,9 +322,23 @@ public class XmasTower extends Game {
 
         SpriteBatch.end();
 
+        SpriteBatch.setProjectionMatrix(Camera.combined);
+
         Stage.draw();
 
-        SpriteBatch.setProjectionMatrix(Camera.combined);
+        SpriteBatch.begin();
+
+        for (Gift gift : Gifts) {
+            gift.draw(SpriteBatch, 1);
+        }
+
+        // Draw ribbons at top of everything
+        for (Gift gift : Gifts) {
+            gift.drawRibbon(SpriteBatch);
+        }
+
+        SpriteBatch.end();
+
 
         // Scale down the sprite batches projection matrix to box2D size
         _debugMatrix = SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);

@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
@@ -61,7 +62,7 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     private void initializeUI() {
-        _uiStage = new Stage(new ScreenViewport());
+        _uiStage = new Stage(new FitViewport(720, 1280));
 
         Sprite titleSprite = new Sprite(Assets.title);
 
@@ -92,26 +93,18 @@ public class MenuScreen implements InputProcessor, Screen {
         titleTable.align(Align.top | Align.center);
         titleTable.add(_title);
 
-        Table playButtonTable = new Table();
-        playButtonTable.setFillParent(true);
-        playButtonTable.align(Align.center | Align.bottom);
-        playButtonTable.padBottom(Gdx.graphics.getHeight() / 20f);
-        playButtonTable.add(_achievementButton).pad(
-                Gdx.graphics.getHeight() / 10f,
-                0,
-                0,
-                Gdx.graphics.getWidth() / 40f
-        );
-        playButtonTable.add(_playButton);
-        playButtonTable.add(_leaderboardButton).pad(
-                Gdx.graphics.getHeight() / 10f,
-                Gdx.graphics.getWidth() / 40f,
-                0,
-                0
-        );
+        Table buttonsTable = new Table();
+        buttonsTable.setFillParent(true);
+        buttonsTable.align(Align.center | Align.bottom);
+        buttonsTable.padBottom(50);
+        buttonsTable.add(_achievementButton).pad(150, 0, 0, 30);
+        buttonsTable.add(_playButton);
+        buttonsTable.add(_leaderboardButton).pad(150, 30, 0, 0);
+
+        buttonsTable.sizeBy(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         _uiStage.addActor(titleTable);
-        _uiStage.addActor(playButtonTable);
+        _uiStage.addActor(buttonsTable);
 
         _playButton.addListener(new ClickListener() {
             @Override

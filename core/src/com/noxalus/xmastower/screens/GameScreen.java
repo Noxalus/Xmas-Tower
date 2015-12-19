@@ -26,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
@@ -64,8 +65,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     InputMultiplexer _inputMultiplexer;
 
     // UI
-    OrthographicCamera _uiCamera;
-    Viewport _uiViewport;
     Stage _uiStage;
     Label _bestScoreLabel;
     Label _scoreLabel;
@@ -129,7 +128,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _score = 0;
         _currentPlayedSound = null;
 
-        Gdx.app.log(TAG, "Clean");
         if (_groundBody != null) {
             _game.World.destroyBody(_groundBody);
             _groundBody = null;
@@ -162,7 +160,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _game.Stage.addActor(_groundSpriteActor);
 
-        Gdx.app.log(TAG, "Initialize physics");
         initializePhysics();
 
         Assets.gameMusicIntro.play();
@@ -187,10 +184,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     private void initializeUI() {
-        _uiCamera = new OrthographicCamera();
-        _uiViewport = new ScreenViewport(_uiCamera);
-        _uiCamera.position.set(0, 0, 0);
-        _uiStage = new Stage(_uiViewport);
+        _uiStage = new Stage(new FitViewport(720, 1280));
 
         Label.LabelStyle normalLabelStyle = new Label.LabelStyle(Assets.normalFont, Color.WHITE);
         Label.LabelStyle mediumLabelStyle = new Label.LabelStyle(Assets.mediumFont, Color.WHITE);
@@ -235,20 +229,10 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         Table buttonsTable = new Table();
         buttonsTable.setFillParent(true);
         buttonsTable.align(Align.center | Align.bottom);
-        buttonsTable.padBottom(Gdx.graphics.getHeight() / 20f);
-        buttonsTable.add(_backButton).pad(
-                Gdx.graphics.getHeight() / 10f,
-                0,
-                0,
-                Gdx.graphics.getWidth() / 40f
-        );
+        buttonsTable.padBottom(50);
+        buttonsTable.add(_backButton).pad(150, 0, 0, 30);
         buttonsTable.add(_playAgainButton);
-        buttonsTable.add(_zoomOutButton).pad(
-                Gdx.graphics.getHeight() / 10f,
-                Gdx.graphics.getWidth() / 40f,
-                0,
-                0
-        );
+        buttonsTable.add(_zoomOutButton).pad(150, 30, 0, 0);
 
         _uiStage.setDebugAll(true);
         _uiStage.addActor(scoreTable);

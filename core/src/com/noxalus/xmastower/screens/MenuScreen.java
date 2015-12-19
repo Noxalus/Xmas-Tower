@@ -55,6 +55,12 @@ public class MenuScreen implements InputProcessor, Screen {
         _game = game;
 
         // UI
+        initializeUI();
+
+        _inputMultiplexer = new InputMultiplexer(new MenuInputProcessor(_game), _uiStage, this);
+    }
+
+    private void initializeUI() {
         _uiStage = new Stage(new ScreenViewport());
 
         Sprite titleSprite = new Sprite(Assets.title);
@@ -91,17 +97,17 @@ public class MenuScreen implements InputProcessor, Screen {
         playButtonTable.align(Align.center | Align.bottom);
         playButtonTable.padBottom(Gdx.graphics.getHeight() / 20f);
         playButtonTable.add(_achievementButton).pad(
-            Gdx.graphics.getHeight() / 10f,
-            0,
-            0,
-            Gdx.graphics.getWidth() / 40f
+                Gdx.graphics.getHeight() / 10f,
+                0,
+                0,
+                Gdx.graphics.getWidth() / 40f
         );
         playButtonTable.add(_playButton);
         playButtonTable.add(_leaderboardButton).pad(
-            Gdx.graphics.getHeight() / 10f,
-            Gdx.graphics.getWidth() / 40f,
-            0,
-            0
+                Gdx.graphics.getHeight() / 10f,
+                Gdx.graphics.getWidth() / 40f,
+                0,
+                0
         );
 
         _uiStage.addActor(titleTable);
@@ -114,8 +120,19 @@ public class MenuScreen implements InputProcessor, Screen {
             }
         });
 
-        _inputMultiplexer = new InputMultiplexer(new MenuInputProcessor(_game), _uiStage, this);
-        initializePhysics();
+        _achievementButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showAchievements();
+            }
+        });
+
+        _leaderboardButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showLeaderboard();
+            }
+        });
     }
 
     private void initializePhysics()
@@ -161,10 +178,21 @@ public class MenuScreen implements InputProcessor, Screen {
     @Override
     public void show() {
         _game.OnMenu = true;
+        initializePhysics();
         Assets.menuMusic.play();
         addGift();
 
         Gdx.input.setInputProcessor(_inputMultiplexer);
+    }
+
+    private void showAchievements()
+    {
+        // TODO: Show Google Play achievements
+    }
+
+    private void showLeaderboard()
+    {
+        // TODO: Show Google Play leaderboard
     }
 
     private void launchGame()
@@ -172,9 +200,7 @@ public class MenuScreen implements InputProcessor, Screen {
         Assets.menuMusic.stop();
 
         for (Gift g : _game.Gifts)
-        {
             _game.World.destroyBody(g.getBody());
-        }
 
         _game.Gifts.clear();
 

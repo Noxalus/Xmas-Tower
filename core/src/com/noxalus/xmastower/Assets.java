@@ -27,7 +27,6 @@ public class Assets {
     public static Texture groundTexture;
     public static Texture barleySugarTexture;
     public static Texture whitePixel;
-    public static Texture greenPixel;
     public static Texture[] backgrounds;
 
     // Fonts
@@ -43,6 +42,12 @@ public class Assets {
     public static Texture achievementsButtonDown;
     public static Texture leaderboardButtonUp;
     public static Texture leaderboardButtonDown;
+    public static Texture backButtonUp;
+    public static Texture backButtonDown;
+    public static Texture zoomOutButtonUp;
+    public static Texture zoomOutButtonDown;
+
+
     // Musics
     public static Music menuMusic;
     public static Music gameMusicIntro;
@@ -125,7 +130,6 @@ public class Assets {
 
         title = new Texture(Gdx.files.internal("graphics/pictures/title.png"));
         whitePixel = new Texture(Gdx.files.internal("graphics/pictures/white.png"));
-        greenPixel = new Texture(Gdx.files.internal("graphics/pictures/green.png"));
         groundTexture = new Texture(Gdx.files.internal("graphics/sprites/ground.png"));
         barleySugarTexture = new Texture(Gdx.files.internal("graphics/sprites/barleysugar.png"));
 
@@ -161,6 +165,12 @@ public class Assets {
 
         leaderboardButtonUp = new Texture(Gdx.files.internal("graphics/ui/leaderboardbuttonup.png"));
         leaderboardButtonDown = new Texture(Gdx.files.internal("graphics/ui/leaderboardbuttondown.png"));
+
+        backButtonUp = new Texture(Gdx.files.internal("graphics/ui/backbuttonup.png"));
+        backButtonDown = new Texture(Gdx.files.internal("graphics/ui/backbuttondown.png"));
+
+        zoomOutButtonUp = new Texture(Gdx.files.internal("graphics/ui/zoomoutbuttonup.png"));
+        zoomOutButtonDown = new Texture(Gdx.files.internal("graphics/ui/zoomoutbuttondown.png"));
 
         // Musics
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/menu.ogg"));

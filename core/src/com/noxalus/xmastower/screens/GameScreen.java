@@ -17,11 +17,13 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -33,11 +35,6 @@ import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
 import com.noxalus.xmastower.inputs.GameInputProcessor;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
-import javafx.scene.Camera;
 
 public class GameScreen extends ApplicationAdapter implements Screen {
 
@@ -75,7 +72,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     Label _distanceToBestScoreLabel;
     Boolean _showDistanceToBestScore = false;
     private Button _playAgainButton;
-    private Button _zoomButton;
+    private Button _zoomOutButton;
+    ImageButton _backButton;
 
     // Physics
     Body _groundBody;
@@ -95,64 +93,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _bestScoreLine.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         // UI
-        _uiCamera = new OrthographicCamera();
-        _uiViewport = new ScreenViewport(_uiCamera);
-        _uiCamera.position.set(0, 0, 0);
-        _uiStage = new Stage(_uiViewport);
+        initializeUI();
 
-        Label.LabelStyle normalLabelStyle = new Label.LabelStyle(Assets.normalFont, Color.WHITE);
-        Label.LabelStyle mediumLabelStyle = new Label.LabelStyle(Assets.mediumFont, Color.WHITE);
-
-        _scoreLabel = new Label(Config.SCORE_LABEL_PLACEHOLDER, Assets.menuSkin);
-        _scoreLabel.setStyle(mediumLabelStyle);
-        _scoreLabel.setAlignment(Align.center);
-        _scoreLabel.setWidth(Gdx.graphics.getWidth());
-        _scoreLabel.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-        _scoreLabel.setPosition(
-                0,
-                (Gdx.graphics.getHeight() -
-                (_scoreLabel.getHeight()) / 2f) -
-                (Gdx.graphics.getHeight() / 30f)
-        );
-
-        _bestScoreLabel = new Label("Best", Assets.menuSkin);
-        _bestScoreLabel.setStyle(normalLabelStyle);
-        _bestScoreLabel.setFontScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-
-        SpriteDrawable playButtonUpSprite = new SpriteDrawable(new Sprite(Assets.playButtonUp));
-        SpriteDrawable playButtonDownSprite = new SpriteDrawable(new Sprite(Assets.playButtonDown));
-
-        _playAgainButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
-        _playAgainButton.setPosition(
-            (Gdx.graphics.getWidth() / 2f) - (_playAgainButton.getWidth() / 2f),
-            0
-        );
-        _playAgainButton.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-
-        _zoomButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
-        _zoomButton.setPosition(
-            (Gdx.graphics.getWidth()) - (_playAgainButton.getWidth()),
-            0
-        );
-        _zoomButton.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-
-//        Table table = new Table();
-//
-//        table.add(_playAgainButton).size(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-//        table.add(_zoomButton);
-//        table.add(_scoreLabel);
-//        table.setFillParent(true);
-
-//        table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-//        _uiStage.addActor(table);
-        _uiStage.addActor(_playAgainButton);
-        _uiStage.addActor(_zoomButton);
-        _uiStage.addActor(_scoreLabel);
-
-        _inputMultiplexer = new InputMultiplexer();
-        _inputMultiplexer.addProcessor(_uiStage);
-        _inputMultiplexer.addProcessor(_gameInputProcessor);
+        _inputMultiplexer = new InputMultiplexer(_uiStage, _gameInputProcessor);
     }
 
     @Override
@@ -162,19 +105,51 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         reset();
     }
 
-    public void reset() {
-        _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
-        _needToAddNewGift = false;
-        _currentMaxHeight = 0f;
+    private void clean() {
+        Assets.gameMusicLoop.stop();
+        Assets.gameMusicIntro.stop();
+
         CameraSpeedY = 0f;
-        _zooming = false;
         GameWillReset = false;
         GameIsFinished = false;
         _game.Stage.clear();
+        _game.Camera.zoom = 1f;
+        _game.Camera.position.x = Gdx.graphics.getWidth() / 2f;
+        _game.Camera.position.y = Gdx.graphics.getHeight() / 2f;
         _game.MouseJoint = null;
         _game.HitBody = null;
-        _cameraIsMoving = false;
+        _game.DestroyMouseJoint = false;
+        _game.pausePhysics(false);
 
+        _cameraTarget = new Vector2(_game.Camera.position.x, _game.Camera.position.y);
+        _needToAddNewGift = false;
+        _currentMaxHeight = 0f;
+        _zooming = false;
+        _cameraIsMoving = false;
+        _score = 0;
+        _currentPlayedSound = null;
+
+        Gdx.app.log(TAG, "Clean");
+        if (_groundBody != null) {
+            _game.World.destroyBody(_groundBody);
+            _groundBody = null;
+        }
+
+        for (Gift g : _game.Gifts)
+            _game.World.destroyBody(g.getBody());
+        _game.Gifts.clear();
+    }
+
+    private void reset() {
+        if (_score > _bestScore) {
+            _preferences.putFloat("highscore", _score);
+            _preferences.flush();
+            _bestScore = _score;
+        }
+
+        clean();
+
+        // Generate a random size ground
         float minGroundScale = 1.f;
         float maxGroundScale = (Gdx.graphics.getWidth() / _groundSpriteActor.sprite.getWidth()) / 1.5f;
         float groundScale = MathUtils.random(minGroundScale, maxGroundScale);
@@ -187,33 +162,10 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _game.Stage.addActor(_groundSpriteActor);
 
-        if (_groundBody != null)
-            _game.World.destroyBody(_groundBody);
-
+        Gdx.app.log(TAG, "Initialize physics");
         initializePhysics();
 
-        if (_score > _bestScore) {
-            _preferences.putFloat("highscore", _score);
-            _preferences.flush();
-            _bestScore = _score;
-        }
-
-        _score = 0;
-
-        _game.DestroyMouseJoint = false;
-        _game.pausePhysics(false);
-        _currentPlayedSound = null;
-
-        Assets.gameMusicLoop.stop();
-        Assets.gameMusicIntro.stop();
         Assets.gameMusicIntro.play();
-
-        for (Gift g : _game.Gifts)
-        {
-            _game.World.destroyBody(g.getBody());
-        }
-
-        _game.Gifts.clear();
 
         addGift();
 
@@ -230,7 +182,127 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         }
 
         _playAgainButton.setVisible(false);
-        _playAgainButton.setChecked(false);
+        _backButton.setVisible(false);
+        _zoomOutButton.setVisible(false);
+    }
+
+    private void initializeUI() {
+        _uiCamera = new OrthographicCamera();
+        _uiViewport = new ScreenViewport(_uiCamera);
+        _uiCamera.position.set(0, 0, 0);
+        _uiStage = new Stage(_uiViewport);
+
+        Label.LabelStyle normalLabelStyle = new Label.LabelStyle(Assets.normalFont, Color.WHITE);
+        Label.LabelStyle mediumLabelStyle = new Label.LabelStyle(Assets.mediumFont, Color.WHITE);
+
+        _scoreLabel = new Label(Config.SCORE_LABEL_PLACEHOLDER, Assets.menuSkin);
+        _scoreLabel.setStyle(mediumLabelStyle);
+        _scoreLabel.setAlignment(Align.center);
+        _scoreLabel.setWidth(Gdx.graphics.getWidth());
+        _scoreLabel.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+        _scoreLabel.setPosition(
+                0,
+                (Gdx.graphics.getHeight() -
+                        (_scoreLabel.getHeight()) / 2f) -
+                        (Gdx.graphics.getHeight() / 30f)
+        );
+
+        _bestScoreLabel = new Label("Best", Assets.menuSkin);
+        _bestScoreLabel.setStyle(normalLabelStyle);
+        _bestScoreLabel.setFontScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+
+        SpriteDrawable playButtonUpSprite = new SpriteDrawable(new Sprite(Assets.playButtonUp));
+        SpriteDrawable playButtonDownSprite = new SpriteDrawable(new Sprite(Assets.playButtonDown));
+
+        _playAgainButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
+
+        SpriteDrawable zoomOutButtonUpSprite = new SpriteDrawable(new Sprite(Assets.zoomOutButtonUp));
+        SpriteDrawable zoomOutButtonDownSprite = new SpriteDrawable(new Sprite(Assets.zoomOutButtonDown));
+
+        _zoomOutButton = new ImageButton(zoomOutButtonUpSprite, zoomOutButtonDownSprite);
+
+        SpriteDrawable backButtonUpSprite = new SpriteDrawable(new Sprite(Assets.backButtonUp));
+        SpriteDrawable backButtonDownSprite = new SpriteDrawable(new Sprite(Assets.backButtonDown));
+
+        _backButton = new ImageButton(backButtonUpSprite, backButtonDownSprite);
+
+        Table scoreTable = new Table();
+        scoreTable.setFillParent(true);
+        scoreTable.setSize(_uiStage.getWidth(), _uiStage.getHeight());
+        scoreTable.align(Align.center | Align.top);
+        scoreTable.add(_scoreLabel);
+
+        Table buttonsTable = new Table();
+        buttonsTable.setFillParent(true);
+        buttonsTable.align(Align.center | Align.bottom);
+        buttonsTable.padBottom(Gdx.graphics.getHeight() / 20f);
+        buttonsTable.add(_backButton).pad(
+                Gdx.graphics.getHeight() / 10f,
+                0,
+                0,
+                Gdx.graphics.getWidth() / 40f
+        );
+        buttonsTable.add(_playAgainButton);
+        buttonsTable.add(_zoomOutButton).pad(
+                Gdx.graphics.getHeight() / 10f,
+                Gdx.graphics.getWidth() / 40f,
+                0,
+                0
+        );
+
+        _uiStage.setDebugAll(true);
+        _uiStage.addActor(scoreTable);
+        _uiStage.addActor(buttonsTable);
+
+        // Buttons click events
+        _playAgainButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameIsFinished) {
+                    reset();
+                }
+            }
+        });
+
+        _backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameIsFinished) {
+                    backToMenu();
+                }
+            }
+        });
+
+        _zoomOutButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameIsFinished) {
+                    if (_zooming) {
+                        _zooming = false;
+                        _game.Camera.zoom = 1f;
+                        _game.Camera.position.y = _cameraSavedYPosition;
+
+                        // Show again some interface elements
+                        _scoreLabel.setVisible(true);
+                        _bestScoreLabel.setVisible(true);
+
+                    } else {
+                        float ratio = (_currentMaxHeight + Gdx.graphics.getHeight()) / Gdx.graphics.getHeight();
+
+                        if (ratio > 1f) {
+                            _cameraSavedYPosition = _game.Camera.position.y;
+                            _game.Camera.zoom = ratio;
+                            _game.Camera.position.y = _currentMaxHeight / 2f;
+                            _zooming = true;
+
+                            // Hide some interface elements
+                            _scoreLabel.setVisible(false);
+                            _bestScoreLabel.setVisible(false);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void initializePhysics() {
@@ -283,40 +355,12 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         GameWillReset = true;
     }
 
+    private void backToMenu() {
+        clean();
+        _game.setScreen(_game.MenuScreen);
+    }
+
     public void update(float delta) {
-        if (GameIsFinished && _playAgainButton.isChecked())
-        {
-            reset();
-        }
-
-        if (_zoomButton.isChecked())
-        {
-            if (_zooming)
-            {
-                _zooming = false;
-                _game.Camera.zoom = 1f;
-                _game.Camera.position.y = _cameraSavedYPosition;
-            }
-            else
-            {
-                float ratio = (_currentMaxHeight + Gdx.graphics.getHeight()) / Gdx.graphics.getHeight();
-
-                Gdx.app.log(TAG, "Camera position: " + _game.Camera.position.y);
-                Gdx.app.log(TAG, "Camera position (ratio): " + (_game.Camera.position.y - (Gdx.graphics.getHeight() / 2f)));
-                Gdx.app.log(TAG, "Current max height: " + _currentMaxHeight);
-                Gdx.app.log(TAG, "Ratio: " + ratio);
-
-                if (ratio > 1f) {
-                    _cameraSavedYPosition = _game.Camera.position.y;
-                    _game.Camera.zoom = ratio;
-                    _game.Camera.position.y = _currentMaxHeight / 2f;
-                    _zooming = true;
-                }
-            }
-
-            _zoomButton.setChecked(false);
-        }
-
         if (!GameWillReset) {
             for (int i = 0; i < _game.Gifts.size(); i++) {
                 Gift currentGift = _game.Gifts.get(i);
@@ -376,8 +420,10 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
     private void updateCamera(float delta) {
 
-        if (_zooming)
+        if (_zooming) {
+            CameraSpeedY = 0;
             return;
+        }
 
         if (GameIsFinished) {
             // Camera inertia
@@ -390,8 +436,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                         Gdx.graphics.getHeight() / 2f,
                         _game.Camera.position.z
                 );
-            }
-            else
+            } else
                 _game.Camera.position.y += CameraSpeedY;
 
             return;
@@ -408,7 +453,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             _game.Camera.position.set(position);
         }
         else if (_cameraIsMoving) {
-            Gdx.app.log(TAG, "CAMERA STOP MOVING");
             _cameraIsMoving = false;
 
             if (_needToAddNewGift) {
@@ -420,6 +464,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                 GameWillReset = false;
                 GameIsFinished = true;
                 _playAgainButton.setVisible(true);
+                _backButton.setVisible(true);
+                _zoomOutButton.setVisible(true);
             }
         }
     }
@@ -432,7 +478,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     public void draw(float delta) {
         _game.SpriteBatch.setProjectionMatrix(_game.Camera.combined);
 
-        if (_bestScore > 0f) {
+        if (!_zooming && _bestScore > 0f) {
             _game.SpriteBatch.begin();
             _bestScoreLine.draw(_game.SpriteBatch, 1f);
             _game.SpriteBatch.end();

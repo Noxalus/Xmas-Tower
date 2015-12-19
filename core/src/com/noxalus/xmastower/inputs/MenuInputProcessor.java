@@ -81,10 +81,6 @@ public class MenuInputProcessor implements InputProcessor{
 
     @Override
     public boolean touchDragged (int x, int y, int pointer) {
-
-        Gdx.app.log(TAG, "Touch dragged pointer: " + pointer);
-        Gdx.app.log(TAG, "Touch dragged: " + x + ", " + y);
-
         if (pointer > 0)
             return false;
 
@@ -108,8 +104,6 @@ public class MenuInputProcessor implements InputProcessor{
         }
 
         if (_game.MouseJoint != null && _game.HitBody != null) {
-            Gdx.app.log(TAG, "Remove mouse joint from touch up");
-
             ((Gift)(_game.HitBody.getUserData())).isSelected(false);
             _game.World.destroyJoint(_game.MouseJoint);
             _game.MouseJoint = null;

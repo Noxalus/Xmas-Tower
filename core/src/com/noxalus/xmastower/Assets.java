@@ -9,6 +9,10 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+
 public class Assets {
     // Texture atlas
     public static TextureAtlas atlas;
@@ -21,7 +25,9 @@ public class Assets {
 
     public static Texture title;
     public static Texture groundTexture;
+    public static Texture barleySugarTexture;
     public static Texture whitePixel;
+    public static Texture greenPixel;
     public static Texture[] backgrounds;
 
     // Fonts
@@ -33,7 +39,10 @@ public class Assets {
     public static Skin menuSkin;
     public static Texture playButtonUp;
     public static Texture playButtonDown;
-
+    public static Texture achievementsButtonUp;
+    public static Texture achievementsButtonDown;
+    public static Texture leaderboardButtonUp;
+    public static Texture leaderboardButtonDown;
     // Musics
     public static Music menuMusic;
     public static Music gameMusicIntro;
@@ -42,65 +51,83 @@ public class Assets {
     // SFX
     public static Sound[] grabSounds;
     public static Sound[] ouchSounds;
-
-    public static Texture loadTexture(String file) {
-        return new Texture(Gdx.files.internal(file));
-    }
+    public static Sound[] fallSounds;
 
     public static void load() {
         // Texture atlas
         atlas = new TextureAtlas("graphics/sprites/atlas.pack");
 
         // Texture regions
-        normalBoxRegions = new TextureRegion[20];
-        normalBoxRegions[0] = atlas.findRegion("giftbox_pink_red");
-        normalBoxRegions[1] = atlas.findRegion("giftbox_pink_yellow");
-        normalBoxRegions[2] = atlas.findRegion("giftbox_pink_green");
-        normalBoxRegions[3] = atlas.findRegion("giftbox_pink_white");
+        // TODO: Reorganize insertion order according to ribbon color instead of gift box color
+        normalBoxRegions = new TextureRegion[30];
+        normalBoxRegions[0] = atlas.findRegion("giftbox_red_pink");
+        normalBoxRegions[1] = atlas.findRegion("giftbox_yellow_pink");
+        normalBoxRegions[2] = atlas.findRegion("giftbox_green_pink");
+        normalBoxRegions[3] = atlas.findRegion("giftbox_white_pink");
+        normalBoxRegions[4] = atlas.findRegion("giftbox_blue_pink");
 
-        normalBoxRegions[4] = atlas.findRegion("giftbox_red_pink");
-        normalBoxRegions[5] = atlas.findRegion("giftbox_red_yellow");
-        normalBoxRegions[6] = atlas.findRegion("giftbox_red_green");
-        normalBoxRegions[7] = atlas.findRegion("giftbox_red_white");
+        normalBoxRegions[5] = atlas.findRegion("giftbox_pink_yellow");
+        normalBoxRegions[6] = atlas.findRegion("giftbox_red_yellow");
+        normalBoxRegions[7] = atlas.findRegion("giftbox_green_yellow");
+        normalBoxRegions[8] = atlas.findRegion("giftbox_white_yellow");
+        normalBoxRegions[9] = atlas.findRegion("giftbox_blue_yellow");
 
-        normalBoxRegions[8] = atlas.findRegion("giftbox_yellow_pink");
-        normalBoxRegions[9] = atlas.findRegion("giftbox_yellow_red");
-        normalBoxRegions[10] = atlas.findRegion("giftbox_yellow_green");
-        normalBoxRegions[11] = atlas.findRegion("giftbox_yellow_white");
+        normalBoxRegions[10] = atlas.findRegion("giftbox_pink_red");
+        normalBoxRegions[11] = atlas.findRegion("giftbox_yellow_red");
+        normalBoxRegions[12] = atlas.findRegion("giftbox_green_red");
+        normalBoxRegions[13] = atlas.findRegion("giftbox_white_red");
+        normalBoxRegions[14] = atlas.findRegion("giftbox_blue_red");
 
-        normalBoxRegions[12] = atlas.findRegion("giftbox_green_pink");
-        normalBoxRegions[13] = atlas.findRegion("giftbox_green_yellow");
-        normalBoxRegions[14] = atlas.findRegion("giftbox_green_red");
-        normalBoxRegions[15] = atlas.findRegion("giftbox_green_white");
-
-        normalBoxRegions[16] = atlas.findRegion("giftbox_white_pink");
-        normalBoxRegions[17] = atlas.findRegion("giftbox_white_yellow");
+        normalBoxRegions[15] = atlas.findRegion("giftbox_pink_green");
+        normalBoxRegions[16] = atlas.findRegion("giftbox_red_green");
+        normalBoxRegions[17] = atlas.findRegion("giftbox_yellow_green");
         normalBoxRegions[18] = atlas.findRegion("giftbox_white_green");
-        normalBoxRegions[19] = atlas.findRegion("giftbox_white_red");
+        normalBoxRegions[19] = atlas.findRegion("giftbox_blue_green");
 
-        ribbonRegions = new TextureRegion[4];
+        normalBoxRegions[20] = atlas.findRegion("giftbox_pink_white");
+        normalBoxRegions[21] = atlas.findRegion("giftbox_red_white");
+        normalBoxRegions[22] = atlas.findRegion("giftbox_yellow_white");
+        normalBoxRegions[23] = atlas.findRegion("giftbox_green_white");
+        normalBoxRegions[24] = atlas.findRegion("giftbox_blue_white");
+
+        normalBoxRegions[25] = atlas.findRegion("giftbox_pink_blue");
+        normalBoxRegions[26] = atlas.findRegion("giftbox_red_blue");
+        normalBoxRegions[27] = atlas.findRegion("giftbox_yellow_blue");
+        normalBoxRegions[28] = atlas.findRegion("giftbox_green_blue");
+        normalBoxRegions[29] = atlas.findRegion("giftbox_white_blue");
+
+        ribbonRegions = new TextureRegion[6];
         ribbonRegions[0] = atlas.findRegion("ribbon1");
         ribbonRegions[1] = atlas.findRegion("ribbon2");
         ribbonRegions[2] = atlas.findRegion("ribbon3");
         ribbonRegions[3] = atlas.findRegion("ribbon4");
+        ribbonRegions[4] = atlas.findRegion("ribbon5");
+        ribbonRegions[5] = atlas.findRegion("ribbon6");
 
-        eyeRegions = new TextureRegion[6];
+        eyeRegions = new TextureRegion[8];
         eyeRegions[0] = atlas.findRegion("eye1");
         eyeRegions[1] = atlas.findRegion("eye2");
         eyeRegions[2] = atlas.findRegion("eye3");
         eyeRegions[3] = atlas.findRegion("eye4");
         eyeRegions[4] = atlas.findRegion("eye5");
         eyeRegions[5] = atlas.findRegion("eye6");
+        eyeRegions[6] = atlas.findRegion("eye7");
+        eyeRegions[7] = atlas.findRegion("eye8");
 
-        mouthRegions = new TextureRegion[4];
+        mouthRegions = new TextureRegion[7];
         mouthRegions[0] = atlas.findRegion("mouth1");
         mouthRegions[1] = atlas.findRegion("mouth2");
         mouthRegions[2] = atlas.findRegion("mouth3");
         mouthRegions[3] = atlas.findRegion("mouth4");
+        mouthRegions[4] = atlas.findRegion("mouth5");
+        mouthRegions[5] = atlas.findRegion("mouth6");
+        mouthRegions[6] = atlas.findRegion("mouth7");
 
         title = new Texture(Gdx.files.internal("graphics/pictures/title.png"));
         whitePixel = new Texture(Gdx.files.internal("graphics/pictures/white.png"));
+        greenPixel = new Texture(Gdx.files.internal("graphics/pictures/green.png"));
         groundTexture = new Texture(Gdx.files.internal("graphics/sprites/ground.png"));
+        barleySugarTexture = new Texture(Gdx.files.internal("graphics/sprites/barleysugar.png"));
 
         backgrounds = new Texture[1];
         backgrounds[0] = new Texture(Gdx.files.internal("graphics/pictures/background1.png"));
@@ -129,6 +156,12 @@ public class Assets {
         playButtonUp = new Texture(Gdx.files.internal("graphics/ui/playbuttonup.png"));
         playButtonDown = new Texture(Gdx.files.internal("graphics/ui/playbuttondown.png"));
 
+        achievementsButtonUp = new Texture(Gdx.files.internal("graphics/ui/achievementsbuttonup.png"));
+        achievementsButtonDown = new Texture(Gdx.files.internal("graphics/ui/achievementsbuttondown.png"));
+
+        leaderboardButtonUp = new Texture(Gdx.files.internal("graphics/ui/leaderboardbuttonup.png"));
+        leaderboardButtonDown = new Texture(Gdx.files.internal("graphics/ui/leaderboardbuttondown.png"));
+
         // Musics
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/menu.ogg"));
         gameMusicIntro = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/intro.ogg"));
@@ -137,7 +170,7 @@ public class Assets {
         gameMusicIntro.setOnCompletionListener(new Music.OnCompletionListener() {
             @Override
             public void onCompletion(Music music) {
-                Assets.gameMusicLoop.play();
+            Assets.gameMusicLoop.play();
             }
         });
 
@@ -159,5 +192,8 @@ public class Assets {
         ouchSounds[5] = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/ouch6.wav"));
         ouchSounds[6] = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/ouch7.wav"));
         ouchSounds[7] = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/ouch8.wav"));
+
+        fallSounds = new Sound[1];
+        fallSounds[0] = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/fall1.wav"));
     }
 }

@@ -255,49 +255,42 @@ giftbox_yellow_white
   orig: 64, 48
   offset: 0, 0
   index: -1
+eye8
+  rotate: false
+  xy: 1, 9
+  size: 20, 16
+  orig: 20, 16
+  offset: 0, 0
+  index: -1
 eye1
-  rotate: false
-  xy: 1, 10
-  size: 15, 15
-  orig: 15, 15
-  offset: 0, 0
-  index: -1
-eye4
-  rotate: false
-  xy: 1, 1
-  size: 11, 7
-  orig: 11, 7
-  offset: 0, 0
-  index: -1
-eye3
   rotate: false
   xy: 961, 240
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
-eye5
+eye3
   rotate: false
   xy: 331, 80
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
-eye6
+eye5
   rotate: false
   xy: 453, 140
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
-eye7
+eye6
   rotate: false
-  xy: 18, 10
+  xy: 23, 10
   size: 15, 15
   orig: 15, 15
   offset: 0, 0
   index: -1
-eye8
+eye7
   rotate: false
   xy: 961, 223
   size: 15, 15
@@ -332,31 +325,38 @@ mouth1
   orig: 15, 9
   offset: 0, 0
   index: -1
+mouth4
+  rotate: false
+  xy: 453, 123
+  size: 9, 15
+  orig: 9, 15
+  offset: 0, 0
+  index: -1
+eye4
+  rotate: false
+  xy: 23, 1
+  size: 11, 7
+  orig: 11, 7
+  offset: 0, 0
+  index: -1
 mouth6
   rotate: false
-  xy: 453, 127
+  xy: 40, 14
   size: 11, 11
   orig: 11, 11
   offset: 0, 0
   index: -1
 mouth2
   rotate: false
-  xy: 35, 15
+  xy: 961, 211
   size: 11, 10
   orig: 11, 10
   offset: 0, 0
   index: -1
 mouth5
   rotate: false
-  xy: 961, 211
+  xy: 978, 232
   size: 11, 10
   orig: 11, 10
-  offset: 0, 0
-  index: -1
-mouth4
-  rotate: false
-  xy: 123, 77
-  size: 5, 8
-  orig: 5, 8
   offset: 0, 0
   index: -1

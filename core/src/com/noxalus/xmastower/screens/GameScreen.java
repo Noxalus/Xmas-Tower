@@ -191,15 +191,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _scoreLabel = new Label(Config.SCORE_LABEL_PLACEHOLDER, Assets.menuSkin);
         _scoreLabel.setStyle(mediumLabelStyle);
-        _scoreLabel.setAlignment(Align.center);
-        _scoreLabel.setWidth(Gdx.graphics.getWidth());
-        _scoreLabel.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
-        _scoreLabel.setPosition(
-                0,
-                (Gdx.graphics.getHeight() -
-                        (_scoreLabel.getHeight()) / 2f) -
-                        (Gdx.graphics.getHeight() / 30f)
-        );
 
         _bestScoreLabel = new Label("Best", Assets.menuSkin);
         _bestScoreLabel.setStyle(normalLabelStyle);
@@ -269,6 +260,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                         // Show again some interface elements
                         _scoreLabel.setVisible(true);
                         _bestScoreLabel.setVisible(true);
+                        _playAgainButton.setVisible(true);
+                        _backButton.setVisible(true);
 
                     } else {
                         float ratio = (_currentMaxHeight + Gdx.graphics.getHeight()) / Gdx.graphics.getHeight();
@@ -282,6 +275,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                             // Hide some interface elements
                             _scoreLabel.setVisible(false);
                             _bestScoreLabel.setVisible(false);
+                            _playAgainButton.setVisible(false);
+                            _backButton.setVisible(false);
                         }
                     }
                 }
@@ -467,6 +462,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             _bestScoreLine.draw(_game.SpriteBatch, 1f);
             _game.SpriteBatch.end();
         }
+
+        _game.drawGifs();
 
         _uiStage.draw();
 

@@ -224,6 +224,7 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     public void draw(float delta) {
+        _game.drawGifs();
         _uiStage.draw();
     }
 

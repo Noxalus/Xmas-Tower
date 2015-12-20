@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.utils.Timer;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
@@ -26,11 +27,16 @@ public class Gift extends Group {
 
     Body _body;
 
+    State _currentState = State.IDLE;
+
     boolean _isPlaced = false;
     boolean _isSelected = false;
     boolean _isMovable = true;
     boolean _isFalling = false;
     boolean _isSick = false;
+    boolean _isAngry = false;
+    boolean _isPouting = false;
+    boolean _isHurt = false;
 
     Sound _fallSound;
 
@@ -114,18 +120,26 @@ public class Gift extends Group {
     }
 
     public void update(float delta) {
-        if (_isFalling && _body.getLinearVelocity().y < -10 && _fallSound == null)
-        {
-            _fallSound = Assets.fallSounds[MathUtils.random(Assets.fallSounds.length - 1)];
-            _fallSound.setLooping(0, false);
-            _fallSound.play();
-        }
+//        if (_isFalling && _body.getLinearVelocity().y < -10 && _fallSound == null)
+//        {
+//            _fallSound = Assets.fallSounds[MathUtils.random(Assets.fallSounds.length - 1)];
+//            _fallSound.setLooping(0, false);
+//            _fallSound.play();
+//        }
 
-        if (!_isSick && (getRotation() > 360 || getRotation() < -360))
+        if (!_isSick && Math.abs(getRotation()) > 360)
         {
             switchState(State.SICK);
             _isSick = true;
         }
+
+        if (_isPlaced && Math.abs(getRotation()) > 5) {
+            switchState(State.POUTING);
+            _isPouting = true;
+        } else if (_isPlaced && _isPouting && Math.abs(getRotation()) < 5) {
+            switchState(State.SLEEPING);
+            _isPouting = false;
+            }
 
         if (_isSelected) {
 //            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
@@ -133,11 +147,29 @@ public class Gift extends Group {
         }
 
         setPosition(
-                (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
-                (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
+            (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
+            (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
         );
         setOrigin(_box.sprite.getOriginX(), _box.sprite.getOriginY());
         setRotation((float) Math.toDegrees(_body.getAngle()));
+    }
+
+    public void isHurt(boolean value) {
+        if (value) {
+            switchState(State.HURT);
+
+            if (!_isAngry) {
+                Timer.schedule(new Timer.Task() {
+                    @Override
+                    public void run() {
+                        switchState(State.ANGRY);
+                        _isAngry = true;
+                    }
+                }, 1);
+            }
+        }
+
+        _isHurt = value;
     }
 
     public boolean isMovable()
@@ -147,9 +179,6 @@ public class Gift extends Group {
 
     public void isMovable(boolean value)
     {
-        if (!value)
-            switchState(State.IDLE);
-
         _isMovable = value;
     }
 
@@ -192,20 +221,14 @@ public class Gift extends Group {
 
     public void switchState(State newState)
     {
-        if (_isSick)
+        if (_isSick || _isAngry)
             return;
 
         _leftEye.switchState(newState);
         _rightEye.switchState(newState);
         _mouth.switchState(newState);
-    }
 
-    public void applyTransform(Batch batch) {
-        this.applyTransform(batch, computeTransform());
-    }
-
-    public void resetTransform(Batch batch) {
-        super.resetTransform(batch);
+        _currentState = newState;
     }
 
     public void drawRibbon(Batch batch)

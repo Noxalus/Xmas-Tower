@@ -199,10 +199,16 @@ public class XmasTower extends Game {
                 Gift giftA = (Gift) (fixtureA.getBody().getUserData());
                 Gift giftB = (Gift) (fixtureB.getBody().getUserData());
 
+                boolean giftAIsHurt = false;
+                boolean giftBIsHurt = false;
+
                 if (giftA != null) {
+                    giftA.switchState(State.COLLISIONING);
+
                     if (giftA.getBody().getLinearVelocity().y < -10) {
                         Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
-                        giftA.switchState(State.COLLISIONING);
+
+                        giftAIsHurt = true;
                     }
 
 //                    Gdx.app.log(TAG, "Gift A linear velocity: " + giftA.getBody().getLinearVelocity());
@@ -214,9 +220,12 @@ public class XmasTower extends Game {
                 }
 
                 if (giftB != null) {
+                    giftB.switchState(State.COLLISIONING);
+
                     if (giftB.getBody().getLinearVelocity().y < -10) {
                         Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
-                        giftB.switchState(State.COLLISIONING);
+
+                        giftBIsHurt = true;
                     }
 
 //                    Gdx.app.log(TAG, "Gift B linear velocity: " + giftB.getBody().getLinearVelocity());
@@ -225,6 +234,14 @@ public class XmasTower extends Game {
                         giftB.isMovable(false);
                         giftB.isSelected(false);
                     }
+                }
+
+                if ((giftA != null && giftAIsHurt) && (giftB != null && !giftBIsHurt)) {
+                    giftB.isHurt(true);
+                }
+
+                if ((giftA != null && !giftAIsHurt) && (giftB != null && giftBIsHurt)) {
+                    giftA.isHurt(true);
                 }
             }
 
@@ -235,15 +252,15 @@ public class XmasTower extends Game {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
 
-                Gift giftA = (Gift) (fixtureA.getBody().getUserData());
-                if (giftA != null) {
-                    giftA.switchState(State.IDLE);
-                }
-
-                Gift giftB = (Gift) (fixtureB.getBody().getUserData());
-                if (giftB != null) {
-                    giftB.switchState(State.IDLE);
-                }
+//                Gift giftA = (Gift) (fixtureA.getBody().getUserData());
+//                if (giftA != null) {
+//                    giftA.switchState(State.IDLE);
+//                }
+//
+//                Gift giftB = (Gift) (fixtureB.getBody().getUserData());
+//                if (giftB != null) {
+//                    giftB.switchState(State.IDLE);
+//                }
             }
 
             @Override
@@ -280,6 +297,19 @@ public class XmasTower extends Game {
         Gifts.add(gift);
 
         Collections.sort(Gifts, _giftComparator);
+    }
+
+    public void drawGifs() {
+        SpriteBatch.begin();
+
+        for (Gift gift : Gifts)
+            gift.draw(SpriteBatch, 1);
+
+        // Draw ribbons at top of everything
+        for (Gift gift : Gifts)
+            gift.drawRibbon(SpriteBatch);
+
+        SpriteBatch.end();
     }
 
     public void update() {
@@ -325,20 +355,6 @@ public class XmasTower extends Game {
         SpriteBatch.setProjectionMatrix(Camera.combined);
 
         Stage.draw();
-
-        SpriteBatch.begin();
-
-        for (Gift gift : Gifts) {
-            gift.draw(SpriteBatch, 1);
-        }
-
-        // Draw ribbons at top of everything
-        for (Gift gift : Gifts) {
-            gift.drawRibbon(SpriteBatch);
-        }
-
-        SpriteBatch.end();
-
 
         // Scale down the sprite batches projection matrix to box2D size
         _debugMatrix = SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);

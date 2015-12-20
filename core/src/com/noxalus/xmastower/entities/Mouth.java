@@ -42,6 +42,11 @@ public class Mouth extends StatableSpriteActor
             sprite = _sprites.get(2);
             setPosition(25f, 8f);
         }
+        else if (newState == State.HURT)
+        {
+            sprite = _sprites.get(5);
+            setPosition(27f, 8f);
+        }
         else if (newState == State.SLEEPING)
         {
             sprite = _sprites.get(0);
@@ -57,7 +62,16 @@ public class Mouth extends StatableSpriteActor
             sprite = _sprites.get(6);
             setPosition(26f, 8f);
         }
-        else {
+        else if (newState == State.ANGRY)
+        {
+            sprite = _sprites.get(2);
+            setPosition(25f, 8f);
+        }
+        else if (newState == State.POUTING)
+        {
+            sprite = _sprites.get(3);
+            setPosition(26f, 8f);
+        } else {
             sprite = _sprites.get(0);
             setPosition(26f, 8f);
         }

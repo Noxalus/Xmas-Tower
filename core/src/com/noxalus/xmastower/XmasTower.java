@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.entities.Gift;
+import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.noxalus.xmastower.screens.MenuScreen;
 import com.noxalus.xmastower.screens.GameScreen;
 
@@ -51,6 +52,7 @@ public class XmasTower extends Game {
 
 	private static final String TAG = "XmasTower";
 
+    public ActionResolver ActionResolver;
 	public SpriteBatch SpriteBatch;
 
 	public MenuScreen MenuScreen;
@@ -110,6 +112,10 @@ public class XmasTower extends Game {
     public void pausePhysics(boolean value)
     {
         _physicsPaused = value;
+    }
+
+    public XmasTower(ActionResolver actionResolver) {
+        ActionResolver = actionResolver;
     }
 
     @Override

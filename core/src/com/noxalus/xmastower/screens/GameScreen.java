@@ -225,7 +225,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         buttonsTable.add(_playAgainButton);
         buttonsTable.add(_zoomOutButton).pad(150, 30, 0, 0);
 
-        _uiStage.setDebugAll(true);
         _uiStage.addActor(scoreTable);
         _uiStage.addActor(buttonsTable);
 

@@ -77,15 +77,9 @@ public class MenuScreen implements InputProcessor, Screen {
         SpriteDrawable leaderboardButtonUpSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonUp));
         SpriteDrawable leaderboardButtonDownSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonDown));
 
-        Gdx.app.log(TAG, "Resolution scale ratio: " + Config.RESOLUTION_SCALE_RATIO.toString());
-
         _playButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
         _achievementButton = new ImageButton(achievementsButtonUpSprite, achievementsButtonDownSprite);
         _leaderboardButton = new ImageButton(leaderboardButtonUpSprite, leaderboardButtonDownSprite);
-
-        _uiStage.setDebugAll(true);
-
-        Gdx.app.log(TAG, "UI Stage width: " + _uiStage.getWidth());
 
         Table titleTable = new Table();
         titleTable.setFillParent(true);
@@ -180,12 +174,20 @@ public class MenuScreen implements InputProcessor, Screen {
 
     private void showAchievements()
     {
-        // TODO: Show Google Play achievements
+        if (_game.ActionResolver.getSignedInGPGS()) {
+            _game.ActionResolver.getAchievementsGPGS();
+        }
+        else
+            _game.ActionResolver.loginGPGS();
     }
 
     private void showLeaderboard()
     {
-        // TODO: Show Google Play leaderboard
+        if (_game.ActionResolver.getSignedInGPGS()) {
+            _game.ActionResolver.getLeaderboardGPGS();
+        }
+        else
+            _game.ActionResolver.loginGPGS();
     }
 
     private void launchGame()

@@ -305,11 +305,12 @@ public class XmasTower extends Game {
         Collections.sort(Gifts, _giftComparator);
     }
 
-    public void drawGifs() {
+    public void drawGifts() {
         SpriteBatch.begin();
 
-        for (Gift gift : Gifts)
+        for (Gift gift : Gifts) {
             gift.draw(SpriteBatch, 1);
+        }
 
         // Draw ribbons at top of everything
         for (Gift gift : Gifts)
@@ -362,17 +363,19 @@ public class XmasTower extends Game {
 
         Stage.draw();
 
-        // Scale down the sprite batches projection matrix to box2D size
-        _debugMatrix = SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
+        if (Config.ENABLE_PHYSICS_DEBUG) {
+            // Scale down the sprite batches projection matrix to box2D size
+            _debugMatrix = SpriteBatch.getProjectionMatrix().cpy().scale(Config.PIXELS_TO_METERS, Config.PIXELS_TO_METERS, 0);
 
-        // Now render the physics World using our scaled down matrix
-        // Note, this is strictly optional and is, as the name suggests, just for debugging purposes
-        _debugRenderer.render(World, _debugMatrix);
+            // Now render the physics World using our scaled down matrix
+            // Note, this is strictly optional and is, as the name suggests, just for debugging purposes
+            _debugRenderer.render(World, _debugMatrix);
 
-        SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        SpriteBatch.begin();
-        _font.draw(SpriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + _physicsUpdateTime, 0, 20);
-        SpriteBatch.end();
+            SpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            SpriteBatch.begin();
+            _font.draw(SpriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond() + " | Physics update time: " + _physicsUpdateTime, 0, 20);
+            SpriteBatch.end();
+        }
     }
 
     @Override

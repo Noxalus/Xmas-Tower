@@ -7,7 +7,6 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -27,8 +26,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.State;
@@ -50,8 +47,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     boolean _needToAddNewGift;
     boolean _cameraIsMoving;
     public float _score;
-    private float _bestScore;
-    private Sprite _bestScoreLine;
+    private float _highScore;
+    private float _highScoreHeight; // in pixel
+    private Sprite _highScoreLine;
     Sound _currentPlayedSound;
     public boolean GameWillReset;
     public boolean GameIsFinished;
@@ -66,7 +64,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
     // UI
     Stage _uiStage;
-    Label _bestScoreLabel;
     Label _scoreLabel;
     Label _distanceToBestScoreLabel;
     Boolean _showDistanceToBestScore = false;
@@ -86,10 +83,11 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _groundSpriteActor = new SpriteActor(new Sprite(Assets.groundTexture));
 
         _preferences = Gdx.app.getPreferences("xmas-tower");
-        _bestScore = _preferences.getFloat("highscore", 0f);
+        _highScore = _preferences.getFloat("highscore", 0f);
+        _highScoreHeight = _preferences.getFloat("highscoreHeight", 0f);
 
-        _bestScoreLine = new Sprite(Assets.barleySugarTexture);
-        _bestScoreLine.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+        _highScoreLine = new Sprite(Assets.barleySugarTexture);
+        _highScoreLine.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         // UI
         initializeUI();
@@ -139,12 +137,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     private void reset() {
-        if (_score > _bestScore) {
-            _preferences.putFloat("highscore", _score);
-            _preferences.flush();
-            _bestScore = _score;
-        }
-
         clean();
 
         // Generate a random size ground
@@ -168,14 +160,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _scoreLabel.setText(Config.SCORE_LABEL_PLACEHOLDER);
 
-        if (_bestScore > 0f) {
-            _bestScoreLine.setPosition(0,
-                    (_bestScore * Config.HEIGHT_UNIT_FACTOR) +
-                    _groundSpriteActor.sprite.getHeight());
-            _bestScoreLabel.setPosition(0, (_bestScore * Config.HEIGHT_UNIT_FACTOR) +
-                    ((_bestScoreLine.getHeight()) * 2f) +
-                    (_bestScoreLabel.getPrefHeight() * _bestScoreLabel.getFontScaleY()) / 2f);
-            _game.Stage.addActor(_bestScoreLabel);
+        if (_highScoreHeight > 0f) {
+            _highScoreLine.setPosition(0, _highScoreHeight);
         }
 
         _playAgainButton.setVisible(false);
@@ -184,17 +170,16 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     private void initializeUI() {
-        _uiStage = new Stage(new FitViewport(720, 1280));
+        _uiStage = new Stage(new FitViewport(Config.IDEAL_RESOLUTION.x, Config.IDEAL_RESOLUTION.y));
+
+        if (Config.ENABLE_UI_DEBUG)
+            _uiStage.setDebugAll(true);
 
         Label.LabelStyle normalLabelStyle = new Label.LabelStyle(Assets.normalFont, Color.WHITE);
         Label.LabelStyle mediumLabelStyle = new Label.LabelStyle(Assets.mediumFont, Color.WHITE);
 
         _scoreLabel = new Label(Config.SCORE_LABEL_PLACEHOLDER, Assets.menuSkin);
         _scoreLabel.setStyle(mediumLabelStyle);
-
-        _bestScoreLabel = new Label("Best", Assets.menuSkin);
-        _bestScoreLabel.setStyle(normalLabelStyle);
-        _bestScoreLabel.setFontScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         SpriteDrawable playButtonUpSprite = new SpriteDrawable(new Sprite(Assets.playButtonUp));
         SpriteDrawable playButtonDownSprite = new SpriteDrawable(new Sprite(Assets.playButtonDown));
@@ -258,7 +243,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                         // Show again some interface elements
                         _scoreLabel.setVisible(true);
-                        _bestScoreLabel.setVisible(true);
                         _playAgainButton.setVisible(true);
                         _backButton.setVisible(true);
 
@@ -273,7 +257,6 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                             // Hide some interface elements
                             _scoreLabel.setVisible(false);
-                            _bestScoreLabel.setVisible(false);
                             _playAgainButton.setVisible(false);
                             _backButton.setVisible(false);
                         }
@@ -331,6 +314,20 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _game.pausePhysics(true);
         translateCamera(new Vector2(0, -(_game.Camera.position.y - Gdx.graphics.getHeight() / 2f)));
         GameWillReset = true;
+
+        // Save the highscore
+        if (_score > _highScore) {
+            _highScore = _score;
+            _highScoreHeight = _currentMaxHeight;
+
+            // Store data in user preferences
+            _preferences.putFloat("highscore", _score);
+            _preferences.putFloat("highscoreHeight", _highScoreHeight);
+            _preferences.flush();
+        }
+
+        if (_game.ActionResolver.getSignedInGPGS())
+            _game.ActionResolver.submitScoreGPGS((int)(_score * 10)); // Need to be an integer
     }
 
     private void backToMenu() {
@@ -358,26 +355,30 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                     currentGift.switchState(State.SLEEPING);
 
                     Vector3 screenCoordinates = _game.Camera.project(
-                        new Vector3(currentGift.getX(), currentGift.getY(), 0.f)
+                        new Vector3(
+                            currentGift.getX(),
+                            currentGift.getY(),
+                            0.f
+                        )
                     );
-                    float limitThreshold = Gdx.graphics.getWidth() / 1.5f;
 
-                    if (screenCoordinates.y > limitThreshold)
-                        translateCamera(new Vector2(0f, Gdx.graphics.getWidth() / 2f));
+                    screenCoordinates.y += ((currentGift.getBox().getHeight() / 2f) * currentGift.getScaleY());
 
-                    currentGift.getBox().getHeight();
+                    if (screenCoordinates.y > Gdx.graphics.getHeight() / 2f)
+                        translateCamera(new Vector2(0f, Gdx.graphics.getHeight() / 2f));
 
-
-                    if (_currentMaxHeight < currentGift.getY())
+                    if (currentGift.getY() > _currentMaxHeight)
                     {
                         _currentMaxHeight = currentGift.getY();
-                        Gdx.app.log(TAG, "Current max height: " + _currentMaxHeight);
                     }
 
-                    float currentScore = (
-                        (currentGift.getY()) -
-                        _groundSpriteActor.sprite.getHeight()
-                    ) / Config.HEIGHT_UNIT_FACTOR;
+                    float relativeGiftPosition = ((currentGift.getY() / Config.RESOLUTION_SCALE_RATIO.y) * currentGift.getScaleY());
+                    float relativeGroundHeight = _groundSpriteActor.sprite.getHeight() / Config.RESOLUTION_SCALE_RATIO.y;
+                    float currentScore = ((
+                        relativeGiftPosition - relativeGroundHeight
+                    )) / (Config.HEIGHT_UNIT_FACTOR);
+
+                    currentScore /= Config.RESOLUTION_SCALE_RATIO.y;
 
                     if (currentScore > _score) {
                         _score = ((Math.round(currentScore * 10f)) / 10f); // Round to 1 decimal after comma
@@ -456,13 +457,18 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     public void draw(float delta) {
         _game.SpriteBatch.setProjectionMatrix(_game.Camera.combined);
 
-        if (!_zooming && _bestScore > 0f) {
+        if (!_zooming && _highScoreLine.getY() > 0f) {
             _game.SpriteBatch.begin();
-            _bestScoreLine.draw(_game.SpriteBatch, 1f);
+            _highScoreLine.draw(_game.SpriteBatch, 1f);
+            Assets.mediumFont.draw(_game.SpriteBatch, "Best", 10,
+                (_highScoreHeight + 10) +
+                (_highScoreLine.getHeight() * _highScoreLine.getScaleY()) +
+                Assets.mediumFont.getData().capHeight
+            );
             _game.SpriteBatch.end();
         }
 
-        _game.drawGifs();
+        _game.drawGifts();
 
         _uiStage.draw();
 

@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 public class Config {
+    public static boolean ENABLE_PHYSICS_DEBUG = false;
+    public static boolean ENABLE_UI_DEBUG = false;
     public static final Vector2 IDEAL_RESOLUTION = new Vector2(720, 1280);
     public static final	float PIXELS_TO_METERS = 100f;
     public static final float LINEAR_VELOCITY_THRESHOLD = 0.1f;

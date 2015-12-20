@@ -4,26 +4,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
@@ -62,7 +57,10 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     private void initializeUI() {
-        _uiStage = new Stage(new FitViewport(720, 1280));
+        _uiStage = new Stage(new FitViewport(Config.IDEAL_RESOLUTION.x, Config.IDEAL_RESOLUTION.y));
+
+        if (Config.ENABLE_UI_DEBUG)
+            _uiStage.setDebugAll(true);
 
         Sprite titleSprite = new Sprite(Assets.title);
 
@@ -85,7 +83,7 @@ public class MenuScreen implements InputProcessor, Screen {
         titleTable.setFillParent(true);
         titleTable.setSize(_uiStage.getWidth(), _uiStage.getHeight());
         titleTable.align(Align.top | Align.center);
-        titleTable.add(_title);
+        titleTable.add(_title).padTop(50);
 
         Table buttonsTable = new Table();
         buttonsTable.setFillParent(true);
@@ -226,7 +224,7 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     public void draw(float delta) {
-        _game.drawGifs();
+        _game.drawGifts();
         _uiStage.draw();
     }
 
@@ -277,11 +275,11 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
-        float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
-
-        if (screenYRatio < 0.25f)
-            addGift();
+//        float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
+//        float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
+//
+//        if (screenYRatio < 0.25f)
+//            addGift();
 
         return true;
     }

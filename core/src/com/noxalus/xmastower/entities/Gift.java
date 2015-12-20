@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -50,6 +51,8 @@ public class Gift extends Group {
         float minScale = Config.GIFT_MIN_SIZE / _box.sprite.getWidth();
         float maxScale = Config.GIFT_MAX_SIZE / _box.sprite.getWidth();
         float scale = MathUtils.random(minScale, maxScale);
+
+        scale = minScale;
 
         addActor(_box);
         addActor(_leftEye);
@@ -139,11 +142,10 @@ public class Gift extends Group {
         } else if (_isPlaced && _isPouting && Math.abs(getRotation()) < 5) {
             switchState(State.SLEEPING);
             _isPouting = false;
-            }
+        }
 
         if (_isSelected) {
-//            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
-//            Gdx.app.log("GIFT", "Sprite rotation: " + getRotation() % 360);
+            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
         }
 
         setPosition(
@@ -170,6 +172,18 @@ public class Gift extends Group {
         }
 
         _isHurt = value;
+    }
+
+    public float getHighestPosition(SpriteBatch batch) {
+
+        float[] vertices = _box.sprite.getVertices();
+
+        float y1 = vertices[batch.Y1];
+        float y2 = vertices[batch.Y2];
+        float y3 = vertices[batch.Y3];
+        float y4 = vertices[batch.Y4];
+
+        return Math.max(Math.max(y1, y2), Math.max(y3, y4));
     }
 
     public boolean isMovable()

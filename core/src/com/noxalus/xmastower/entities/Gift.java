@@ -52,8 +52,6 @@ public class Gift extends Group {
         float maxScale = Config.GIFT_MAX_SIZE / _box.sprite.getWidth();
         float scale = MathUtils.random(minScale, maxScale);
 
-        scale = minScale;
-
         addActor(_box);
         addActor(_leftEye);
         addActor(_rightEye);
@@ -184,6 +182,10 @@ public class Gift extends Group {
         float y4 = vertices[batch.Y4];
 
         return Math.max(Math.max(y1, y2), Math.max(y3, y4));
+    }
+
+    public boolean isSick() {
+        return _isSick;
     }
 
     public boolean isMovable()

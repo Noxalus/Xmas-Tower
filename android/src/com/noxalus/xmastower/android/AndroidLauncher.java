@@ -68,8 +68,35 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 	}
 
 	@Override
-	public void unlockAchievementGPGS(String achievementId) {
-		Games.Achievements.unlock(gameHelper.getApiClient(), achievementId);
+	public void unlockAchievementGPGS(Achievement achievement) {
+		String achievementId = "";
+
+		switch (achievement) {
+			case ACHIEVEMENT_1_M:
+				achievementId = getString(R.string.achievement_1_m);
+				break;
+			case ACHIEVEMENT_10_M:
+				achievementId = getString(R.string.achievement_10_m);
+				break;
+			case ACHIEVEMENT_100_M:
+				achievementId = getString(R.string.achievement_100_m);
+				break;
+			case ACHIEVEMENT_1_KM:
+				achievementId = getString(R.string.achievement_1_km);
+				break;
+			case ACHIEVEMENT_ITS_TOO_SMALL:
+				achievementId = getString(R.string.achievement_its_too_small);
+				break;
+			case ACHIEVEMENT_ITS_TOO_BIG:
+				achievementId = getString(R.string.achievement_its_too_big);
+				break;
+			case ACHIEVEMENT_IM_FEELING_DIZZY:
+				achievementId = getString(R.string.achievement_im_feeling_dizzy);
+				break;
+		}
+
+		if (!achievementId.equals(""))
+			Games.Achievements.unlock(gameHelper.getApiClient(), achievementId);
 	}
 
 	@Override

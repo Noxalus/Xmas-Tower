@@ -32,6 +32,7 @@ import com.noxalus.xmastower.State;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
+import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.noxalus.xmastower.inputs.GameInputProcessor;
 
 public class GameScreen extends ApplicationAdapter implements Screen {
@@ -59,6 +60,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     private float _cameraSavedYPosition;
     public float CameraSpeedY;
     private boolean _zooming;
+    private boolean _isSickAchievement = false;
 
     InputMultiplexer _inputMultiplexer;
 
@@ -326,8 +328,22 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             _preferences.flush();
         }
 
+        // Submit the score to leaderboard
         if (_game.ActionResolver.getSignedInGPGS())
             _game.ActionResolver.submitScoreGPGS((int)(_score * 10)); // Need to be an integer
+
+        // Achivements unlocked?
+        if (_game.ActionResolver.getSignedInGPGS())
+        {
+            if (_score >= 100)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_M);
+            else if (_score >= 1000)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_10_M);
+            else if (_score >= 10000)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_100_M);
+            else if (_score >= 100000)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_KM);
+        }
     }
 
     private void backToMenu() {
@@ -339,6 +355,11 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         if (!GameWillReset) {
             for (int i = 0; i < _game.Gifts.size(); i++) {
                 Gift currentGift = _game.Gifts.get(i);
+
+                if (!_isSickAchievement && currentGift.isSick() && _game.ActionResolver.getSignedInGPGS()) {
+                    _isSickAchievement = true;
+                    _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_IM_FEELING_DIZZY);
+                }
 
                 // Outside of the scene?
                 if (currentGift.getX() < -(currentGift.getBox().sprite.getWidth() * 2f) ||

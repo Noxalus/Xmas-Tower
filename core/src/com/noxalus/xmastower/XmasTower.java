@@ -299,6 +299,20 @@ public class XmasTower extends Game {
     {
         Gift gift = new Gift(position);
 
+        if (ActionResolver.getSignedInGPGS()) {
+            if (gift.getScaleX() == Config.GIFT_MIN_SIZE / gift.getBox().sprite.getWidth()) {
+                ActionResolver.unlockAchievementGPGS(
+                        com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_SMALL
+                );
+            }
+
+            else if (gift.getScaleX() == Config.GIFT_MAX_SIZE / gift.getBox().sprite.getWidth()) {
+                ActionResolver.unlockAchievementGPGS(
+                        com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_BIG
+                );
+            }
+        }
+
         gift.initializePhysics(World);
         Gifts.add(gift);
 

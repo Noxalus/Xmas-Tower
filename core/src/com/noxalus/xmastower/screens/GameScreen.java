@@ -385,7 +385,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                     screenCoordinates.y += ((currentGift.getBox().getHeight() / 2f) * currentGift.getScaleY());
 
-                    if (screenCoordinates.y > Gdx.graphics.getHeight() / 2f)
+                    if (screenCoordinates.y > Gdx.graphics.getHeight() / 1.75f)
                         translateCamera(new Vector2(0f, Gdx.graphics.getHeight() / 2f));
 
                     if (currentGift.getY() > _currentMaxHeight)

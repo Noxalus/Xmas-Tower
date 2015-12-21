@@ -144,7 +144,7 @@ public class XmasTower extends Game {
 
     @Override
     public void resize(int width, int height) {
-        Gdx.app.log(TAG, "Resize: " + width + ", " + height);
+//        Gdx.app.log(TAG, "Resize: " + width + ", " + height);
         Viewport.update(width, height);
     }
 

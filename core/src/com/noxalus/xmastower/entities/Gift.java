@@ -142,9 +142,9 @@ public class Gift extends Group {
             _isPouting = false;
         }
 
-        if (_isSelected) {
-            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
-        }
+//        if (_isSelected) {
+//            Gdx.app.log("GIFT", "Sprite position: " + getX() + ", " + getY());
+//        }
 
         setPosition(
             (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,

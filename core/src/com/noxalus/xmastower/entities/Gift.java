@@ -115,7 +115,7 @@ public class Gift extends Group {
         _body.setLinearDamping(1.f);
         _body.createFixture(fixtureDef);
         _body.setAwake(false);
-//        _body.setSleepingAllowed(true);
+        _body.setSleepingAllowed(true);
 
         shape.dispose();
     }
@@ -147,8 +147,8 @@ public class Gift extends Group {
 //        }
 
         setPosition(
-            (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
-            (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
+                (_body.getPosition().x * Config.PIXELS_TO_METERS) - _box.sprite.getWidth() / 2f,
+                (_body.getPosition().y * Config.PIXELS_TO_METERS) - _box.sprite.getHeight() / 2f
         );
         setOrigin(_box.sprite.getOriginX(), _box.sprite.getOriginY());
         setRotation((float) Math.toDegrees(_body.getAngle()));
@@ -172,16 +172,58 @@ public class Gift extends Group {
         _isHurt = value;
     }
 
-    public float getHighestPosition(SpriteBatch batch) {
+    // LocalPosition relative to center
+    public Vector2 getWorldPosition(Vector2 localPosition) {
+        float cos = (float)Math.cos(Math.toRadians(getRotation()));
+        float sin = (float)Math.sin(Math.toRadians(getRotation()));
 
-        float[] vertices = _box.sprite.getVertices();
+        float originX = getCenter().x;
+        float originY = getCenter().y;
 
-        float y1 = vertices[batch.Y1];
-        float y2 = vertices[batch.Y2];
-        float y3 = vertices[batch.Y3];
-        float y4 = vertices[batch.Y4];
+        float x1 = getCenter().x + (localPosition.x * getScaleX());
+        float y1 = getCenter().y + (localPosition.y * getScaleY());
 
-        return Math.max(Math.max(y1, y2), Math.max(y3, y4));
+        float x2 = (x1 - originX) * cos - (y1 - originY) * sin + originX;
+        float y2 = (x1 - originX) * sin + (y1 - originY) * cos + originY;
+
+        return new Vector2(x2, y2);
+    }
+
+    public float getHighestPosition() {
+        Vector2 leftBottomCornerPosition = getWorldPosition(new Vector2(
+            (-_box.sprite.getWidth() / 2f),
+            (-_box.sprite.getHeight() / 2f))
+        );
+        Vector2 leftUpCornerPosition = getWorldPosition(new Vector2(
+            (-_box.sprite.getWidth() / 2f),
+            (_box.sprite.getHeight() / 2f))
+        );
+        Vector2 rightBottomCornerPosition = getWorldPosition(new Vector2(
+            (_box.sprite.getWidth() / 2f),
+            (-_box.sprite.getHeight() / 2f))
+        );
+        Vector2 rightUpCornerPosition = getWorldPosition(new Vector2(
+            (_box.sprite.getWidth() / 2f),
+            (_box.sprite.getHeight() / 2f))
+        );
+
+        return Math.max(
+            Math.max(
+                leftBottomCornerPosition.y,
+                leftUpCornerPosition.y
+            ),
+            Math.max(
+                rightBottomCornerPosition.y,
+                rightUpCornerPosition.y
+            )
+        );
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(
+            getX() + (_box.sprite.getWidth() / 2f),
+            getY() + (_box.sprite.getHeight() / 2f)
+        );
     }
 
     public boolean isSick() {

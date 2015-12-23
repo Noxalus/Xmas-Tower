@@ -20,5 +20,6 @@ public class Config {
         Gdx.graphics.getHeight() / IDEAL_RESOLUTION.y
     );
 
+    public static final int MAX_GIFT_NUMBER = 15;
     public static final String SCORE_LABEL_PLACEHOLDER = "0 cm";
 }

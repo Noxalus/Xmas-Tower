@@ -75,14 +75,29 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 			case ACHIEVEMENT_1_M:
 				achievementId = getString(R.string.achievement_1_m);
 				break;
+			case ACHIEVEMENT_2_5_M:
+				achievementId = getString(R.string.achievement_2_5_m);
+				break;
+			case ACHIEVEMENT_5_M:
+				achievementId = getString(R.string.achievement_5_m);
+				break;
+			case ACHIEVEMENT_7_5_M:
+				achievementId = getString(R.string.achievement_7_5_m);
+				break;
 			case ACHIEVEMENT_10_M:
 				achievementId = getString(R.string.achievement_10_m);
 				break;
+			case ACHIEVEMENT_15_M:
+				achievementId = getString(R.string.achievement_15_m);
+				break;
+			case ACHIEVEMENT_30_M:
+				achievementId = getString(R.string.achievement_30_m);
+				break;
+			case ACHIEVEMENT_50_M:
+				achievementId = getString(R.string.achievement_50_m);
+				break;
 			case ACHIEVEMENT_100_M:
 				achievementId = getString(R.string.achievement_100_m);
-				break;
-			case ACHIEVEMENT_1_KM:
-				achievementId = getString(R.string.achievement_1_km);
 				break;
 			case ACHIEVEMENT_ITS_TOO_SMALL:
 				achievementId = getString(R.string.achievement_its_too_small);
@@ -92,6 +107,9 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 				break;
 			case ACHIEVEMENT_IM_FEELING_DIZZY:
 				achievementId = getString(R.string.achievement_im_feeling_dizzy);
+				break;
+			case ACHIEVEMENT_HIDDEN_SPAWN:
+				achievementId = getString(R.string.achievement_hidden_spawn);
 				break;
 		}
 

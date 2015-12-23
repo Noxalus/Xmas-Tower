@@ -24,6 +24,7 @@ import com.noxalus.xmastower.Config;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
+import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.noxalus.xmastower.inputs.MenuInputProcessor;
 
 public class MenuScreen implements InputProcessor, Screen {
@@ -206,6 +207,9 @@ public class MenuScreen implements InputProcessor, Screen {
     }
 
     public void addGift() {
+        if (_game.Gifts.size() >= Config.MAX_GIFT_NUMBER)
+            return;
+
         Vector2 giftPosition = new Vector2(
                 Gdx.graphics.getWidth() / 2f,
                 Gdx.graphics.getHeight() / 2f
@@ -255,7 +259,6 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public void dispose() {
-
     }
 
     @Override
@@ -275,11 +278,16 @@ public class MenuScreen implements InputProcessor, Screen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//        float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
-//        float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
-//
-//        if (screenYRatio < 0.25f)
-//            addGift();
+        float screenXRatio = (float)screenX / Gdx.graphics.getWidth();
+        float screenYRatio = (float)screenY / Gdx.graphics.getHeight();
+
+        if (screenXRatio < 0.15f && screenYRatio < 0.15f) {
+            if (_game.ActionResolver.getSignedInGPGS()) {
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_HIDDEN_SPAWN);
+            }
+
+            addGift();
+        }
 
         return true;
     }

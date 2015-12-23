@@ -337,12 +337,22 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         {
             if (_score >= 100)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_M);
+            else if (_score >= 250)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_2_5_M);
+            else if (_score >= 500)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_5_M);
+            else if (_score >= 750)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_7_5_M);
             else if (_score >= 1000)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_10_M);
+            else if (_score >= 1500)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_15_M);
+            else if (_score >= 3000)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_30_M);
+            else if (_score >= 5000)
+                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_50_M);
             else if (_score >= 10000)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_100_M);
-            else if (_score >= 100000)
-                _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_KM);
         }
     }
 

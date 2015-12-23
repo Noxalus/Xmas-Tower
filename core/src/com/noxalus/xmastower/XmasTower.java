@@ -303,15 +303,15 @@ public class XmasTower extends Game {
             float minScale = Config.GIFT_MIN_SIZE / gift.getBox().sprite.getWidth();
             float maxScale = Config.GIFT_MAX_SIZE / gift.getBox().sprite.getWidth();
 
-            if (gift.getScaleX() < minScale + (minScale * 0.1f)) {
+            if (gift.getScaleX() < minScale + (minScale * 0.042f)) {
                 ActionResolver.unlockAchievementGPGS(
-                        com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_SMALL
+                    com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_SMALL
                 );
             }
 
-            else if (gift.getScaleX() > maxScale - (maxScale * 0.1f)) {
+            else if (gift.getScaleX() > maxScale - (maxScale * 0.042f)) {
                 ActionResolver.unlockAchievementGPGS(
-                        com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_BIG
+                    com.noxalus.xmastower.gameservices.ActionResolver.Achievement.ACHIEVEMENT_ITS_TOO_BIG
                 );
             }
         }

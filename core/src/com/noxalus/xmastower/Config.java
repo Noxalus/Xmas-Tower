@@ -13,7 +13,7 @@ public class Config {
     public static final float GIFT_MAX_SIZE = (Gdx.graphics.getWidth() - (Gdx.graphics.getWidth() / 3f));
     public static final float HEIGHT_UNIT_FACTOR = 25f;
     public static final float CAMERA_TRANSLATION_INTERPOLATION = 0.05f;
-    public static final float CAMERA_INTERPOLATION_THRESHOLD = 10f;
+    public static final float CAMERA_INTERPOLATION_THRESHOLD = 50f;
     public static final float CAMERA_INERTIA = 0.90f;
     public static final Vector2 RESOLUTION_SCALE_RATIO = new Vector2(
         Gdx.graphics.getWidth() / IDEAL_RESOLUTION.x,

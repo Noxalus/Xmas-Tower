@@ -375,35 +375,27 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                     currentGift.switchState(State.SLEEPING);
 
-                    Vector3 screenCoordinates = _game.Camera.project(
-                        new Vector3(
-                            currentGift.getX(),
-                            currentGift.getY(),
-                            0.f
-                        )
-                    );
+                    float currentHeight = currentGift.getHighestPosition();
+                    if (currentHeight > _currentMaxHeight) {
+                        _currentMaxHeight = currentHeight;
 
-                    screenCoordinates.y += ((currentGift.getBox().getHeight() / 2f) * currentGift.getScaleY());
+                        float currentScore = _currentMaxHeight;
+                        currentScore -= _groundSpriteActor.sprite.getHeight() * _groundSpriteActor.sprite.getScaleY(); // We remove the ground
+                        currentScore /= Config.RESOLUTION_SCALE_RATIO.y; // Resolution uniformisation
+                        currentScore /= Config.HEIGHT_UNIT_FACTOR; // Arbitrary factor to get centimeters
 
-                    if (screenCoordinates.y > Gdx.graphics.getHeight() / 1.75f)
-                        translateCamera(new Vector2(0f, Gdx.graphics.getHeight() / 2f));
-
-                    if (currentGift.getY() > _currentMaxHeight)
-                    {
-                        _currentMaxHeight = currentGift.getY();
+                        if (currentScore > _score) {
+                            _score = ((Math.round(currentScore * 10f)) / 10f); // Round to 1 decimal after comma
+                            _scoreLabel.setText(Float.toString(_score) + " cm");
+                        }
                     }
 
-                    float relativeGiftPosition = ((currentGift.getY() / Config.RESOLUTION_SCALE_RATIO.y) * currentGift.getScaleY());
-                    float relativeGroundHeight = _groundSpriteActor.sprite.getHeight() / Config.RESOLUTION_SCALE_RATIO.y;
-                    float currentScore = ((
-                        relativeGiftPosition - relativeGroundHeight
-                    )) / (Config.HEIGHT_UNIT_FACTOR);
+                    float screenHeight = _currentMaxHeight - _game.Camera.position.y;
 
-                    currentScore /= Config.RESOLUTION_SCALE_RATIO.y;
+                    if (screenHeight > 0) {
+                        float distance = screenHeight + Gdx.graphics.getHeight() / 3.5f;
 
-                    if (currentScore > _score) {
-                        _score = ((Math.round(currentScore * 10f)) / 10f); // Round to 1 decimal after comma
-                        _scoreLabel.setText(Float.toString(_score) + " cm");
+                        translateCamera(new Vector2(0f, distance));
                     }
 
                     addGift();

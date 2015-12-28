@@ -46,7 +46,8 @@ public class Assets {
     public static Texture backButtonDown;
     public static Texture zoomOutButtonUp;
     public static Texture zoomOutButtonDown;
-
+    public static Texture shareButtonUp;
+    public static Texture shareButtonDown;
 
     // Musics
     public static Music menuMusic;
@@ -171,6 +172,9 @@ public class Assets {
 
         zoomOutButtonUp = new Texture(Gdx.files.internal("graphics/ui/zoomoutbuttonup.png"));
         zoomOutButtonDown = new Texture(Gdx.files.internal("graphics/ui/zoomoutbuttondown.png"));
+
+        shareButtonUp = new Texture(Gdx.files.internal("graphics/ui/sharebuttonup.png"));
+        shareButtonDown = new Texture(Gdx.files.internal("graphics/ui/sharebuttondown.png"));
 
         // Musics
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/menu.ogg"));

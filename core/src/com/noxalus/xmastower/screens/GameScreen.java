@@ -6,7 +6,10 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -25,6 +28,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.noxalus.xmastower.Assets;
 import com.noxalus.xmastower.Config;
@@ -34,6 +40,13 @@ import com.noxalus.xmastower.entities.Gift;
 import com.noxalus.xmastower.entities.SpriteActor;
 import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.noxalus.xmastower.inputs.GameInputProcessor;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.FileHandler;
 
 public class GameScreen extends ApplicationAdapter implements Screen {
 
@@ -61,17 +74,24 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     public float CameraSpeedY;
     private boolean _zooming;
     private boolean _isSickAchievement = false;
+    private int _gameNumber;
 
     InputMultiplexer _inputMultiplexer;
 
     // UI
-    Stage _uiStage;
-    Label _scoreLabel;
-    Label _distanceToBestScoreLabel;
-    Boolean _showDistanceToBestScore = false;
+    private Stage _uiStage;
+    private Label _scoreLabel;
+    private Label _distanceToBestScoreLabel;
+    private Boolean _showDistanceToBestScore = false;
     private Button _playAgainButton;
     private Button _zoomOutButton;
-    ImageButton _backButton;
+    private ImageButton _backButton;
+
+    SpriteDrawable _shareButtonUpSprite;
+    SpriteDrawable _shareButtonDownSprite;
+
+    SpriteDrawable _backButtonUpSprite;
+    SpriteDrawable _backButtonDownSprite;
 
     // Physics
     Body _groundBody;
@@ -87,6 +107,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _preferences = Gdx.app.getPreferences("xmas-tower");
         _highScore = _preferences.getFloat("highscore", 0f);
         _highScoreHeight = _preferences.getFloat("highscoreHeight", 0f);
+
+        _gameNumber = _preferences.getInteger("gameNumber", 0);
 
         _highScoreLine = new Sprite(Assets.barleySugarTexture);
         _highScoreLine.setScale(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
@@ -141,6 +163,10 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     private void reset() {
         clean();
 
+        _gameNumber++;
+        _preferences.putInteger("gameNumber", _gameNumber);
+        _preferences.flush();
+
         // Generate a random size ground
         float minGroundScale = 1.f;
         float maxGroundScale = (Gdx.graphics.getWidth() / _groundSpriteActor.sprite.getWidth()) / 1.5f;
@@ -169,6 +195,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         _playAgainButton.setVisible(false);
         _backButton.setVisible(false);
         _zoomOutButton.setVisible(false);
+
+        _backButton.getStyle().imageUp = _backButtonUpSprite;
+        _backButton.getStyle().imageDown = _backButtonDownSprite;
     }
 
     private void initializeUI() {
@@ -193,10 +222,13 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         _zoomOutButton = new ImageButton(zoomOutButtonUpSprite, zoomOutButtonDownSprite);
 
-        SpriteDrawable backButtonUpSprite = new SpriteDrawable(new Sprite(Assets.backButtonUp));
-        SpriteDrawable backButtonDownSprite = new SpriteDrawable(new Sprite(Assets.backButtonDown));
+        _shareButtonUpSprite = new SpriteDrawable(new Sprite(Assets.shareButtonUp));
+        _shareButtonDownSprite = new SpriteDrawable(new Sprite(Assets.shareButtonDown));
 
-        _backButton = new ImageButton(backButtonUpSprite, backButtonDownSprite);
+        _backButtonUpSprite = new SpriteDrawable(new Sprite(Assets.backButtonUp));
+        _backButtonDownSprite = new SpriteDrawable(new Sprite(Assets.backButtonDown));
+
+        _backButton = new ImageButton(_backButtonUpSprite, _backButtonDownSprite);
 
         Table scoreTable = new Table();
         scoreTable.setFillParent(true);
@@ -229,7 +261,27 @@ public class GameScreen extends ApplicationAdapter implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (GameIsFinished) {
-                    backToMenu();
+
+                    if (!_zooming)
+                    {
+                        backToMenu();
+                    }
+                    else
+                    {
+                        byte[] pixelData = ScreenUtils.getFrameBufferPixels(true);
+                        Pixmap pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGBA8888);
+                        ByteBuffer pixels = pixmap.getPixels();
+                        pixels.clear();
+                        pixels.put(pixelData);
+                        pixels.position(0);
+
+                        Date date = new Date(TimeUtils.millis());
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                        String formatedDate = formatter.format(date);
+                        FileHandle screenshot = Gdx.files.external("Screenshots/Xmas-Tower/Screenshot_" + formatedDate + ".png");
+                        PixmapIO.writePNG(screenshot, pixmap);
+                        Gdx.app.log(TAG, "Took a screenshoot to " + screenshot.path());
+                    }
                 }
             }
         });
@@ -246,7 +298,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                         // Show again some interface elements
                         _scoreLabel.setVisible(true);
                         _playAgainButton.setVisible(true);
-                        _backButton.setVisible(true);
+
+                        _backButton.getStyle().imageUp = _backButtonUpSprite;
+                        _backButton.getStyle().imageDown = _backButtonDownSprite;
 
                     } else {
                         float ratio = (_currentMaxHeight + Gdx.graphics.getHeight()) / Gdx.graphics.getHeight();
@@ -260,7 +314,9 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                             // Hide some interface elements
                             _scoreLabel.setVisible(false);
                             _playAgainButton.setVisible(false);
-                            _backButton.setVisible(false);
+
+                            _backButton.getStyle().imageUp = _shareButtonUpSprite;
+                            _backButton.getStyle().imageDown = _shareButtonDownSprite;
                         }
                     }
                 }
@@ -402,7 +458,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
                     float screenHeight = _currentMaxHeight - _game.Camera.position.y;
 
-                    if (screenHeight > 0) {
+                    if (screenHeight > -Gdx.graphics.getHeight() / 4f) {
                         float distance = screenHeight + Gdx.graphics.getHeight() / 3.5f;
 
                         translateCamera(new Vector2(0f, distance));
@@ -499,7 +555,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
     }
 
     @Override
-    public void render(float delta) {
+    public void render(float delta)
+    {
         update(delta);
         draw(delta);
     }

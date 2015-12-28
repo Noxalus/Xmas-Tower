@@ -280,7 +280,11 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                         String formatedDate = formatter.format(date);
                         FileHandle screenshot = Gdx.files.external("Screenshots/Xmas-Tower/Screenshot_" + formatedDate + ".png");
                         PixmapIO.writePNG(screenshot, pixmap);
-                        Gdx.app.log(TAG, "Took a screenshoot to " + screenshot.path());
+
+                        String screenshotAbsolutePath = Gdx.files.getExternalStoragePath() + "/" + screenshot.path();
+
+                        // Social share
+                        _game.SharableActivity.shareImage(screenshotAbsolutePath, _score);
                     }
                 }
             }

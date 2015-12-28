@@ -1,23 +1,27 @@
 package com.noxalus.xmastower.android;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.google.example.games.basegameutils.GameHelper;
+import com.noxalus.xmastower.SharableActivity;
 import com.noxalus.xmastower.XmasTower;
 import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.google.android.gms.games.Games;
 
-public class AndroidLauncher extends AndroidApplication implements GameHelper.GameHelperListener, ActionResolver {
+public class AndroidLauncher extends AndroidApplication implements GameHelper.GameHelperListener, ActionResolver, SharableActivity
+{
 	private GameHelper gameHelper;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new XmasTower(this), config);
+		initialize(new XmasTower(this, this), config);
 
 		if (gameHelper == null) {
 			gameHelper = new GameHelper(this, GameHelper.CLIENT_GAMES);
@@ -143,5 +147,17 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 	@Override
 	public void onSignInSucceeded() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void shareImage(String imagePath, float score)
+	{
+		Uri uri = Uri.parse("file://" + imagePath);
+		Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+		shareIntent.putExtra(Intent.EXTRA_TEXT, "I just performed a score of " + score + " cm! #XmasTower");
+		shareIntent.setType("image/png");
+		startActivity(Intent.createChooser(shareIntent, "Share from"));
 	}
 }

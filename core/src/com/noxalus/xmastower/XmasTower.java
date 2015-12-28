@@ -53,6 +53,7 @@ public class XmasTower extends Game {
 	private static final String TAG = "XmasTower";
 
     public ActionResolver ActionResolver;
+    public SharableActivity SharableActivity;
 	public SpriteBatch SpriteBatch;
 
 	public MenuScreen MenuScreen;
@@ -114,8 +115,9 @@ public class XmasTower extends Game {
         _physicsPaused = value;
     }
 
-    public XmasTower(ActionResolver actionResolver) {
+    public XmasTower(ActionResolver actionResolver, SharableActivity sharableActivity) {
         ActionResolver = actionResolver;
+        SharableActivity = sharableActivity;
     }
 
     @Override

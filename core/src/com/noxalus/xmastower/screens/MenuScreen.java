@@ -47,6 +47,7 @@ public class MenuScreen implements InputProcessor, Screen {
     private Button _playButton;
     private Button _achievementButton;
     private Button _leaderboardButton;
+    private Button _soundButton;
 
     public MenuScreen(XmasTower game) {
         _game = game;
@@ -76,15 +77,24 @@ public class MenuScreen implements InputProcessor, Screen {
         SpriteDrawable leaderboardButtonUpSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonUp));
         SpriteDrawable leaderboardButtonDownSprite = new SpriteDrawable(new Sprite(Assets.leaderboardButtonDown));
 
+        SpriteDrawable soundButtonUpSprite = new SpriteDrawable(new Sprite(Assets.soundButtonUp));
+        SpriteDrawable soundButtonCheckSprite = new SpriteDrawable(new Sprite(Assets.soundButtonChecked));
+
         _playButton = new ImageButton(playButtonUpSprite, playButtonDownSprite);
         _achievementButton = new ImageButton(achievementsButtonUpSprite, achievementsButtonDownSprite);
         _leaderboardButton = new ImageButton(leaderboardButtonUpSprite, leaderboardButtonDownSprite);
+        _soundButton = new ImageButton(soundButtonUpSprite, soundButtonUpSprite, soundButtonCheckSprite);
 
         Table titleTable = new Table();
         titleTable.setFillParent(true);
         titleTable.setSize(_uiStage.getWidth(), _uiStage.getHeight());
         titleTable.align(Align.top | Align.center);
         titleTable.add(_title).padTop(50);
+
+        Table soundButtonTable = new Table();
+        soundButtonTable.setFillParent(true);
+        soundButtonTable.align(Align.top | Align.right);
+        soundButtonTable.add(_soundButton).pad(10);
 
         Table buttonsTable = new Table();
         buttonsTable.setFillParent(true);
@@ -94,9 +104,12 @@ public class MenuScreen implements InputProcessor, Screen {
         buttonsTable.add(_playButton);
         buttonsTable.add(_leaderboardButton).pad(150, 30, 0, 0);
 
+        titleTable.sizeBy(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
+        soundButtonTable.sizeBy(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
         buttonsTable.sizeBy(Config.RESOLUTION_SCALE_RATIO.x, Config.RESOLUTION_SCALE_RATIO.y);
 
         _uiStage.addActor(titleTable);
+        _uiStage.addActor(soundButtonTable);
         _uiStage.addActor(buttonsTable);
 
         _playButton.addListener(new ClickListener() {
@@ -117,6 +130,22 @@ public class MenuScreen implements InputProcessor, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 showLeaderboard();
+            }
+        });
+
+        _soundButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (_game.SoundsEnabled)
+                {
+                    _game.SoundsEnabled = false;
+                    Assets.menuMusic.stop();
+                }
+                else
+                {
+                    _game.SoundsEnabled = true;
+                    Assets.menuMusic.play();
+                }
             }
         });
     }
@@ -164,8 +193,12 @@ public class MenuScreen implements InputProcessor, Screen {
     @Override
     public void show() {
         _game.OnMenu = true;
+
         initializePhysics();
-        Assets.menuMusic.play();
+
+        if (_game.SoundsEnabled)
+            Assets.menuMusic.play();
+
         addGift();
 
         Gdx.input.setInputProcessor(_inputMultiplexer);

@@ -182,7 +182,8 @@ public class GameScreen extends ApplicationAdapter implements Screen {
 
         initializePhysics();
 
-        Assets.gameMusicIntro.play();
+        if (_game.SoundsEnabled)
+            Assets.gameMusicIntro.play();
 
         addGift();
 
@@ -381,6 +382,7 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         if (_score > _highScore) {
             _highScore = _score;
             _highScoreHeight = _currentMaxHeight;
+            _highScoreLine.setPosition(0, _highScoreHeight);
 
             // Store data in user preferences
             _preferences.putFloat("highscore", _score);

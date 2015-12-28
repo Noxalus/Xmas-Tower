@@ -66,8 +66,11 @@ public class GameInputProcessor implements InputProcessor{
         // if we hit something we create a new mouse joint
         // and attach it to the hit body.
         if (_game.MouseJoint == null && _game.HitBody != null) {
-            _currentPlayedSound = Assets.grabSounds[MathUtils.random(0, Assets.grabSounds.length - 1)];
-            _currentPlayedSound.play();
+            if (_game.SoundsEnabled) {
+                _currentPlayedSound = Assets.grabSounds[MathUtils.random(0, Assets.grabSounds.length - 1)];
+                _currentPlayedSound.play();
+            }
+
             MouseJointDef def = new MouseJointDef();
             def.bodyA = _game.HitBody;
             def.bodyB = _game.HitBody;

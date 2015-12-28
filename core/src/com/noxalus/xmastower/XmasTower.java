@@ -77,6 +77,9 @@ public class XmasTower extends Game {
     ParticleEffectPool _snowRainEffectPool;
     Array<ParticleEffectPool.PooledEffect> _effects = new Array();
 
+    // Musics and sounds
+    public boolean SoundsEnabled = true;
+
     // Physics
     public World World;
     private Box2DDebugRenderer _debugRenderer;
@@ -214,7 +217,8 @@ public class XmasTower extends Game {
                     giftA.switchState(State.COLLISIONING);
 
                     if (giftA.getBody().getLinearVelocity().y < -10) {
-                        Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                        if (SoundsEnabled)
+                            Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
 
                         giftAIsHurt = true;
                     }
@@ -231,7 +235,8 @@ public class XmasTower extends Game {
                     giftB.switchState(State.COLLISIONING);
 
                     if (giftB.getBody().getLinearVelocity().y < -10) {
-                        Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
+                        if (SoundsEnabled)
+                            Assets.ouchSounds[MathUtils.random(Assets.ouchSounds.length - 1)].play();
 
                         giftBIsHurt = true;
                     }

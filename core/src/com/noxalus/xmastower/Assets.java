@@ -49,6 +49,9 @@ public class Assets {
     public static Texture shareButtonUp;
     public static Texture shareButtonDown;
 
+    public static Texture soundButtonUp;
+    public static Texture soundButtonChecked;
+
     // Musics
     public static Music menuMusic;
     public static Music gameMusicIntro;
@@ -135,7 +138,7 @@ public class Assets {
         barleySugarTexture = new Texture(Gdx.files.internal("graphics/sprites/barleysugar.png"));
 
         backgrounds = new Texture[1];
-        backgrounds[0] = new Texture(Gdx.files.internal("graphics/pictures/background1.png"));
+        backgrounds[0] = new Texture(Gdx.files.internal("graphics/pictures/background1.jpg"));
 
         // Fonts
         normalFont = new BitmapFont(
@@ -175,6 +178,9 @@ public class Assets {
 
         shareButtonUp = new Texture(Gdx.files.internal("graphics/ui/sharebuttonup.png"));
         shareButtonDown = new Texture(Gdx.files.internal("graphics/ui/sharebuttondown.png"));
+
+        soundButtonUp = new Texture(Gdx.files.internal("graphics/ui/soundbuttonup.png"));
+        soundButtonChecked = new Texture(Gdx.files.internal("graphics/ui/soundbuttonchecked.png"));
 
         // Musics
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/bgm/menu.ogg"));

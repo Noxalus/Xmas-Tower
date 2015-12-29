@@ -79,8 +79,26 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 			case ACHIEVEMENT_1_M:
 				achievementId = getString(R.string.achievement_1_m);
 				break;
+			case ACHIEVEMENT_1_5_M:
+				achievementId = getString(R.string.achievement_1_5_m);
+				break;
+			case ACHIEVEMENT_2_M:
+				achievementId = getString(R.string.achievement_2_m);
+				break;
 			case ACHIEVEMENT_2_5_M:
 				achievementId = getString(R.string.achievement_2_5_m);
+				break;
+			case ACHIEVEMENT_3_M:
+				achievementId = getString(R.string.achievement_3_m);
+				break;
+			case ACHIEVEMENT_3_5_M:
+				achievementId = getString(R.string.achievement_3_5_m);
+				break;
+			case ACHIEVEMENT_4_M:
+				achievementId = getString(R.string.achievement_4_m);
+				break;
+			case ACHIEVEMENT_4_5_M:
+				achievementId = getString(R.string.achievement_4_5_m);
 				break;
 			case ACHIEVEMENT_5_M:
 				achievementId = getString(R.string.achievement_5_m);
@@ -90,18 +108,6 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 				break;
 			case ACHIEVEMENT_10_M:
 				achievementId = getString(R.string.achievement_10_m);
-				break;
-			case ACHIEVEMENT_15_M:
-				achievementId = getString(R.string.achievement_15_m);
-				break;
-			case ACHIEVEMENT_30_M:
-				achievementId = getString(R.string.achievement_30_m);
-				break;
-			case ACHIEVEMENT_50_M:
-				achievementId = getString(R.string.achievement_50_m);
-				break;
-			case ACHIEVEMENT_100_M:
-				achievementId = getString(R.string.achievement_100_m);
 				break;
 			case ACHIEVEMENT_ITS_TOO_SMALL:
 				achievementId = getString(R.string.achievement_its_too_small);

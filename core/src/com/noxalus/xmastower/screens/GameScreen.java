@@ -397,27 +397,27 @@ public class GameScreen extends ApplicationAdapter implements Screen {
         // Achivements unlocked?
         if (_game.ActionResolver.getSignedInGPGS())
         {
-            if (_score >= 100 && _score < 150)
+            if (_score >= 100)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_M);
-            else if (_score >= 150 && _score < 200)
+            if (_score >= 150)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_1_5_M);
-            else if (_score >= 200 && _score < 250)
+            if (_score >= 200)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_2_M);
-            else if (_score >= 250 && _score < 300)
+            if (_score >= 250)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_2_5_M);
-            else if (_score >= 300 && _score < 350)
+            if (_score >= 300)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_3_M);
-            else if (_score >= 350 && _score < 400)
+            if (_score >= 350)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_3_5_M);
-            else if (_score >= 400 && _score < 450)
+            if (_score >= 400)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_4_M);
-            else if (_score >= 450 && _score < 500)
+            if (_score >= 450)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_4_5_M);
-            else if (_score >= 500 && _score < 750)
+            if (_score >= 500)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_5_M);
-            else if (_score >= 750 && _score < 1000)
+            if (_score >= 750)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_7_5_M);
-            else if (_score >= 1000 && _score < 150)
+            if (_score >= 1000)
                 _game.ActionResolver.unlockAchievementGPGS(ActionResolver.Achievement.ACHIEVEMENT_10_M);
         }
     }

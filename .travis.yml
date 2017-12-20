@@ -1,0 +1,56 @@
+language: android
+sudo: required
+jdk: oraclejdk8
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+env:
+  global:
+  - ANDROID_API=26
+  - EMULATOR_API=26
+  - ANDROID_BUILD_TOOLS=26.0.2
+  - ADB_INSTALL_TIMEOUT=5
+  - secure: ELAzw0XuibOAmfU1IJZvKnGbfmW/Y6O79kFIJQKY+1mCWuMA8fNwVXCsrkvPAnnVRLt3nF++4xMd+bNrH+OLAxiGyBWhdSHE0wuPP5RsJ8oYVivthnDEdM5t8NlgcWAeQ8Myjwbm9HhflGp8t/JqYSqH/SazxijsRgYJYorGNn72IGjSfVByK+OrAblDfcvKGxG0CMuzyP9DvCOEO1fZAPRMXcJLCE1z4p1GhnGSZA4xqL+cnsUb6uwiqnY+UFgnbG/QhXE+k+/1IrB/3gHQ03b7VLWgPUXtl7IG6z7yGWIEvddEu96ogxejuEe9yEahl7OQa5pQgefhiQXkQL+xhZ8UlxZU8iHfhZROOI3wEDW5lu79abXx06RviW822abww0kKIPZs62izEgqsTDa+SCOm3LHe9xraD9JOG9yIfbWPCoqtoORhVShBNfnme557oipMM6hsEgEszcF1IdHTsce54caBAe8SuyvsRHSX6Q1gX6W0GmP0uBK2L3kt1/LOKVqm7hHo1ERw39DjgQWNfI8heVu2KLjElmWROf1V7L6qDIXqFbNljCnk8BPvaI65xLNK20W1q3xIrtOP/hTvCnnL+aBoXwtAF6DoYUYHbXOF2e/4Qfk9usptyKOrx28ljD/DtFBFVQt4JsNc6UQPlj+FFlt732mXFSDIRhblCKk=
+  - secure: WCETpAayp5F6EM6JrUpbO0uvi2bV7LtRvlTf8gjf/1bIeAwiEVn10pPOisbkOUn8/hSzg/THBraUnlB+x5z1Hg12a+ErUzYHXaZb4wR0J13wqvbn2JliYVbAB+A1YMKgv/Q9EFhDAWn9ZzdnW37x2NbK7PQ/Goh5/++38hgNCd5I1MYa90XVMUcDKUWiKyqVJqYhMrXxNsFaY8rABIPi79rSMeSuv8pOwPgpUwrsO0fzuOPu9/KD7MK6e8Jp8afFnk5BR6jNrFeDRxs/Dd8gyp1qYSBjbhIB+0AcAmBvUhOzbhtR5nP9EAGKJvxMJJFI+QOjmPSkCURQE7LgIOE0lCMoWf8r21nhxIDroB/nWqn7sdLvrM3mfjYXamephkbvxRym2kjXNbiU3wk38CJTc/BuwCjRWxXz+WIeEJmuVre3v2t1+9F6nkr6jYlYjuZw1ei/UAU3YhStAIz64CuDEjcxxYlOjEB10tLPwOOW2uaEveTFqYWzb3aJ9sWEr/oXKWIPjOmbAHyDVmBqsVkOTTU2u64jw0eOGYGyOdWoV9aKCr18TVR2V94MZhGQwqWe1ef6ZVBFRL9E3NVdOd09TKhVTX+vy82EJoCLt+0ZiBGnoQRng2IInG/fMrTvZ5CvfWXnQUZA7V/8Zl1hJZdZWxkWJftjDlj3GR/B7XxO8pY=
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-$ANDROID_BUILD_TOOLS
+  - android-$ANDROID_API
+  - android-$EMULATOR_API_LEVEL
+  - extra-google-m2repository
+  - extra-android-m2repository
+  - addon-google_apis-google-19
+  - sys-img-armeabi-v7a-addon-google_apis-google-$ANDROID_API_LEVEL
+  - sys-img-armeabi-v7a-addon-google_apis-google-$EMULATOR_API_LEVEL
+  licenses:
+  - android-sdk-preview-license-.+
+  - android-sdk-license-.+
+  - google-gdk-license-.+
+before_install:
+- openssl aes-256-cbc -K $encrypted_139538ef8311_key -iv $encrypted_139538ef8311_iv
+  -in XmasTower.jks.enc -out XmasTower.jks -d
+- mkdir "$ANDROID_HOME/licenses" || true
+- echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+- echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+- chmod +x gradlew
+before_script:
+- echo no | android create avd --force -n test -t android-$EMULATOR_API_LEVEL --abi
+  armeabi-v7a
+- emulator -avd test -no-skin -no-audio -no-window &
+- android-wait-for-emulator
+- adb shell input keyevent 82 &
+script:
+- "./gradlew clean build connectedCheck -PdisablePreDex --stacktrace"
+before_deploy:
+- cp $TRAVIS_BUILD_DIR/XmasTower.jks $HOME
+- cd app/build/outputs/apk/
+- jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $HOME/XmasTower.jks
+  -storepass $storepass -keypass $keypass app-release-unsigned.apk Noxalus
+- jarsigner -verify app-release-unsigned.apk
+- "${ANDROID_HOME}/build-tools/24.0.2/zipalign -v 4 app-release-unsigned.apk XmasTower.apk"

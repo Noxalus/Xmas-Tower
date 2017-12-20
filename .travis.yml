@@ -33,8 +33,7 @@ android:
   - android-sdk-license-.+
   - google-gdk-license-.+
 before_install:
-- openssl aes-256-cbc -K $encrypted_139538ef8311_key -iv $encrypted_139538ef8311_iv
-  -in XmasTower.jks.enc -out XmasTower.jks -d
+- openssl aes-256-cbc -K $encrypted_139538ef8311_key -iv $encrypted_139538ef8311_iv -in key/XmasTower.jks.enc -out XmasTower.jks -d
 - mkdir "$ANDROID_HOME/licenses" || true
 - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
 - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
@@ -54,3 +53,13 @@ before_deploy:
   -storepass $storepass -keypass $keypass app-release-unsigned.apk Noxalus
 - jarsigner -verify app-release-unsigned.apk
 - "${ANDROID_HOME}/build-tools/24.0.2/zipalign -v 4 app-release-unsigned.apk XmasTower.apk"
+deploy:
+  provider: releases
+  file: XmasTower.apk
+  skip_cleanup: true
+  on:
+    repo: Noxalus/Xmas-Tower
+    tags: true
+    jdk: oraclejdk8
+  api_key:
+    secure: "h8gUa6wAwwf4nsRBslpwxlkA4zOh2Tuv6Qf8VmSSBBK0UzYMKlGkc/7wIJ1Y/OhH5RsunIGPi6z/qKktLakSG+tEhDcIHd3OjhJAT4Nfx/C1ofDzOGZgHtrCR41rrdb10K2Fp7o52mbJDF9WB/fkexUvkuMGX6TzrvFftBKtNs9FsjYVimaCLxN8czhkOWRkytIK9kk+2zYTdXFI0TM5QuzXUPhe6X3pJGD/gxviYXgtqkN6hwWLHNiFVHO2EQS2FxEY5PXMVAnzgXZBsGBuWFa3CiI6aYkqBj6jKKW3oh53IAg3UXjj1G3afPzZPvAfS+kgHqcyqVbwe5BgVt+hekjm6vDERo5lvM0iia8DfUCQu7QOVT45qHurk+b7ZIO/ivDYkb6kXbVwtUdceHw3oTCA6lulB6qHet++Ie6/UiFa106xc7w2XDqnw0we5Npfz42WQ37trD9gGbQhpUx3rD5xlqrYsCVZBVZ2+4f7fvXDC6/yLh54yLfSRGFC8UN1Y0poKZNO53ZNz8aW+3JOaEX8hG89aoDk9tCTjAdl1KwqQlP7guWQ1DWbYyPYMHsaFPfxgEeuHuOcxXWtR7GQ9IhBsWnJkNjtgvG3uq9Iqtslpme4LVUKL6JGG6rz3NY5mOnwIPug5xWSP/pGnpbE+71z5QTse8g3GOJqTk6tNxo="

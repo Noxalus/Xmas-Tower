@@ -1,4 +1,4 @@
-# Xmas-Tower
+# Xmas-Tower [![Build Status](https://travis-ci.org/Noxalus/Xmas-Tower.svg?branch=master)](https://travis-ci.org/Noxalus/Xmas-Tower)
 
 A little Android 2D game written in Java using Libgdx for christmas.
 

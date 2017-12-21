@@ -3,11 +3,6 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 pushd ${DIR}/.. > /dev/null
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 HOCKEYAPP_TOKEN" >&2
-  exit 1
-fi
-
 SIGNED_APK="XmasTower.apk"
 
 echo "Deploy signed APK on HockeyApp"

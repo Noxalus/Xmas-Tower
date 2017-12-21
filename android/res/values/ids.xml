@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <string name="app_id">233153082400</string>
+    <string name="package_name">com.noxalus.xmastower.android</string>
+    <string name="achievement_1_m">CgkIoOiGyOQGEAIQAw</string>
+    <string name="achievement_1.5_m">CgkIoOiGyOQGEAIQDg</string>
+    <string name="achievement_2_m">CgkIoOiGyOQGEAIQDw</string>
+    <string name="achievement_2.5_m">CgkIoOiGyOQGEAIQBA</string>
+    <string name="achievement_3_m">CgkIoOiGyOQGEAIQEQ</string>
+    <string name="achievement_3.5_m">CgkIoOiGyOQGEAIQEg</string>
+    <string name="achievement_4_m">CgkIoOiGyOQGEAIQFA</string>
+    <string name="achievement_4.5_m">CgkIoOiGyOQGEAIQFQ</string>
+    <string name="achievement_5_m">CgkIoOiGyOQGEAIQBQ</string>
+    <string name="achievement_7.5_m">CgkIoOiGyOQGEAIQBw</string>
+    <string name="achievement_10_m">CgkIoOiGyOQGEAIQDA</string>
+    <string name="achievement_its_too_small">CgkIoOiGyOQGEAIQCA</string>
+    <string name="achievement_its_too_big">CgkIoOiGyOQGEAIQCQ</string>
+    <string name="achievement_im_feeling_dizzy">CgkIoOiGyOQGEAIQCg</string>
+    <string name="achievement_hidden_spawn">CgkIoOiGyOQGEAIQCw</string>
+    <string name="leaderboard_leaderboard">CgkIoOiGyOQGEAIQEw</string>
+</resources>

@@ -1,8 +1,12 @@
 package com.noxalus.xmastower.android;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
@@ -16,6 +20,7 @@ import com.google.android.gms.games.Games;
 public class AndroidLauncher extends AndroidApplication implements GameHelper.GameHelperListener, ActionResolver, SharableActivity
 {
 	private GameHelper gameHelper;
+	private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
@@ -166,4 +171,21 @@ public class AndroidLauncher extends AndroidApplication implements GameHelper.Ga
 		shareIntent.setType("image/png");
 		startActivity(Intent.createChooser(shareIntent, "Share from"));
 	}
+
+	@Override
+	public boolean checkStoragePermission()
+	{
+		if (ContextCompat.checkSelfPermission(this,
+				Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED) {
+
+			ActivityCompat.requestPermissions(this,
+					new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+
+			return false;
+		}
+
+		return true;
+	}
+
 }

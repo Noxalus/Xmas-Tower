@@ -28,7 +28,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -41,12 +40,9 @@ import com.noxalus.xmastower.entities.SpriteActor;
 import com.noxalus.xmastower.gameservices.ActionResolver;
 import com.noxalus.xmastower.inputs.GameInputProcessor;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.FileHandler;
 
 public class GameScreen extends ApplicationAdapter implements Screen {
 
@@ -269,23 +265,26 @@ public class GameScreen extends ApplicationAdapter implements Screen {
                     }
                     else
                     {
-                        byte[] pixelData = ScreenUtils.getFrameBufferPixels(true);
-                        Pixmap pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGBA8888);
-                        ByteBuffer pixels = pixmap.getPixels();
-                        pixels.clear();
-                        pixels.put(pixelData);
-                        pixels.position(0);
 
-                        Date date = new Date(TimeUtils.millis());
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-                        String formatedDate = formatter.format(date);
-                        FileHandle screenshot = Gdx.files.external("Screenshots/Xmas-Tower/Screenshot_" + formatedDate + ".png");
-                        PixmapIO.writePNG(screenshot, pixmap);
+                        if (_game.SharableActivity.checkStoragePermission()) {
+                            byte[] pixelData = ScreenUtils.getFrameBufferPixels(true);
+                            Pixmap pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGBA8888);
+                            ByteBuffer pixels = pixmap.getPixels();
+                            pixels.clear();
+                            pixels.put(pixelData);
+                            pixels.position(0);
 
-                        String screenshotAbsolutePath = Gdx.files.getExternalStoragePath() + "/" + screenshot.path();
+                            Date date = new Date(TimeUtils.millis());
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                            String formatedDate = formatter.format(date);
+                            FileHandle screenshot = Gdx.files.external("Screenshots/Xmas-Tower/Screenshot_" + formatedDate + ".png");
+                            PixmapIO.writePNG(screenshot, pixmap);
 
-                        // Social share
-                        _game.SharableActivity.shareImage(screenshotAbsolutePath, _score);
+                            String screenshotAbsolutePath = Gdx.files.getExternalStoragePath() + "/" + screenshot.path();
+
+                            // Social share
+                            _game.SharableActivity.shareImage(screenshotAbsolutePath, _score);
+                        }
                     }
                 }
             }

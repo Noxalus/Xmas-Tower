@@ -48,13 +48,13 @@ script:
 - "./gradlew android:clean android:generateReleaseSources BaseGameUtils:generateReleaseSources
   android:assembleRelease -PdisablePreDex --stacktrace"
 before_deploy:
+- chmod +x "scripts/deploy.sh"
 - cp $TRAVIS_BUILD_DIR/XmasTower.jks $HOME
 - cd android/build/outputs/apk/release
 - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $HOME/XmasTower.jks
   -storepass $storepass -keypass $keypass android-release-unsigned.apk Noxalus
 - jarsigner -verify android-release-unsigned.apk
 - "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
-- chmod +x "scripts/deploy.sh"
 deploy:
   provider: script
   script: scripts/deploy.sh

@@ -16,7 +16,7 @@ env:
   - ADB_INSTALL_TIMEOUT=5
   - secure: ELAzw0XuibOAmfU1IJZvKnGbfmW/Y6O79kFIJQKY+1mCWuMA8fNwVXCsrkvPAnnVRLt3nF++4xMd+bNrH+OLAxiGyBWhdSHE0wuPP5RsJ8oYVivthnDEdM5t8NlgcWAeQ8Myjwbm9HhflGp8t/JqYSqH/SazxijsRgYJYorGNn72IGjSfVByK+OrAblDfcvKGxG0CMuzyP9DvCOEO1fZAPRMXcJLCE1z4p1GhnGSZA4xqL+cnsUb6uwiqnY+UFgnbG/QhXE+k+/1IrB/3gHQ03b7VLWgPUXtl7IG6z7yGWIEvddEu96ogxejuEe9yEahl7OQa5pQgefhiQXkQL+xhZ8UlxZU8iHfhZROOI3wEDW5lu79abXx06RviW822abww0kKIPZs62izEgqsTDa+SCOm3LHe9xraD9JOG9yIfbWPCoqtoORhVShBNfnme557oipMM6hsEgEszcF1IdHTsce54caBAe8SuyvsRHSX6Q1gX6W0GmP0uBK2L3kt1/LOKVqm7hHo1ERw39DjgQWNfI8heVu2KLjElmWROf1V7L6qDIXqFbNljCnk8BPvaI65xLNK20W1q3xIrtOP/hTvCnnL+aBoXwtAF6DoYUYHbXOF2e/4Qfk9usptyKOrx28ljD/DtFBFVQt4JsNc6UQPlj+FFlt732mXFSDIRhblCKk=
   - secure: WCETpAayp5F6EM6JrUpbO0uvi2bV7LtRvlTf8gjf/1bIeAwiEVn10pPOisbkOUn8/hSzg/THBraUnlB+x5z1Hg12a+ErUzYHXaZb4wR0J13wqvbn2JliYVbAB+A1YMKgv/Q9EFhDAWn9ZzdnW37x2NbK7PQ/Goh5/++38hgNCd5I1MYa90XVMUcDKUWiKyqVJqYhMrXxNsFaY8rABIPi79rSMeSuv8pOwPgpUwrsO0fzuOPu9/KD7MK6e8Jp8afFnk5BR6jNrFeDRxs/Dd8gyp1qYSBjbhIB+0AcAmBvUhOzbhtR5nP9EAGKJvxMJJFI+QOjmPSkCURQE7LgIOE0lCMoWf8r21nhxIDroB/nWqn7sdLvrM3mfjYXamephkbvxRym2kjXNbiU3wk38CJTc/BuwCjRWxXz+WIeEJmuVre3v2t1+9F6nkr6jYlYjuZw1ei/UAU3YhStAIz64CuDEjcxxYlOjEB10tLPwOOW2uaEveTFqYWzb3aJ9sWEr/oXKWIPjOmbAHyDVmBqsVkOTTU2u64jw0eOGYGyOdWoV9aKCr18TVR2V94MZhGQwqWe1ef6ZVBFRL9E3NVdOd09TKhVTX+vy82EJoCLt+0ZiBGnoQRng2IInG/fMrTvZ5CvfWXnQUZA7V/8Zl1hJZdZWxkWJftjDlj3GR/B7XxO8pY=
-  - secure: oV27pTatC6WxwhYYyFfnaINtlRPVnujmXCSM2qkUZpCxmvucY7xTF7Iu0cb8NWmZVmyOlciTfJUzuDZjBJxax8GBdI+Att1z7bXB9CURxUBOOwRmMAJNKIyUI8putcI+VVflC0edHvAeMqEvQcL1N3QDetosJ+LsnEpuoiiQNGYjgwt/ha/lV+e1DZXqHzXgwz79ASU5G8401919oEFn8K7Ujn54fs3JFy0jm+G5fnwm55r+SKy8LYtc7RBqmIUZTVpRcMJwI/bYMR4OtfVWHJr1VSEWcMnY8i32tPN+Wx/vy/vWiBAHn9ayC7grZmssFOQFCkPtENd7Hy2CStMFNegyonnc59zc6VQE4JgTTLq8KYlkAITRrdIru6riKlVidYNolCHdHHab1RoMC6dmadq8nsy03bvcUzEcGY8uJCY+XmMv84xaZN7o3V3szCeROscUsxfvRHGnNulL77F4/mnQobvAvAWq5nzl0ZAuysvNDesADSKah2DKvOKFrdrHWWEJAZIaaaPd+JPGbmhISejAvlgDdBBVoCy1u/FdFF86x1JwpAE17fQ8IOF4tBdzNai8QXGZsMN0F6mLS0JBi0rWrpbXYBIX7ggTwfFKS28mcccfkKPrsbHxc6PMWu7QaD1fYiom7itOgjq0SDkBAQfoU9ImiheU4d976MDAyoA=
+  - secure: qwkDdVC0uKPPDVQRczROBYmKAhcUSB8WB1lHWetIu8RESi4NnbGEElbihJOOscjW9MGqRwwqkzLXGz+zxLnHpJQdqLZ4L66yqh5cn/nfQkAJeCWhLUZ5Oc05ZzGTqaKBLpL2gNoqleOATgmlA5Gz9iULKw+hUYEY2mracWk54dTZmOYv2S34AYYNTFG2T68jPTSkFXGf1aSQS8PJQfgrx2bDa6YYSbOcP9HnNRd1yvTqauq3o9rlk50ql1OXvuGYyBjbBHV748CvVcj22AjGSzsb/PC67itXaYhG5r/UP1AQvG+kZDgBl9FKEewpGmUVTfQSLJVgygWAcYFmn11gP/+wJvSxG1as9H5G03M4ngYTjxCW6C/fVx8FO2fikYcjUBwNDuNdhvaloULwJuGCTnKVLZ/jm4UxnH/wgKvAtUqR17lnlRBgU3o9ryPL1uqee0nAJhr2UnsipJ2HyMPYPI6FgdSIiPfd5oqi/sHNNqf+3btIiAdOCZ10Q8sZmrCneKhmkEiW22X0XZuUyiGYsJADu3rQ1YEW+7cNAQ4dqjPkv8ygXhjuZGdhQBXl2DA614aL+s/kNVXcr/MS9CjeZ+qzb97f+YdL6SHCNCB/safwMR4QbBGxO2sv6Rw8BSWSgIeAQVLhGox+su9dnwWwqnT89fSeJjvt+ARKiZ+3Aos=
 android:
   components:
   - tools
@@ -53,11 +53,6 @@ before_deploy:
 - jarsigner -verify android-release-unsigned.apk
 - "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
 deploy:
-- curl
-  -F "status=2"
-  -F "notify=1"
-  -F "notes=$TRAVIS_COMMIT_MESSAGE"
-  -F "notes_type=0"
-  -F "ipa=@XmasTower.apk"
-  -H "X-HockeyAppToken: $HOCKEYAPP_TOKEN"
-  https://rink.hockeyapp.net/api/2/apps/upload
+- ? curl -F "status=2" -F "notify=1" -F "notes=$TRAVIS_COMMIT_MESSAGE" -F "notes_type=0"
+    -F "ipa=@XmasTower.apk" -H "X-HockeyAppToken
+  : $HOCKEYAPP_TOKEN" https://rink.hockeyapp.net/api/2/apps/upload

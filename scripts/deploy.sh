@@ -3,7 +3,7 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 pushd ${DIR}/.. > /dev/null
 
-SIGNED_APK="XmasTower.apk"
+SIGNED_APK="$TRAVIS_BUILD_DIR/XmasTower.apk"
 
 echo "Deploy signed APK on HockeyApp"
 echo "Commit message: $TRAVIS_COMMIT_MESSAGE"

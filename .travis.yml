@@ -40,14 +40,14 @@ before_install:
 - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
 - chmod +x gradlew
 script:
-- "./gradlew clean build -PdisablePreDex --stacktrace"
+- "./gradlew android:clean android:generateReleaseSources BaseGameUtils:generateReleaseSources android:assembleRelease -PdisablePreDex --stacktrace"
 before_deploy:
 - cp $TRAVIS_BUILD_DIR/XmasTower.jks $HOME
-- cd app/build/outputs/apk/
+- cd android/build/outputs/apk/release
 - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $HOME/XmasTower.jks
-  -storepass $storepass -keypass $keypass app-release-unsigned.apk Noxalus
-- jarsigner -verify app-release-unsigned.apk
-- "${ANDROID_HOME}/build-tools/24.0.2/zipalign -v 4 app-release-unsigned.apk XmasTower.apk"
+  -storepass $storepass -keypass $keypass android-release-unsigned.apk Noxalus
+- jarsigner -verify android-release-unsigned.apk
+- "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
 deploy:
   provider: releases
   file: XmasTower.apk

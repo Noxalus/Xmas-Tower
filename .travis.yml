@@ -11,7 +11,7 @@ cache:
 env:
   global:
   - ANDROID_API=26
-  - EMULATOR_API=26
+  - EMULATOR_API=21
   - ANDROID_BUILD_TOOLS=26.0.2
   - ADB_INSTALL_TIMEOUT=5
   - secure: ELAzw0XuibOAmfU1IJZvKnGbfmW/Y6O79kFIJQKY+1mCWuMA8fNwVXCsrkvPAnnVRLt3nF++4xMd+bNrH+OLAxiGyBWhdSHE0wuPP5RsJ8oYVivthnDEdM5t8NlgcWAeQ8Myjwbm9HhflGp8t/JqYSqH/SazxijsRgYJYorGNn72IGjSfVByK+OrAblDfcvKGxG0CMuzyP9DvCOEO1fZAPRMXcJLCE1z4p1GhnGSZA4xqL+cnsUb6uwiqnY+UFgnbG/QhXE+k+/1IrB/3gHQ03b7VLWgPUXtl7IG6z7yGWIEvddEu96ogxejuEe9yEahl7OQa5pQgefhiQXkQL+xhZ8UlxZU8iHfhZROOI3wEDW5lu79abXx06RviW822abww0kKIPZs62izEgqsTDa+SCOm3LHe9xraD9JOG9yIfbWPCoqtoORhVShBNfnme557oipMM6hsEgEszcF1IdHTsce54caBAe8SuyvsRHSX6Q1gX6W0GmP0uBK2L3kt1/LOKVqm7hHo1ERw39DjgQWNfI8heVu2KLjElmWROf1V7L6qDIXqFbNljCnk8BPvaI65xLNK20W1q3xIrtOP/hTvCnnL+aBoXwtAF6DoYUYHbXOF2e/4Qfk9usptyKOrx28ljD/DtFBFVQt4JsNc6UQPlj+FFlt732mXFSDIRhblCKk=
@@ -40,7 +40,7 @@ before_install:
 - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
 - chmod +x gradlew
 before_script:
-- echo no | android create avd --force -n test -t android-26 --abi
+- echo no | android create avd --force -n test -t android-21 --abi
   armeabi-v7a
 - emulator -avd test -no-skin -no-audio -no-window &
 - android-wait-for-emulator

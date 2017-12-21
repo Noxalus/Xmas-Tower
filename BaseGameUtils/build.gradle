@@ -39,6 +39,10 @@ android {
         ext.android_version = '26'
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     compileSdkVersion android_compile_version
     buildToolsVersion android_version
     buildToolsVersion '26.0.2'

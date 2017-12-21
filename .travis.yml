@@ -54,7 +54,7 @@ before_deploy:
 - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $HOME/XmasTower.jks
   -storepass $storepass -keypass $keypass android-release-unsigned.apk Noxalus
 - jarsigner -verify android-release-unsigned.apk
-- "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
+- "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk ${TRAVIS_BUILD_DIR}/XmasTower.apk"
 deploy:
   skip_cleanup: true
   provider: script

@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 
-
 buildscript {
     repositories {
         google()
@@ -15,10 +14,10 @@ buildscript {
 dependencies {
     // Set defaults so that BaseGameUtils can be used outside of BasicSamples
     if (!project.hasProperty('appcompat_library_version')) {
-        ext.appcompat_library_version = '20.0.+'
+        ext.appcompat_library_version = '23.0.+'
     }
     if (!project.hasProperty('support_library_version')) {
-        ext.support_library_version = '20.0.+'
+        ext.support_library_version = '23.0.+'
     }
     if (!project.hasProperty('gms_library_version')) {
         ext.gms_library_version = '8.1.0'
@@ -44,6 +43,5 @@ android {
     }
 
     compileSdkVersion android_compile_version
-    buildToolsVersion android_version
 }
 

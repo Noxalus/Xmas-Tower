@@ -58,6 +58,6 @@ before_deploy:
 deploy:
   skip_cleanup: true
   provider: script
-  script: scripts/deploy.sh ${HOCKEYAPP_TOKEN}
+  script: "./scripts/deploy.sh"
   on:
     branch: master

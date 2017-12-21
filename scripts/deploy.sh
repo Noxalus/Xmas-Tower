@@ -8,11 +8,9 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-HOCKEYAPP_TOKEN=$1
 SIGNED_APK="XmasTower.apk"
 
 echo "Deploy signed APK on HockeyApp"
-echo "HockeyApp Token: $HOCKEYAPP_TOKEN"
 echo "Commit message: $TRAVIS_COMMIT_MESSAGE"
 echo "Signed APK: $SIGNED_APK"
 

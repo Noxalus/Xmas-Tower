@@ -43,7 +43,7 @@ before_install:
 - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
 - chmod +x gradlew
 before_script:
-  - "./scripts/version.sh" # Bump version code
+  - chmod +x "scripts/version.sh" && "./scripts/version.sh" # Bump version code
 script:
 - "./gradlew android:clean android:generateReleaseSources BaseGameUtils:generateReleaseSources
   android:assembleRelease -PdisablePreDex --stacktrace"
@@ -54,6 +54,7 @@ before_deploy:
   -storepass $storepass -keypass $keypass android-release-unsigned.apk Noxalus
 - jarsigner -verify android-release-unsigned.apk
 - "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
+- chmod +x "scripts/deploy.sh"
 deploy:
   provider: script
   script: scripts/deploy.sh

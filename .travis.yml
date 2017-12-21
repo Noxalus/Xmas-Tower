@@ -55,6 +55,7 @@ before_deploy:
 - jarsigner -verify android-release-unsigned.apk
 - "${ANDROID_HOME}/build-tools/26.0.2/zipalign -v 4 android-release-unsigned.apk XmasTower.apk"
 deploy:
-- ? curl -F "status=2" -F "notify=1" -F "notes=$TRAVIS_COMMIT_MESSAGE" -F "notes_type=0"
-    -F "ipa=@XmasTower.apk" -H "X-HockeyAppToken
-  : $HOCKEYAPP_TOKEN" https://rink.hockeyapp.net/api/2/apps/upload
+  provider: script
+  script: scripts/deploy.sh
+  on:
+    branch: master

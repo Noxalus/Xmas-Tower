@@ -22,6 +22,7 @@ android:
   - tools
   - platform-tools
   - android-26
+  - build-tools-23.0.0
   - build-tools-$ANDROID_BUILD_TOOLS
   - android-$ANDROID_API
   - android-$EMULATOR_API_LEVEL
